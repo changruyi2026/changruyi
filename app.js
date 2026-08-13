@@ -1185,9 +1185,10 @@ function renderXhs() {
       <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z'))}</div>
     </div>
     <button class="btn btn-primary" style="margin-bottom:16px" data-action="xhs-add">+ 记录当前数据（粉丝 / 笔记 / 赞藏 当前总数）</button>
-    ${limitBox}
-
-    ${recHistory}
+    <div class="xhs-top-row">
+      ${limitBox}
+      ${recHistory}
+    </div>
 
     <div class="card" style="margin-top:20px">
       <div class="card-title"><span class="dot" style="background:var(--sage)"></span>待返款
