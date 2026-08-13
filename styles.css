@@ -576,3 +576,40 @@ input,textarea,select{font-family:inherit;color:inherit}
 .rb-sum.pgy b{color:#6E8050}
 .rb-done{margin-left:auto;background:rgba(190,170,130,.18);color:var(--ink-soft);font-weight:700;padding:3px 10px;border-radius:10px;font-size:12px}
 .xhs-hist-act{justify-content:center}
+
+/* ===================== 小红书：笔记支出（按笔记分组） ===================== */
+.note-exp-list{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.note-exp-card{display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;background:var(--card-2);border:1px solid var(--line)}
+.note-exp-card.cart{background:rgba(169,140,110,.10)}
+.note-cover{width:72px;height:72px;flex:0 0 auto;border-radius:12px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(224,169,138,.16);border:1px dashed var(--sand-deep);transition:transform .12s ease}
+.note-cover:hover{transform:scale(1.04)}
+.note-cover img{width:100%;height:100%;object-fit:cover}
+.note-cover.no-cover .cover-ph{font-size:12px;text-align:center;color:var(--sand-deep);line-height:1.5}
+.note-info{flex:1;min-width:0}
+.note-name{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.note-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+.note-total{font-size:13px;color:var(--ink-soft);margin-top:4px}
+.note-total b{font-family:"Nunito";font-size:17px;color:var(--rose-deep);font-weight:800}
+.note-ops{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+
+/* 添加/编辑弹窗：封面选择 + 多项明细 */
+.cover-pick{display:flex;flex-direction:column;gap:10px}
+.cover-prev{width:100%;max-height:200px;object-fit:cover;border-radius:12px;border:1px solid var(--line)}
+.cover-empty{font-size:13px;color:var(--ink-faint);padding:14px;text-align:center;background:rgba(224,169,138,.10);border-radius:12px}
+.cover-btns{display:flex;gap:8px}
+.exp-item-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.exp-item-row .exp-desc{flex:1;min-width:0}
+.exp-item-row .exp-amt{width:120px;flex:0 0 auto}
+.ne-total{margin-top:6px;font-size:14px;color:var(--ink-soft)}
+.ne-total b{font-family:"Nunito";font-size:20px;color:var(--rose-deep);font-weight:800}
+
+/* 明细弹窗 */
+.detail-cover{width:100%;max-height:240px;object-fit:cover;border-radius:14px;margin:6px 0 14px;border:1px solid var(--line)}
+.detail-date{font-size:13px;color:var(--ink-soft);margin-bottom:12px}
+.detail-list{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
+.detail-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:11px 14px;border-radius:12px;background:var(--card-2)}
+.detail-row .d-desc{flex:1;min-width:0;font-size:14px}
+.detail-row .d-amt{font-family:"Nunito";font-weight:800;color:var(--rose-deep);white-space:nowrap}
+.detail-total{display:flex;justify-content:flex-end;align-items:baseline;gap:10px;font-size:15px;color:var(--ink-soft);padding:12px 14px;border-radius:12px;background:rgba(224,169,138,.12);border:1px solid var(--line)}
+.detail-total b{font-family:"Nunito";font-size:24px;color:var(--rose-deep);font-weight:800}
+
