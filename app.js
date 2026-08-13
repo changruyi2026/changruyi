@@ -1131,8 +1131,10 @@ function renderXhs() {
   // 限流笔记备注
   const L = S.xhs.limit || { count: 0, names: '' };
   const limitBox = `
-    <div class="limit-box">
-      <div class="limit-head"><span>🚫 限流笔记</span><button class="btn btn-sm btn-ghost" data-action="xhs-edit-limit">编辑</button></div>
+    <div class="card limit-box">
+      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🚫 限流笔记
+        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="xhs-edit-limit">编辑</button>
+      </div>
       <div class="limit-row">
         <span class="limit-num">${L.count || 0}<small> 篇</small></span>
         <span class="limit-names">${L.names ? esc(L.names) : '<span class="limit-empty">还没有记录限流笔记，点「编辑」添加</span>'}</span>
@@ -1169,7 +1171,7 @@ function renderXhs() {
 
   // 数据记录入口（点「查看统计」弹窗查看按日期的累计值与每日增长）
   const recHistory = `
-    <div class="card" style="margin-top:20px">
+    <div class="card">
       <div class="card-title"><span class="dot" style="background:var(--clay)"></span>数据记录历史
         <button class="btn btn-sm btn-ghost" data-action="xhs-open-history">📊 查看统计</button>
         <button class="btn btn-sm btn-ghost" data-action="xhs-open-base">⚙️ 设置起始基准</button>
@@ -1206,9 +1208,10 @@ function renderXhs() {
 
     <div class="card" style="margin-top:20px">
       <div class="card-title"><span class="dot" style="background:var(--clay)"></span>笔记支出
-        <button class="btn btn-sm btn-primary" style="margin-left:auto" data-action="xhs-exp-add">+ 记一笔</button>
+        <span class="stat-pill" style="margin-left:auto">金额合计<b>${money(totalAll)}</b></span>
       </div>
-      ${notes.length ? `<div class="note-exp-list">${noteCards}</div>` : '<div class="empty">还没有笔记支出。点「+ 记一笔」，按<b>笔记名称</b>记录，可上传封面图、填多条花费（如真人推广、评论互动），点封面即可看明细合计。</div>'}
+      ${notes.length ? `<div class="note-exp-list">${noteCards}</div>` : '<div class="empty">还没有笔记支出。点下方「+ 记一笔」，按<b>笔记名称</b>记录，可上传封面图、填多条花费（如真人推广、评论互动），点封面即可看明细合计。</div>'}
+      <div class="note-exp-foot"><button class="btn btn-sm btn-primary" data-action="xhs-exp-add">+ 记一笔</button></div>
     </div>
 
     <div class="card" style="margin-top:20px">
