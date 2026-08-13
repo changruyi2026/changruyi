@@ -440,6 +440,11 @@ input,textarea,select{font-family:inherit;color:inherit}
 .limit-names{font-size:13.5px;color:var(--ink-soft);font-weight:500;line-height:1.5}
 .limit-empty{color:var(--ink-faint)}
 
+/* 限流笔记 + 数据记录历史 两栏并排 */
+.xhs-top-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;margin:4px 0 8px}
+.xhs-top-row .limit-box,.xhs-top-row>.card{height:100%;margin:0}
+@media(max-width:760px){.xhs-top-row{grid-template-columns:1fr}}
+
 /* ============ 弹窗 ============ */
 .modal-root{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
 .modal-root.show{display:flex}
