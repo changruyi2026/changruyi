@@ -428,10 +428,8 @@ input,textarea,select{font-family:inherit;color:inherit}
 
 /* 限流笔记备注框 */
 .limit-box{
-  margin:6px 0 4px;padding:16px 18px;border-radius:18px;
   background:linear-gradient(135deg,rgba(204,169,177,.16),rgba(232,169,126,.14));
   border:1px solid rgba(204,140,120,.22);
-  box-shadow:var(--shadow-sm);
 }
 .limit-head{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px;color:var(--ink);margin-bottom:10px}
 .limit-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -596,6 +594,7 @@ input,textarea,select{font-family:inherit;color:inherit}
 .note-total{font-size:13px;color:var(--ink-soft);margin-top:4px}
 .note-total b{font-family:"Nunito";font-size:17px;color:var(--rose-deep);font-weight:800}
 .note-ops{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.note-exp-foot{display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 
 /* 添加/编辑弹窗：封面选择 + 多项明细 */
 .cover-pick{display:flex;flex-direction:column;gap:10px}
