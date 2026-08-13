@@ -38,6 +38,7 @@ const money = n => (n < 0 ? '-' : '') + '¥' + Math.abs(n).toLocaleString('zh-CN
 /* ---------- 默认数据（首次打开的轻量种子） ---------- */
 function defaultState() {
   return {
+    _modifiedAt: 0,
     home: {
       countdowns: [{ id: uid(), label: '芽芽生日', lunar: { y: 2024, m: 7, d: 7, leap: false }, date: '' }],
       rest: []
@@ -112,7 +113,7 @@ function load() {
   catch (e) { console.warn('load failed', e); }
   return defaultState();
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); }
+function save() { S._modifiedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); }
 
 /* ---------- 通用：toast ---------- */
 function toast(msg, kind = 'ok') {
@@ -1128,18 +1129,8 @@ function renderXhs() {
     </div>`;
   }).join('') : '<div class="empty">暂无返款记录，点右上角「+ 添加」</div>';
 
-  // 限流笔记备注
+  // 限流笔记备注（摘要放在「笔记数量」统计格，点击打开弹窗）
   const L = S.xhs.limit || { count: 0, names: '' };
-  const limitBox = `
-    <div class="card limit-box">
-      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🚫 限流笔记
-        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="xhs-edit-limit">编辑</button>
-      </div>
-      <div class="limit-row">
-        <span class="limit-num">${L.count || 0}<small> 篇</small></span>
-        <span class="limit-names">${L.names ? esc(L.names) : '<span class="limit-empty">还没有记录限流笔记，点「编辑」添加</span>'}</span>
-      </div>
-    </div>`;
 
   // 笔记支出（按笔记名称分组，每条含封面图 + 多条明细）
   const now = new Date();
@@ -1183,14 +1174,16 @@ function renderXhs() {
   $('#view-xhs').innerHTML = `
     <div class="xhs-stat" style="margin-bottom:18px">
       <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f'))}</div>
-      <div class="xhs-cell"><div class="big">${cur.n.toLocaleString()}</div><div class="lbl">笔记数量</div>${deltaHTML(xhsDelta('n'))}</div>
+      <div class="xhs-cell xhs-cell-limit ${L.count ? 'has-limit' : ''}" data-action="xhs-open-limit" title="点击管理限流笔记">
+        <div class="big">${cur.n.toLocaleString()}</div>
+        <div class="lbl">笔记数量</div>
+        ${deltaHTML(xhsDelta('n'))}
+        ${L.count ? `<div class="limit-mini">🚫 ${L.count} 篇限流</div>` : '<div class="limit-mini ok">未限流</div>'}
+      </div>
       <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z'))}</div>
     </div>
     <button class="btn btn-primary" style="margin-bottom:16px" data-action="xhs-add">+ 记录当前数据（粉丝 / 笔记 / 赞藏 当前总数）</button>
-    <div class="xhs-top-row">
-      ${limitBox}
-      ${recHistory}
-    </div>
+    ${recHistory}
 
     <div class="card" style="margin-top:20px">
       <div class="card-title"><span class="dot" style="background:var(--sage)"></span>待返款
@@ -1223,6 +1216,16 @@ function renderXhs() {
       </div>
       <div class="xhs-chart">${xhsMonthChart()}</div>
       <div class="total-line">总支出金额 <b>${money(totalAll)}</b><span class="total-sub">共 ${expCount} 笔（含笔记支出与作业车）</span></div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="card-title"><span class="dot" style="background:var(--blue)"></span>数据备份
+        <span style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-sm btn-ghost" data-action="xhs-export-backup">⬇️ 导出备份</button>
+          <button class="btn btn-sm btn-ghost" data-action="xhs-import-backup">⬆️ 导入备份</button>
+        </span>
+      </div>
+      <div style="color:var(--ink-soft);font-size:13px">建议定期点「导出备份」把数据下载到电脑。换浏览器、清缓存或同步异常时，可用「导入备份」恢复。</div>
     </div>`;
 }
 
@@ -1442,7 +1445,10 @@ document.addEventListener('click', e => {
       S.xhs.records.push(rec);
       save(); closeModal(); renderXhs(); toast('已记录（最新一条即为当前数）'); break;
     }
-    case 'xhs-edit-limit': openXhsLimitModal(); break;
+    case 'xhs-edit-limit':
+    case 'xhs-open-limit': openXhsLimitModal(); break;
+    case 'xhs-export-backup': exportBackup(); break;
+    case 'xhs-import-backup': openImportPicker(); break;
     case 'xhs-save-limit': {
       const count = Math.max(0, parseInt($('#xLimitCount').value || '0', 10) || 0);
       const names = ($('#xLimitNames').value || '').trim();
@@ -1667,7 +1673,8 @@ async function pullSync() {
     if (data && data.data) {
       cloudHasData = true;
       const remote = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
-      if (new Date(data.updated_at).getTime() > lastSaveTime && JSON.stringify(remote) !== JSON.stringify(S)) {
+      const localMtime = S._modifiedAt || 0;
+      if (new Date(data.updated_at).getTime() > localMtime && JSON.stringify(remote) !== JSON.stringify(S)) {
         S = Object.assign(defaultState(), remote);
         renderView(currentView);
         toast('已从云端同步最新数据', 'ok');
@@ -1693,7 +1700,6 @@ function isFreshDefault(s) {
     && (x.base ? (x.base.followers || 0) === 0 && (x.base.notes || 0) === 0 && (x.base.zanCang || 0) === 0 : true);
 }
 function pushSync() {
-  lastSaveTime = Date.now();
   if (!sbClient) { setSync('offline', '未配置云端'); return; }
   /* 安全护栏：空白设备不要覆盖云端已有数据（避免误清空真实记录） */
   if (isFreshDefault(S) && cloudHasData === true) return;
@@ -1704,10 +1710,44 @@ function pushSync() {
         user_id: SUPABASE_CFG.userId, data: S, updated_at: new Date().toISOString()
       });
       if (error) throw error;
+      lastSaveTime = Date.now();
       setSync('online');
     } catch (e) { setSync('offline', '同步失败'); }
   }, 600);
 }
+/* ---------- 手动备份：导出 / 导入 ---------- */
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `changruyi_backup_${todayStr()}.json`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+  toast('备份文件已下载', 'ok');
+}
+function importBackup(file) {
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const raw = JSON.parse(fr.result);
+      if (!raw || typeof raw !== 'object' || !raw.xhs) throw new Error('文件格式不对');
+      if (!confirm('导入备份会覆盖当前所有数据（笔记支出、返款、历史记录等）。确定继续？')) return;
+      S = Object.assign(defaultState(), raw);
+      save(); renderView(currentView);
+      toast('备份已导入', 'ok');
+    } catch (e) { toast('导入失败：' + e.message, 'warn'); }
+  };
+  fr.onerror = () => toast('读取文件失败', 'warn');
+  fr.readAsText(file);
+}
+function openImportPicker() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = () => { if (inp.files && inp.files[0]) importBackup(inp.files[0]); };
+  inp.click();
+}
+
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('sw.js').catch(() => {});
