@@ -401,6 +401,10 @@ input,textarea,select{font-family:inherit;color:inherit}
 .delta.up{background:rgba(224,169,138,.2);color:var(--sage-deep)}
 .delta.flat{background:rgba(182,173,161,.2);color:var(--ink-soft)}
 .delta.down{background:rgba(204,140,120,.2);color:var(--rose-deep)}
+.xhs-cell-limit{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;border:1px solid transparent}
+.xhs-cell-limit:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:rgba(204,140,120,.25)}
+.limit-mini{margin-top:8px;font-size:12px;font-weight:700;color:var(--rose-deep);background:rgba(204,140,120,.12);display:inline-flex;padding:3px 10px;border-radius:20px}
+.limit-mini.ok{color:var(--sage-deep);background:rgba(168,181,140,.16)}
 
 /* 金额统计表：汇总标签 + 近6月柱状图 */
 .stat-pills{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
