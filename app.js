@@ -160,7 +160,8 @@ const TITLES = {
   todo: ['工作待办', '一件一件来，慢慢推进'],
   diet: ['饮食记录', '好好吃饭，才有力气带娃'],
   ledger: ['记账', '每一笔，都是生活的痕迹'],
-  xhs: ['小红书', '发芽芽的日常 · 常如意i']
+  xhs: ['小红书', '发芽芽的日常 · 常如意i'],
+  baby: ['芽芽', '发芽芽的日常 · 拉屎打卡 💩']
 };
 let currentView = 'home';
 
@@ -180,6 +181,7 @@ function renderView(v) {
   else if (v === 'diet') renderDiet();
   else if (v === 'ledger') renderLedger();
   else if (v === 'xhs') renderXhs();
+  else if (v === 'baby') renderBaby();
 }
 
 /* ===================== 0. 首页 ===================== */
@@ -287,43 +289,13 @@ function renderHome() {
         ${renderHomeCalendar()}
       </div>
 
-      ${renderHomeXhsModule()}
-      ${renderHomeBabyModule()}
     `;
   tickClock();
   fetchWeather();
 }
 
 /* 首页：小红书运营概览模块（首页下方第二个模块） */
-function renderHomeXhsModule() {
-  const cur = { f: xhsCurrent('f'), n: xhsCurrent('n'), z: xhsCurrent('z') };
-  const L = S.xhs.limit || { count: 0 };
-  const flat = xhsFlatExpenses();
-  const expTotal = flat.reduce((s, e) => s + (e.amount || 0), 0);
-  const rebates = S.xhs.rebates || [];
-  const inPending = rebates.filter(r => r.dir === 'in' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
-  const outPending = rebates.filter(r => r.dir === 'out' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
-  const cell = (label, val, delta) => `<div class="xhs-cell"><div class="big">${val.toLocaleString()}</div><div class="lbl">${label}</div>${deltaHTML(delta)}</div>`;
-  return `
-    <div class="card" style="margin-top:20px">
-      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>📕 小红书运营
-        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="goto-xhs">进入完整页 →</button>
-      </div>
-      <div class="xhs-stat" style="margin-bottom:12px">
-        ${cell('粉丝量', cur.f, xhsDelta('f'))}
-        ${cell('笔记数量' + (L.count ? ` · 🚫${L.count}` : ''), cur.n, xhsDelta('n'))}
-        ${cell('赞藏数量', cur.z, xhsDelta('z'))}
-      </div>
-      <div class="rb-summary">
-        <span class="rb-sum in">PR返我 待收 <b>${money(inPending)}</b></span>
-        <span class="rb-sum out">我返PR 还需 <b>${money(outPending)}</b></span>
-        <span class="rb-sum">笔记支出合计 <b>${money(expTotal)}</b></span>
-      </div>
-      <div style="color:var(--ink-soft);font-size:12.5px;margin-top:8px">点「进入完整页」可记数据、管待返款、记笔记支出与查看统计。</div>
-    </div>`;
-}
-
-/* ===================== 首页：芽芽拉屎记录模块 ===================== */
+/* ===================== 芽芽拉屎记录模块（独立页面，侧边栏第3） ===================== */
 const BABY_TYPES = ['正常（金黄软糊）', '偏稀（水样）', '偏干（颗粒便）', '便秘', '腹泻', '绿便', '奶瓣', '其他'];
 
 function babyDayPoops(ds) {
@@ -374,7 +346,7 @@ function babyDayDetail(ds) {
   </div>`;
 }
 
-function renderHomeBabyModule() {
+function renderBaby() {
   const all = S.baby.poops || [];
   const monthKey = `${babyCal.y}-${pad(babyCal.m + 1)}`;
   const curM = all.filter(p => (p.date || '').slice(0, 7) === monthKey).length;
@@ -399,21 +371,22 @@ function renderHomeBabyModule() {
     </div>`;
   }).join('') : '<div class="empty">还没有拉屎记录，点日历上的日期记一笔吧 💩</div>';
 
-  return `<div class="card" style="margin-top:20px">
-    <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 芽芽拉屎记录
-      <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
-        <span class="cal-hint">点日期记录当天拉屎</span>
-        <button class="icon-btn btn-sm" data-action="baby-cal-prev">${icPrev()}</button>
-        <button class="icon-btn btn-sm" data-action="baby-cal-next">${icNext()}</button>
-      </span>
-    </div>
-    ${summary}
-    ${renderBabyCalendar()}
-    <div class="hist-block">
-      <div class="hist-head">📅 拉屎记录历史</div>
-      <div class="hist-scroll">${hist}</div>
-    </div>
-  </div>`;
+  $('#view-baby').innerHTML = `
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 芽芽拉屎记录
+        <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <span class="cal-hint">点日期记录当天拉屎</span>
+          <button class="icon-btn btn-sm" data-action="baby-cal-prev">${icPrev()}</button>
+          <button class="icon-btn btn-sm" data-action="baby-cal-next">${icNext()}</button>
+        </span>
+      </div>
+      ${summary}
+      ${renderBabyCalendar()}
+      <div class="hist-block">
+        <div class="hist-head">📅 拉屎记录历史</div>
+        <div class="hist-scroll">${hist}</div>
+      </div>
+    </div>`;
 }
 
 function renderHomeCalendar() {
@@ -1490,20 +1463,20 @@ document.addEventListener('click', e => {
     case 'home-cal-prev': homeCal.m--; if (homeCal.m < 0) { homeCal.m = 11; homeCal.y--; } renderHome(); break;
     case 'home-cal-next': homeCal.m++; if (homeCal.m > 11) { homeCal.m = 0; homeCal.y++; } renderHome(); break;
     case 'home-pick': homeCal.sel = el.dataset.date; renderHome(); break;
-    case 'baby-cal-prev': babyCal.m--; if (babyCal.m < 0) { babyCal.m = 11; babyCal.y--; } renderHome(); break;
-    case 'baby-cal-next': babyCal.m++; if (babyCal.m > 11) { babyCal.m = 0; babyCal.y++; } renderHome(); break;
-    case 'baby-pick': babyCal.sel = el.dataset.date; renderHome(); break;
+    case 'baby-cal-prev': babyCal.m--; if (babyCal.m < 0) { babyCal.m = 11; babyCal.y--; } renderView('baby'); break;
+    case 'baby-cal-next': babyCal.m++; if (babyCal.m > 11) { babyCal.m = 0; babyCal.y++; } renderView('baby'); break;
+    case 'baby-pick': babyCal.sel = el.dataset.date; renderView('baby'); break;
     case 'baby-save': {
       const ds = el.dataset.date;
       const time = ($('#bpTime').value || '').trim() || '00:00';
       const type = ($('#bpType').value || BABY_TYPES[0]).trim();
       const note = ($('#bpNote').value || '').trim();
       S.baby.poops.push({ id: uid(), date: ds, time, type, note });
-      save(); closeModal(); renderHome(); toast('已记录芽芽拉屎 💩'); break;
+      save(); closeModal(); renderView('baby'); toast('已记录芽芽拉屎 💩'); break;
     }
     case 'baby-del': {
       S.baby.poops = S.baby.poops.filter(p => p.id !== id);
-      save(); renderHome(); break;
+      save(); renderView('baby'); break;
     }
     case 'toggle-rest': {
       const ds = el.dataset.date; const set = S.home.rest || (S.home.rest = []);
