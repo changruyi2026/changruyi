@@ -642,3 +642,12 @@ input,textarea,select{font-family:inherit;color:inherit}
 .hist-items{display:flex;flex-wrap:wrap;gap:6px}
 .hist-tag{font-size:12px;background:rgba(217,142,94,.16);color:var(--rose-deep);border-radius:8px;padding:2px 8px}
 
+/* ============ 换 APP 图标弹窗 ============ */
+.icon-grid{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 16px}
+.icon-opt{flex:1;min-width:86px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:16px;background:var(--card-2);border:2px solid transparent;transition:all .2s;cursor:pointer}
+.icon-opt img{width:64px;height:64px;border-radius:16px;box-shadow:var(--shadow-sm)}
+.icon-opt span{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.icon-opt.on{border-color:var(--rose-deep);background:rgba(224,169,138,.16)}
+.icon-opt.on span{color:var(--rose-deep)}
+.icon-upload{display:flex;align-items:center;flex-wrap:wrap;margin-top:4px}
+
