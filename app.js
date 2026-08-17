@@ -313,14 +313,14 @@ function renderBabyCalendar() {
     const ds = `${y}-${pad(m + 1)}-${pad(d)}`;
     const cnt = (S.baby.poops || []).filter(p => p.date === ds).length;
     const mark = cnt ? `<span class="poop-badge">💩${cnt > 1 ? cnt : ''}</span>` : '';
-    cal += `<div class="cal-day ${ds === babyCal.sel ? 'sel' : ''} ${cnt ? 'poop' : ''} ${ds === todayStr() ? 'today' : ''}" data-action="baby-pick" data-date="${ds}">
+    cal += `<div class="cal-day ${cnt ? 'poop' : ''} ${ds === todayStr() ? 'today' : ''}" data-action="baby-pick" data-date="${ds}">
       <div class="d">${d}</div>${mark}</div>`;
   }
   const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
-  return `<div class="cal-head">${y}年 ${m + 1}月</div><div class="cal">${dows}${cal}</div>${babyDayDetail(babyCal.sel)}`;
+  return `<div class="cal-head">${y}年 ${m + 1}月</div><div class="cal">${dows}${cal}</div>`;
 }
 
-function babyDayDetail(ds) {
+function openBabyDayModal(ds) {
   const recs = babyDayPoops(ds);
   const dt = new Date(ds + 'T00:00:00');
   const ld = lunarStr(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
@@ -333,17 +333,17 @@ function babyDayDetail(ds) {
       <span class="bp-type">${esc(r.type || '')}</span>
       <span class="bp-note">${esc(r.note || '')}</span>
       <button class="icon-btn danger" data-action="baby-del" data-id="${r.id}" title="删除这条">${icTrash()}</button>
-    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录，下面记一笔吧 💩</div>';
-  return `<div class="home-detail">
-    <div class="hd-title">${fmtDateCN(ds)} · ${ld} · 拉屎 ${recs.length} 次</div>
+    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录，记一笔吧 💩</div>';
+  const html = `
+    <h3>👶 ${fmtDateCN(ds)} · ${ld} · 拉屎 ${recs.length} 次</h3>
     <div class="bp-add">
       <input class="input" type="time" id="bpTime" value="${curTime}" style="width:108px" />
       <select class="input" id="bpType" style="flex:1;min-width:120px">${typeOpts}</select>
       <input class="input" id="bpNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
-      <button class="btn btn-sm btn-primary" data-action="baby-save" data-date="${ds}">记一笔</button>
     </div>
-    ${list}
-  </div>`;
+    <button class="btn btn-primary" style="width:100%;margin:4px 0 14px" data-action="baby-save" data-date="${ds}">记一笔</button>
+    ${list}`;
+  openModal(html, 'baby');
 }
 
 function renderBaby() {
@@ -1454,7 +1454,7 @@ document.addEventListener('click', e => {
   const a = el.dataset.action, id = el.dataset.id;
 
   switch (a) {
-    case 'close-modal': closeModal(); break;
+    case 'close-modal': closeModal(); renderView(currentView); break;
 
     /* 导航 */
     case 'nav': break;
@@ -1465,18 +1465,19 @@ document.addEventListener('click', e => {
     case 'home-pick': homeCal.sel = el.dataset.date; renderHome(); break;
     case 'baby-cal-prev': babyCal.m--; if (babyCal.m < 0) { babyCal.m = 11; babyCal.y--; } renderView('baby'); break;
     case 'baby-cal-next': babyCal.m++; if (babyCal.m > 11) { babyCal.m = 0; babyCal.y++; } renderView('baby'); break;
-    case 'baby-pick': babyCal.sel = el.dataset.date; renderView('baby'); break;
+    case 'baby-pick': openBabyDayModal(el.dataset.date); break;
     case 'baby-save': {
       const ds = el.dataset.date;
       const time = ($('#bpTime').value || '').trim() || '00:00';
       const type = ($('#bpType').value || BABY_TYPES[0]).trim();
       const note = ($('#bpNote').value || '').trim();
       S.baby.poops.push({ id: uid(), date: ds, time, type, note });
-      save(); closeModal(); renderView('baby'); toast('已记录芽芽拉屎 💩'); break;
+      save(); openBabyDayModal(ds); toast('已记录芽芽拉屎 💩'); break;
     }
     case 'baby-del': {
+      const rec = (S.baby.poops || []).find(p => p.id === id);
       S.baby.poops = S.baby.poops.filter(p => p.id !== id);
-      save(); renderView('baby'); break;
+      save(); if (rec) openBabyDayModal(rec.date); toast('已删除'); break;
     }
     case 'toggle-rest': {
       const ds = el.dataset.date; const set = S.home.rest || (S.home.rest = []);
