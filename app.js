@@ -135,6 +135,132 @@ function openModal(html, cls) {
 }
 function closeModal() { $('#modalRoot').classList.remove('show'); $('#modalRoot').innerHTML = ''; }
 
+/* ---------- APP 图标切换（预设 + 自定义上传） ---------- */
+const ICON_PRESETS = [
+  { key: '1', name: '芽芽粉' },
+  { key: '2', name: '常如意' },
+  { key: '3', name: '如如意' }
+];
+function getIconCfg() {
+  try { return JSON.parse(localStorage.getItem('app_icon') || '{"type":"default"}'); }
+  catch (e) { return { type: 'default' }; }
+}
+function applyAppIcon() {
+  const cfg = getIconCfg();
+  let touch, m192, m512;
+  if (cfg.type === 'preset' && cfg.key) {
+    touch = `preset-${cfg.key}-apple.png`;
+    m192 = `preset-${cfg.key}-192.png`;
+    m512 = `preset-${cfg.key}-512.png`;
+  } else if (cfg.type === 'custom') {
+    touch = 'app-custom-icon.png';
+    m192 = 'app-custom-icon.png';
+    m512 = 'app-custom-icon.png';
+  } else {
+    touch = 'apple-touch-icon.png';
+    m192 = 'icon-192.png';
+    m512 = 'icon-512.png';
+  }
+  let link = document.querySelector('link[rel="apple-touch-icon"]');
+  if (!link) { link = document.createElement('link'); link.rel = 'apple-touch-icon'; document.head.appendChild(link); }
+  link.href = touch;
+  /* 安卓用 manifest 图标：动态生成（仅替换图标，其余沿用默认） */
+  const manifest = {
+    name: '常如意的工作台', short_name: '常如意', description: '常如意个人工作台',
+    start_url: './', scope: './', display: 'standalone',
+    background_color: '#faf6f1', theme_color: '#e0a98a',
+    icons: [
+      { src: m192, sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: m512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  };
+  try {
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    const url = URL.createObjectURL(blob);
+    const mlink = document.querySelector('link[rel="manifest"]');
+    if (mlink) mlink.href = url;
+  } catch (e) {}
+}
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('changruyi', 1);
+    r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbSet(k, v) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('kv', 'readwrite');
+    tx.objectStore('kv').put(v, k);
+    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+  });
+}
+function openIconModal() {
+  const cfg = getIconCfg();
+  const grid = ICON_PRESETS.map(p => `
+    <button class="icon-opt ${cfg.type === 'preset' && cfg.key === p.key ? 'on' : ''}" data-action="icon-preset" data-key="${p.key}">
+      <img src="preset-${p.key}-apple.png" alt="${p.name}" />
+      <span>${p.name}</span>
+    </button>`).join('');
+  const html = `
+    <h3>🎨 更换 APP 图标</h3>
+    <p class="modal-tip">iPhone 限制：已添加到主屏的图标不会自动变。换好后，<b>删掉主屏旧图标 → 重新「添加到主屏幕」一次</b>就会显示新图标（这是苹果规矩，任何 APP 都一样）。</p>
+    <div class="icon-grid">${grid}</div>
+    <div class="icon-upload">
+      <label class="btn btn-ghost" style="display:inline-block">上传我的图片
+        <input type="file" id="iconFile" accept="image/*" hidden />
+      </label>
+      <span style="font-size:12px;color:var(--ink-faint);margin-left:8px">建议正方形图片</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-action="icon-reset">恢复默认</button>
+      <button class="btn btn-primary" data-action="close-modal">完成</button>
+    </div>`;
+  openModal(html, 'icon');
+  const file = $('#iconFile');
+  if (file) file.addEventListener('change', e => {
+    if (e.target.files && e.target.files[0]) handleIconUpload(e.target.files[0]);
+  });
+}
+function handleIconUpload(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 512;
+      const c = document.createElement('canvas'); c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+      const scale = Math.max(size / img.width, size / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      const dataUrl = c.toDataURL('image/png');
+      idbSet('appIconCustom', { dataUrl }).then(() => {
+        localStorage.setItem('app_icon', JSON.stringify({ type: 'custom' }));
+        applyAppIcon();
+        toast('已设置自定义图标，删掉主屏旧图标重新添加即可生效');
+        openIconModal();
+      });
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function selectPreset(key) {
+  localStorage.setItem('app_icon', JSON.stringify({ type: 'preset', key }));
+  applyAppIcon();
+  toast('已切换图标，删掉主屏旧图标重新添加即可生效');
+  openIconModal();
+}
+function resetIcon() {
+  localStorage.setItem('app_icon', JSON.stringify({ type: 'default' }));
+  applyAppIcon();
+  toast('已恢复默认图标');
+  openIconModal();
+}
+
 /* ---------- 图片压缩 ---------- */
 function compressImage(file, cb) {
   const fr = new FileReader();
@@ -287,6 +413,13 @@ function renderHome() {
           </span>
         </div>
         ${renderHomeCalendar()}
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🎨 个性化
+          <button class="btn btn-sm btn-primary" style="margin-left:auto" data-action="open-icon-modal">更换图标</button>
+        </div>
+        <div style="font-size:12.5px;color:var(--ink-soft)">换 APP 图标：内置几套预设，也能上传自己的图片。iPhone 换完需删掉主屏旧图标、重新添加到主屏幕一次才生效。</div>
       </div>
 
     `;
@@ -1456,6 +1589,11 @@ document.addEventListener('click', e => {
   switch (a) {
     case 'close-modal': closeModal(); renderView(currentView); break;
 
+    /* APP 图标切换 */
+    case 'open-icon-modal': openIconModal(); break;
+    case 'icon-preset': selectPreset(el.dataset.key); break;
+    case 'icon-reset': resetIcon(); break;
+
     /* 导航 */
     case 'nav': break;
 
@@ -1941,5 +2079,6 @@ function registerSW() {
 
 $('#topDate').textContent = fmtDateCN(todayStr());
 showView('home');
+applyAppIcon();
 initSync();
 registerSW();
