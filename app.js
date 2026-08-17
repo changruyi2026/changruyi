@@ -281,9 +281,41 @@ function renderHome() {
           </span>
         </div>
         ${renderHomeCalendar()}
-      </div>`;
+      </div>
+
+      ${renderHomeXhsModule()}
+    `;
   tickClock();
   fetchWeather();
+}
+
+/* 首页：小红书运营概览模块（首页下方第二个模块） */
+function renderHomeXhsModule() {
+  const cur = { f: xhsCurrent('f'), n: xhsCurrent('n'), z: xhsCurrent('z') };
+  const L = S.xhs.limit || { count: 0 };
+  const flat = xhsFlatExpenses();
+  const expTotal = flat.reduce((s, e) => s + (e.amount || 0), 0);
+  const rebates = S.xhs.rebates || [];
+  const inPending = rebates.filter(r => r.dir === 'in' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
+  const outPending = rebates.filter(r => r.dir === 'out' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
+  const cell = (label, val, delta) => `<div class="xhs-cell"><div class="big">${val.toLocaleString()}</div><div class="lbl">${label}</div>${deltaHTML(delta)}</div>`;
+  return `
+    <div class="card" style="margin-top:20px">
+      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>📕 小红书运营
+        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="goto-xhs">进入完整页 →</button>
+      </div>
+      <div class="xhs-stat" style="margin-bottom:12px">
+        ${cell('粉丝量', cur.f, xhsDelta('f'))}
+        ${cell('笔记数量' + (L.count ? ` · 🚫${L.count}` : ''), cur.n, xhsDelta('n'))}
+        ${cell('赞藏数量', cur.z, xhsDelta('z'))}
+      </div>
+      <div class="rb-summary">
+        <span class="rb-sum in">PR返我 待收 <b>${money(inPending)}</b></span>
+        <span class="rb-sum out">我返PR 还需 <b>${money(outPending)}</b></span>
+        <span class="rb-sum">笔记支出合计 <b>${money(expTotal)}</b></span>
+      </div>
+      <div style="color:var(--ink-soft);font-size:12.5px;margin-top:8px">点「进入完整页」可记数据、管待返款、记笔记支出与查看统计。</div>
+    </div>`;
 }
 
 function renderHomeCalendar() {
@@ -646,6 +678,11 @@ function openXhsNoteExpModal(editId) {
   const type = t.type || 'note';
   const rowsHtml = (t.items || []).map(it => `
     <div class="exp-item-row" data-iid="${it.id}">
+      <select class="input exp-kind" data-action="xhs-item-kind">
+        <option value="custom" ${!it.kind || it.kind === 'custom' ? 'selected' : ''}>自定义</option>
+        <option value="real" ${it.kind === 'real' ? 'selected' : ''}>真人2000+20000</option>
+        <option value="comment" ${it.kind === 'comment' ? 'selected' : ''}>围绕评论</option>
+      </select>
       <input class="input exp-desc" placeholder="如：真人2000+20000 / 围绕评论【25个】" value="${esc(it.desc || '')}" />
       <input class="input exp-amt" type="number" min="0" step="0.01" placeholder="金额" value="${it.amount != null && it.amount !== '' ? it.amount : ''}" />
       <button class="icon-btn" data-action="xhs-item-del" data-iid="${it.id}" title="删除这项">${icTrash()}</button>
@@ -684,6 +721,13 @@ function openXhsNoteExpModal(editId) {
     let s = 0; $$('#neItems .exp-amt').forEach(inp => { s += parseFloat(inp.value || '0') || 0; });
     const tv = $('#neTotalVal'); if (tv) tv.textContent = money(s);
   };
+  const applyItemKind = (sel) => {
+    const row = sel.closest('.exp-item-row'); if (!row) return;
+    const desc = row.querySelector('.exp-desc'); if (!desc) return;
+    if (sel.value === 'real') desc.value = '真人2000+20000';            // 真人推广：自动带出说明
+    else if (sel.value === 'comment') desc.value = '围绕评论【】';       // 围绕评论：带出「围绕评论【】」，用户填【】内的值
+    // 自定义：保留原说明文字，用户自由填写
+  };
   $('#neType').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     curType = b.dataset.type;
@@ -694,14 +738,21 @@ function openXhsNoteExpModal(editId) {
     const wrap = $('#neItems'); const iid = uid();
     const row = document.createElement('div');
     row.className = 'exp-item-row'; row.dataset.iid = iid;
-    row.innerHTML = `<input class="input exp-desc" placeholder="如：真人2000+20000 / 围绕评论【25个】" />
+    row.innerHTML = `<select class="input exp-kind" data-action="xhs-item-kind">
+        <option value="custom">自定义</option>
+        <option value="real">真人2000+20000</option>
+        <option value="comment">围绕评论</option>
+      </select>
+      <input class="input exp-desc" placeholder="如：真人2000+20000 / 围绕评论【25个】" />
       <input class="input exp-amt" type="number" min="0" step="0.01" placeholder="金额" />
       <button class="icon-btn" data-action="xhs-item-del" data-iid="${iid}" title="删除这项">${icTrash()}</button>`;
     wrap.appendChild(row);
     row.querySelector('.exp-amt').addEventListener('input', recalc);
+    row.querySelector('.exp-kind').addEventListener('change', e => applyItemKind(e.target));
     recalc();
   });
   $$('#neItems .exp-amt').forEach(inp => inp.addEventListener('input', recalc));
+  $$('#neItems .exp-kind').forEach(sel => sel.addEventListener('change', e => applyItemKind(e.target)));
   const fileInput = $('#neCoverFile');
   $('#neCoverPick').addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', e => {
@@ -735,6 +786,27 @@ function openXhsNoteExpModal(editId) {
   window.__neCover = () => curCover;
 }
 
+/* 封面图：未上传时按笔记名称首字生成文字封面（canvas，带缓存） */
+const _coverCache = {};
+function firstCharCover(name) {
+  const ch = ((name || '?').trim().charAt(0) || '?');
+  if (_coverCache[ch]) return _coverCache[ch];
+  const c = document.createElement('canvas'); c.width = 240; c.height = 240;
+  const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 240, 240);
+  g.addColorStop(0, '#F3D9C4'); g.addColorStop(1, '#E0A98A');
+  x.fillStyle = g; x.fillRect(0, 0, 240, 240);
+  x.fillStyle = 'rgba(255,255,255,0.22)';
+  x.beginPath(); x.arc(192, 48, 50, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#7A4A2F';
+  x.font = 'bold 120px "Noto Sans SC", sans-serif';
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText(ch, 120, 130);
+  const u = c.toDataURL('image/png');
+  _coverCache[ch] = u; return u;
+}
+function noteCoverUrl(n) { return (n && n.cover) ? n.cover : firstCharCover(n && n.name); }
+
 /* 点封面图 → 弹窗展示该笔记的全部支出明细与合计金额 */
 function openXhsNoteDetail(noteId) {
   const n = (S.xhs.noteExpenses || []).find(x => x.id === noteId);
@@ -747,7 +819,7 @@ function openXhsNoteDetail(noteId) {
     </div>`).join('') || '<div class="empty">还没有支出明细</div>';
   openModal(`
     <h3>📒 ${esc(n.name || '未命名笔记')}</h3>
-    ${n.cover ? `<img class="detail-cover" src="${n.cover}" alt="封面" />` : ''}
+    <img class="detail-cover" src="${noteCoverUrl(n)}" alt="封面" />
     ${n.date ? `<div class="detail-date">发布日期：${esc(n.date)}</div>` : ''}
     <div class="detail-list">${rows}</div>
     <div class="detail-total">总花费 <b>¥${total.toFixed(2)}</b></div>
@@ -1145,8 +1217,8 @@ function renderXhs() {
     const noteTotal = xhsNoteItemsTotal(n.items);
     return `
     <div class="note-exp-card ${isCart ? 'cart' : ''}">
-      <div class="note-cover ${n.cover ? '' : 'no-cover'}" data-action="xhs-note-detail" data-id="${n.id}" title="点封面看支出明细">
-        ${n.cover ? `<img src="${n.cover}" alt="封面" />` : `<span class="cover-ph">📷<br>点开看明细</span>`}
+      <div class="note-cover" data-action="xhs-note-detail" data-id="${n.id}" title="点封面看支出明细">
+        <img src="${noteCoverUrl(n)}" alt="封面" />
       </div>
       <div class="note-info">
         <div class="note-name"><b>${esc(n.name || '未命名笔记')}</b> <span class="etype-tag ${isCart ? 'cart' : 'note'}">${isCart ? '作业车' : '笔记'}</span></div>
@@ -1407,6 +1479,7 @@ document.addEventListener('click', e => {
     case 'ledger-del': S.ledger = S.ledger.filter(r => r.id !== id); save(); renderLedger(); break;
 
     /* 小红书 */
+    case 'goto-xhs': showView('xhs'); break;
     case 'xhs-add': openXhsAddModal(); break;
     case 'xhs-open-history': openXhsHistoryModal(); break;
     case 'xhs-open-base': openXhsBaseModal(); break;
@@ -1478,7 +1551,9 @@ document.addEventListener('click', e => {
       $$('#neItems .exp-item-row').forEach(row => {
         const desc = (row.querySelector('.exp-desc').value || '').trim();
         const amt = Math.max(0, parseFloat(row.querySelector('.exp-amt').value || '0'));
-        if (desc || amt) items.push({ id: row.dataset.iid && !row.dataset.iid.startsWith('_') ? row.dataset.iid : uid(), desc, amount: amt });
+        const kindSel = row.querySelector('.exp-kind');
+        const kind = kindSel ? kindSel.value : 'custom';
+        if (desc || amt) items.push({ id: row.dataset.iid && !row.dataset.iid.startsWith('_') ? row.dataset.iid : uid(), desc, amount: amt, kind });
       });
       if (!name) { toast('请填写笔记名称', 'warn'); return; }
       if (!items.length) { toast('请至少填写一项支出金额或说明', 'warn'); return; }
