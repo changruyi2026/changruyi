@@ -52,7 +52,8 @@ function defaultState() {
       limit: { count: 0, names: '' },
       noteExpenses: [],
       rebates: []
-    }
+    },
+    baby: { poops: [] }
   };
 }
 function nextBirthday() {
@@ -205,6 +206,9 @@ function cdSolarDate(c) {
 let homeCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
 const REST_SET = () => (S.home.rest || []);
 
+/* 芽芽拉屎记录：独立月历状态 */
+let babyCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
+
 const HOME_DOT = {
   todo:   { color: 'var(--sage-deep)', label: '待办' },
   diet:   { color: '#7FA97C',          label: '饮食' },
@@ -284,6 +288,7 @@ function renderHome() {
       </div>
 
       ${renderHomeXhsModule()}
+      ${renderHomeBabyModule()}
     `;
   tickClock();
   fetchWeather();
@@ -316,6 +321,99 @@ function renderHomeXhsModule() {
       </div>
       <div style="color:var(--ink-soft);font-size:12.5px;margin-top:8px">点「进入完整页」可记数据、管待返款、记笔记支出与查看统计。</div>
     </div>`;
+}
+
+/* ===================== 首页：芽芽拉屎记录模块 ===================== */
+const BABY_TYPES = ['正常（金黄软糊）', '偏稀（水样）', '偏干（颗粒便）', '便秘', '腹泻', '绿便', '奶瓣', '其他'];
+
+function babyDayPoops(ds) {
+  return (S.baby.poops || []).filter(p => p.date === ds).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+}
+
+function renderBabyCalendar() {
+  const { y, m } = babyCal;
+  const first = new Date(y, m, 1);
+  const startDow = (first.getDay() + 6) % 7; /* 周一为每周第一天 */
+  const daysIn = new Date(y, m + 1, 0).getDate();
+  let cal = '';
+  for (let i = 0; i < startDow; i++) cal += '<div class="cal-day out"></div>';
+  for (let d = 1; d <= daysIn; d++) {
+    const ds = `${y}-${pad(m + 1)}-${pad(d)}`;
+    const cnt = (S.baby.poops || []).filter(p => p.date === ds).length;
+    const mark = cnt ? `<span class="poop-badge">💩${cnt > 1 ? cnt : ''}</span>` : '';
+    cal += `<div class="cal-day ${ds === babyCal.sel ? 'sel' : ''} ${cnt ? 'poop' : ''} ${ds === todayStr() ? 'today' : ''}" data-action="baby-pick" data-date="${ds}">
+      <div class="d">${d}</div>${mark}</div>`;
+  }
+  const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
+  return `<div class="cal-head">${y}年 ${m + 1}月</div><div class="cal">${dows}${cal}</div>${babyDayDetail(babyCal.sel)}`;
+}
+
+function babyDayDetail(ds) {
+  const recs = babyDayPoops(ds);
+  const dt = new Date(ds + 'T00:00:00');
+  const ld = lunarStr(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+  const now = new Date();
+  const curTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const typeOpts = BABY_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
+  const list = recs.length ? `<div class="bp-list">` + recs.map(r => `
+    <div class="bp-item">
+      <span class="bp-time">${esc(r.time || '')}</span>
+      <span class="bp-type">${esc(r.type || '')}</span>
+      <span class="bp-note">${esc(r.note || '')}</span>
+      <button class="icon-btn danger" data-action="baby-del" data-id="${r.id}" title="删除这条">${icTrash()}</button>
+    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录，下面记一笔吧 💩</div>';
+  return `<div class="home-detail">
+    <div class="hd-title">${fmtDateCN(ds)} · ${ld} · 拉屎 ${recs.length} 次</div>
+    <div class="bp-add">
+      <input class="input" type="time" id="bpTime" value="${curTime}" style="width:108px" />
+      <select class="input" id="bpType" style="flex:1;min-width:120px">${typeOpts}</select>
+      <input class="input" id="bpNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
+      <button class="btn btn-sm btn-primary" data-action="baby-save" data-date="${ds}">记一笔</button>
+    </div>
+    ${list}
+  </div>`;
+}
+
+function renderHomeBabyModule() {
+  const all = S.baby.poops || [];
+  const monthKey = `${babyCal.y}-${pad(babyCal.m + 1)}`;
+  const curM = all.filter(p => (p.date || '').slice(0, 7) === monthKey).length;
+  const last = all.length ? all.slice().sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')))[0] : null;
+  const summary = `<div class="rb-summary" style="margin:6px 0 2px">
+    <span class="rb-sum">本月拉屎 <b>${curM}</b> 次</span>
+    <span class="rb-sum">累计 <b>${all.length}</b> 次</span>
+    <span class="rb-sum">${last ? ('最近 ' + fmtDateCN(last.date) + ' ' + esc(last.time || '')) : '还没有记录'}</span>
+  </div>`;
+
+  /* 数据历史：按天倒序，直观看哪天拉屎 */
+  const byDay = {};
+  all.forEach(p => { (byDay[p.date] = byDay[p.date] || []).push(p); });
+  const days = Object.keys(byDay).sort((a, b) => b.localeCompare(a));
+  const hist = days.length ? days.map(ds => {
+    const recs = byDay[ds].slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    const d = new Date(ds + 'T00:00:00');
+    const wk = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
+    return `<div class="hist-day">
+      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span> <span class="hist-cnt">${recs.length} 次</span></div>
+      <div class="hist-items">${recs.map(r => `<span class="hist-tag">${esc(r.time || '')} · ${esc(r.type || '')}</span>`).join('')}</div>
+    </div>`;
+  }).join('') : '<div class="empty">还没有拉屎记录，点日历上的日期记一笔吧 💩</div>';
+
+  return `<div class="card" style="margin-top:20px">
+    <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 芽芽拉屎记录
+      <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <span class="cal-hint">点日期记录当天拉屎</span>
+        <button class="icon-btn btn-sm" data-action="baby-cal-prev">${icPrev()}</button>
+        <button class="icon-btn btn-sm" data-action="baby-cal-next">${icNext()}</button>
+      </span>
+    </div>
+    ${summary}
+    ${renderBabyCalendar()}
+    <div class="hist-block">
+      <div class="hist-head">📅 拉屎记录历史</div>
+      <div class="hist-scroll">${hist}</div>
+    </div>
+  </div>`;
 }
 
 function renderHomeCalendar() {
@@ -1392,6 +1490,21 @@ document.addEventListener('click', e => {
     case 'home-cal-prev': homeCal.m--; if (homeCal.m < 0) { homeCal.m = 11; homeCal.y--; } renderHome(); break;
     case 'home-cal-next': homeCal.m++; if (homeCal.m > 11) { homeCal.m = 0; homeCal.y++; } renderHome(); break;
     case 'home-pick': homeCal.sel = el.dataset.date; renderHome(); break;
+    case 'baby-cal-prev': babyCal.m--; if (babyCal.m < 0) { babyCal.m = 11; babyCal.y--; } renderHome(); break;
+    case 'baby-cal-next': babyCal.m++; if (babyCal.m > 11) { babyCal.m = 0; babyCal.y++; } renderHome(); break;
+    case 'baby-pick': babyCal.sel = el.dataset.date; renderHome(); break;
+    case 'baby-save': {
+      const ds = el.dataset.date;
+      const time = ($('#bpTime').value || '').trim() || '00:00';
+      const type = ($('#bpType').value || BABY_TYPES[0]).trim();
+      const note = ($('#bpNote').value || '').trim();
+      S.baby.poops.push({ id: uid(), date: ds, time, type, note });
+      save(); closeModal(); renderHome(); toast('已记录芽芽拉屎 💩'); break;
+    }
+    case 'baby-del': {
+      S.baby.poops = S.baby.poops.filter(p => p.id !== id);
+      save(); renderHome(); break;
+    }
     case 'toggle-rest': {
       const ds = el.dataset.date; const set = S.home.rest || (S.home.rest = []);
       const i = set.indexOf(ds);
