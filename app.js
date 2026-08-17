@@ -141,6 +141,12 @@ const ICON_PRESETS = [
   { key: '2', name: '常如意' },
   { key: '3', name: '如如意' }
 ];
+
+/* 说明：iPhone 在「添加到主屏幕」时只认服务器 index.html 里写死的 apple-touch-icon 真实文件，
+   不会读取本机 JS / Service Worker 提供的图标。因此"让主屏换图标"必须由助理在服务器端
+   提交图标文件并改写 index.html（不经过浏览器、不暴露任何令牌）。本机这里只负责记录选择，
+   并提示用户在聊天里把选择/图片发给我，由我完成服务器侧的提交。 */
+
 function getIconCfg() {
   try { return JSON.parse(localStorage.getItem('app_icon') || '{"type":"default"}'); }
   catch (e) { return { type: 'default' }; }
@@ -206,7 +212,7 @@ function openIconModal() {
     </button>`).join('');
   const html = `
     <h3>🎨 更换 APP 图标</h3>
-    <p class="modal-tip">iPhone 限制：已添加到主屏的图标不会自动变。换好后，<b>删掉主屏旧图标 → 重新「添加到主屏幕」一次</b>就会显示新图标（这是苹果规矩，任何 APP 都一样）。</p>
+    <p class="modal-tip">iPhone 限制：已添加到主屏的图标不会自动变，且只认服务器上的真实图标文件。<br>所以步骤是：<b>① 在这里选好图标（本机先记住）→ ② 在聊天里把选择/图片发给我，我帮你提交到服务器（约 1 分钟发布）→ ③ 你删掉主屏旧图标，重新「添加到主屏幕」一次</b>就会显示新图标（这是苹果规矩，任何 APP 都一样）。</p>
     <div class="icon-grid">${grid}</div>
     <div class="icon-upload">
       <label class="btn btn-ghost" style="display:inline-block">上传我的图片
@@ -240,8 +246,8 @@ function handleIconUpload(file) {
       idbSet('appIconCustom', { dataUrl }).then(() => {
         localStorage.setItem('app_icon', JSON.stringify({ type: 'custom' }));
         applyAppIcon();
-        toast('已设置自定义图标，删掉主屏旧图标重新添加即可生效');
         openIconModal();
+        toast('图片已在本机保存。要让 iPhone 主屏换成此图，请在聊天里把这张图发给我，我帮你提交到服务器', 'warn');
       });
     };
     img.src = reader.result;
@@ -251,14 +257,14 @@ function handleIconUpload(file) {
 function selectPreset(key) {
   localStorage.setItem('app_icon', JSON.stringify({ type: 'preset', key }));
   applyAppIcon();
-  toast('已切换图标，删掉主屏旧图标重新添加即可生效');
   openIconModal();
+  toast('本机已记录。要让 iPhone 主屏也换这个图标，请在聊天里发我「换成' + ICON_PRESETS.find(p => p.key === key).name + '」，我帮你提交到服务器', 'warn');
 }
 function resetIcon() {
   localStorage.setItem('app_icon', JSON.stringify({ type: 'default' }));
   applyAppIcon();
-  toast('已恢复默认图标');
   openIconModal();
+  toast('本机已恢复默认。要让 iPhone 主屏也恢复，请在聊天里发我「恢复默认图标」', 'warn');
 }
 
 /* ---------- 图片压缩 ---------- */
