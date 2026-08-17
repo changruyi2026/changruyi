@@ -608,6 +608,7 @@ input,textarea,select{font-family:inherit;color:inherit}
 .exp-item-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .exp-item-row .exp-desc{flex:1;min-width:0}
 .exp-item-row .exp-amt{width:120px;flex:0 0 auto}
+.exp-item-row .exp-kind{width:140px;flex:0 0 auto}
 .ne-total{margin-top:6px;font-size:14px;color:var(--ink-soft)}
 .ne-total b{font-family:"Nunito";font-size:20px;color:var(--rose-deep);font-weight:800}
 
