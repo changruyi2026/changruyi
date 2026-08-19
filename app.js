@@ -53,7 +53,8 @@ function defaultState() {
       noteExpenses: [],
       rebates: []
     },
-    baby: { poops: [] }
+    baby: { poops: [] },
+    publish: { notes: [] }
   };
 }
 function nextBirthday() {
@@ -411,14 +412,15 @@ function renderHome() {
       </div>
 
       <div class="card" style="margin-top:20px">
-        <div class="card-title"><span class="dot" style="background:var(--sand)"></span>我的日历 · 联动全站事项
-          <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
-            <span class="cal-hint">点日期可标记为休息日</span>
-            <button class="icon-btn btn-sm" data-action="home-cal-prev">${icPrev()}</button>
-            <button class="icon-btn btn-sm" data-action="home-cal-next">${icNext()}</button>
-          </span>
+        <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🍠 红薯日历 · 出稿笔记
+          <span class="cal-hint" style="margin-left:auto">点日期记录当天出稿笔记</span>
         </div>
-        ${renderHomeCalendar()}
+        ${renderHongshuCalendar()}
+        <div class="hs-legend">
+          <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待初稿</span>
+          <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
+          <span class="hs-legend-item"><i class="hs-lg st-review"></i>待审核</span>
+        </div>
       </div>
 
       <div class="card" style="margin-top:20px">
@@ -568,6 +570,132 @@ function homeDayDetail(ds) {
     ${restBtn}
     ${list}
   </div>`;
+}
+
+/* ===================== 红薯日历（出稿笔记 · 万年历含农历） ===================== */
+const PUB_TYPES = ['水下置换', '水下直发', '蒲公英商单'];
+const PUB_STATUSES = [
+  { key: 'draft',     label: '待初稿', cls: 'st-draft' },
+  { key: 'published', label: '已出稿', cls: 'st-published' },
+  { key: 'review',    label: '待审核', cls: 'st-review' }
+];
+const PUB_STATUS_MAP = Object.fromEntries(PUB_STATUSES.map(s => [s.label, s]));
+/* 状态优先级：未完成的排在前面，决定当天单元格的底色 */
+const PUB_STATUS_ORDER = { '待初稿': 0, '待审核': 1, '已出稿': 2 };
+let hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
+
+function hsDayNotes(ds) { return (S.publish.notes || []).filter(n => n.date === ds); }
+function lunarDayShort(y, m, d) {
+  const L = solarToLunar(y, m, d);
+  return (L.isLeap ? '闰' : '') + LUNAR_DAYS[L.day - 1];
+}
+/* 取当天笔记中"最未完成"的状态，作为单元格底色 */
+function primaryStatusCls(notes) {
+  if (!notes.length) return '';
+  const sorted = notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9));
+  const st = PUB_STATUS_MAP[sorted[0].status];
+  return st ? st.cls : '';
+}
+
+function renderHongshuCalendar() {
+  const { y, m } = hongshuCal;
+  const first = new Date(y, m, 1);
+  const startDow = (first.getDay() + 6) % 7; /* 周一为每周第一天 */
+  const daysIn = new Date(y, m + 1, 0).getDate();
+  let cal = '';
+  for (let i = 0; i < startDow; i++) cal += '<div class="cal-day out"></div>';
+  for (let d = 1; d <= daysIn; d++) {
+    const ds = `${y}-${pad(m + 1)}-${pad(d)}`;
+    const notes = hsDayNotes(ds);
+    const isToday = ds === todayStr();
+    const stCls = notes.length ? primaryStatusCls(notes) : '';
+    const ld = lunarDayShort(y, m + 1, d);
+    const top = notes.length ? notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9))[0] : null;
+    const badge = top ? `<span class="hs-badge">${esc(top.status)}</span>` : '';
+    cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
+      <div class="d">${d}</div>
+      <div class="hs-lunar">${ld}</div>
+      ${badge}
+    </div>`;
+  }
+  const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
+  return `<div class="cal-head">${y}年 ${m + 1}月 · 红薯日历</div>
+    <div class="cal-nav">
+      <button class="icon-btn btn-sm" data-action="hs-cal-prev-year" title="上一年">«</button>
+      <button class="icon-btn btn-sm" data-action="hs-cal-prev" title="上个月">${icPrev()}</button>
+      <button class="btn btn-sm btn-ghost" data-action="hs-cal-today">今天</button>
+      <button class="icon-btn btn-sm" data-action="hs-cal-next" title="下个月">${icNext()}</button>
+      <button class="icon-btn btn-sm" data-action="hs-cal-next-year" title="下一年">»</button>
+    </div>
+    <div class="cal">${dows}${cal}</div>`;
+}
+
+function openHongshuDayModal(ds) {
+  const dt = new Date(ds + 'T00:00:00');
+  const ld = lunarStr(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+  const notes = hsDayNotes(ds).slice().sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+  const typeOpts = PUB_TYPES.map(t => `<option value="${t}"${t === '蒲公英商单' ? ' selected' : ''}>${t}</option>`).join('');
+  const statusOpts = PUB_STATUSES.map(s => `<option value="${s.label}">${s.label}</option>`).join('');
+  const list = notes.length ? `<div class="hs-list">` + notes.map(n => {
+    let moneyBlock = '';
+    if (n.type === '蒲公英商单') {
+      moneyBlock = `<div class="hs-money">
+        <span>图文报价 ${money(n.quote || 0)}</span>
+        <span>手续费 ${money(n.fee || 0)}</span>
+        <span>返点 ${money(n.rebate || 0)}</span>
+        <span class="hs-net">到手 ${money(n.net || 0)}</span>
+      </div>`;
+    }
+    const st = PUB_STATUS_MAP[n.status];
+    return `<div class="hs-note">
+      <div class="hs-note-top">
+        <span class="hs-type-tag">${esc(n.type)}</span>
+        <span class="hs-status ${st ? st.cls : ''}">${esc(n.status)}</span>
+        <button class="icon-btn danger" data-action="hs-note-del" data-id="${n.id}" title="删除">${icTrash()}</button>
+      </div>
+      <div class="hs-note-content">${esc(n.content)}</div>
+      ${moneyBlock}
+    </div>`;
+  }).join('') + `</div>` : '<div class="empty">这一天还没有出稿笔记，新增一笔吧 🍠</div>';
+
+  const html = `
+    <h3>🍠 红薯日历 · ${fmtDateCN(ds)} · ${ld}</h3>
+    <div class="hs-add">
+      <textarea class="input" id="hsContent" rows="2" placeholder="填写出稿笔记内容…"></textarea>
+      <div class="hs-row">
+        <select class="input" id="hsType">${typeOpts}</select>
+        <select class="input" id="hsStatus">${statusOpts}</select>
+      </div>
+      <div class="hs-amounts" id="hsAmounts" style="display:none">
+        <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
+        <div class="hs-amount-row"><label>返点金额(¥)</label><input class="input" id="hsRebate" type="number" min="0" step="0.01" placeholder="0" /></div>
+        <div class="hs-calc">
+          <span>手续费(10%)：<b id="hsFee">¥0</b></span>
+          <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:10px" data-action="hs-add-note" data-date="${ds}">+ 保存出稿笔记</button>
+    </div>
+    <div class="hs-block-title">📝 当天出稿笔记（${notes.length}）</div>
+    ${list}`;
+  openModal(html, 'hongshu');
+  const typeSel = $('#hsType');
+  const amounts = $('#hsAmounts');
+  const toggleAmounts = () => { amounts.style.display = (typeSel.value === '蒲公英商单') ? 'block' : 'none'; };
+  typeSel.addEventListener('change', toggleAmounts);
+  toggleAmounts();
+  const recompute = () => {
+    const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+    const r = Math.max(0, parseFloat($('#hsRebate').value || '0') || 0);
+    const fee = Math.round(q * 0.1 * 100) / 100;
+    const net = Math.round((q - fee + r) * 100) / 100;
+    const feeEl = $('#hsFee'), netEl = $('#hsNet');
+    if (feeEl) feeEl.textContent = money(fee);
+    if (netEl) netEl.textContent = money(net);
+  };
+  $('#hsQuote').addEventListener('input', recompute);
+  $('#hsRebate').addEventListener('input', recompute);
+  recompute();
 }
 
 /* ===================== 首页天气（杭州，Open-Meteo 免费接口，无需密钥） ===================== */
@@ -1855,6 +1983,35 @@ document.addEventListener('click', e => {
       if (r && r.ledgerId) S.ledger = S.ledger.filter(x => x.id !== r.ledgerId);
       S.xhs.rebates = (S.xhs.rebates || []).filter(z => z.id !== id);
       save(); renderXhs(); break;
+    }
+
+    /* 红薯日历（出稿笔记 · 万年历含农历） */
+    case 'hs-cal-prev-year': hongshuCal.y--; renderHome(); break;
+    case 'hs-cal-next-year': hongshuCal.y++; renderHome(); break;
+    case 'hs-cal-prev': hongshuCal.m--; if (hongshuCal.m < 0) { hongshuCal.m = 11; hongshuCal.y--; } renderHome(); break;
+    case 'hs-cal-next': hongshuCal.m++; if (hongshuCal.m > 11) { hongshuCal.m = 0; hongshuCal.y++; } renderHome(); break;
+    case 'hs-cal-today': hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() }; renderHome(); break;
+    case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
+    case 'hs-add-note': {
+      const ds = el.dataset.date;
+      const content = ($('#hsContent').value || '').trim();
+      const type = ($('#hsType').value || PUB_TYPES[0]).trim();
+      const status = ($('#hsStatus').value || '待初稿').trim();
+      if (!content) { toast('请填写出稿笔记内容', 'warn'); return; }
+      let quote = 0, rebate = 0, fee = 0, net = 0;
+      if (type === '蒲公英商单') {
+        quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+        rebate = Math.max(0, parseFloat($('#hsRebate').value || '0') || 0);
+        fee = Math.round(quote * 0.1 * 100) / 100;
+        net = Math.round((quote - fee + rebate) * 100) / 100;
+      }
+      S.publish.notes.push({ id: uid(), date: ds, content, type, status, quote, rebate, fee, net });
+      save(); openHongshuDayModal(ds); toast('已保存出稿笔记 🍠'); break;
+    }
+    case 'hs-note-del': {
+      const n = (S.publish.notes || []).find(x => x.id === id);
+      S.publish.notes = (S.publish.notes || []).filter(x => x.id !== id);
+      save(); if (n) openHongshuDayModal(n.date); toast('已删除'); break;
     }
   }
 });
