@@ -656,6 +656,7 @@ function openHongshuDayModal(ds) {
         <span class="hs-status ${st ? st.cls : ''}">${esc(n.status)}</span>
         <button class="icon-btn danger" data-action="hs-note-del" data-id="${n.id}" title="删除">${icTrash()}</button>
       </div>
+      ${n.deadline ? `<div class="hs-note-meta">📅 发布最晚：${esc(n.deadline)}</div>` : ''}
       <div class="hs-note-content">${esc(n.content)}</div>
       ${moneyBlock}
     </div>`;
@@ -669,6 +670,10 @@ function openHongshuDayModal(ds) {
       <div class="hs-row">
         <select class="input" id="hsType">${typeOpts}</select>
         <select class="input" id="hsStatus">${statusOpts}</select>
+      </div>
+      <div class="hs-deadline-row">
+        <label>发布日期（最晚）</label>
+        <input class="input" id="hsDeadline" type="date" />
       </div>
       <div class="hs-amounts" id="hsAmounts" style="display:none">
         <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
@@ -2005,6 +2010,7 @@ document.addEventListener('click', e => {
       const content = ($('#hsContent').value || '').trim();
       const type = ($('#hsType').value || PUB_TYPES[0]).trim();
       const status = ($('#hsStatus').value || '待出稿').trim();
+      const deadline = ($('#hsDeadline').value || '').trim();
       if (!content) { toast('请填写出稿笔记内容', 'warn'); return; }
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0;
       if (type === '蒲公英商单') {
@@ -2014,8 +2020,8 @@ document.addEventListener('click', e => {
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
       }
-      S.publish.notes.push({ id: uid(), date: ds, item, content, type, status, quote, rebatePct, rebate, fee, net });
-      save(); openHongshuDayModal(ds); toast('已保存出稿笔记 🍠'); break;
+      S.publish.notes.push({ id: uid(), date: ds, item, content, type, status, deadline, quote, rebatePct, rebate, fee, net });
+      save(); closeModal(); renderHome(); toast('已保存出稿笔记 🍠'); break;
     }
     case 'hs-note-del': {
       const n = (S.publish.notes || []).find(x => x.id === id);
