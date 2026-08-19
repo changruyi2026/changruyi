@@ -573,7 +573,9 @@ function homeDayDetail(ds) {
 }
 
 /* ===================== 红薯日历（出稿笔记 · 万年历含农历） ===================== */
-const PUB_TYPES = ['水下置换', '水下直发', '拍单置换', '蒲公英商单'];
+const PUB_TYPES = ['水下置换', '水下直发', '拍单置换', '蒲公英商单', '众测招募'];
+const PUB_ACCOUNTS = ['芽芽Mochi', '常如意i'];
+const PUB_ACCOUNT_BADGE = { '芽芽Mochi': '芽', '常如意i': '常' };
 const PUB_STATUSES = [
   { key: 'draft',     label: '待出稿', cls: 'st-draft' },
   { key: 'published', label: '已出稿', cls: 'st-published' },
@@ -612,7 +614,8 @@ function renderHongshuCalendar() {
     const ld = lunarDayShort(y, m + 1, d);
     const top = notes.length ? notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9))[0] : null;
     const badge = top ? `<span class="hs-badge">${esc(top.status)}</span>` : '';
-    const cover = top && top.item ? `<div class="hs-cover">${esc(top.item)}</div>` : '';
+    const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
+    const cover = top && top.item ? `<div class="hs-cover">${acctBadge}${esc(top.item)}</div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}</div>
       <div class="hs-lunar">${ld}</div>
@@ -638,6 +641,7 @@ function openHongshuDayModal(ds) {
   const notes = hsDayNotes(ds).slice().sort((a, b) => (b.id || '').localeCompare(a.id || ''));
   const typeOpts = PUB_TYPES.map(t => `<option value="${t}"${t === '蒲公英商单' ? ' selected' : ''}>${t}</option>`).join('');
   const statusOpts = PUB_STATUSES.map(s => `<option value="${s.label}">${s.label}</option>`).join('');
+  const accountOpts = PUB_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
   const list = notes.length ? `<div class="hs-list">` + notes.map(n => {
     let moneyBlock = '';
     if (n.type === '蒲公英商单') {
@@ -650,9 +654,11 @@ function openHongshuDayModal(ds) {
       </div>`;
     }
     const st = PUB_STATUS_MAP[n.status];
+    const acctLabel = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="hs-acct-tag">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
     return `<div class="hs-note">
       <div class="hs-note-top">
         <span class="hs-type-tag">${esc(n.type)}</span>
+        ${acctLabel}
         <span class="hs-status ${st ? st.cls : ''}">${esc(n.status)}</span>
         <button class="icon-btn danger" data-action="hs-note-del" data-id="${n.id}" title="删除">${icTrash()}</button>
       </div>
@@ -670,6 +676,9 @@ function openHongshuDayModal(ds) {
       <div class="hs-row">
         <select class="input" id="hsType">${typeOpts}</select>
         <select class="input" id="hsStatus">${statusOpts}</select>
+      </div>
+      <div class="hs-row">
+        <select class="input" id="hsAccount">${accountOpts}</select>
       </div>
       <div class="hs-deadline-row">
         <label>发布日期（最晚）</label>
@@ -2010,6 +2019,7 @@ document.addEventListener('click', e => {
       const content = ($('#hsContent').value || '').trim();
       const type = ($('#hsType').value || PUB_TYPES[0]).trim();
       const status = ($('#hsStatus').value || '待出稿').trim();
+      const account = ($('#hsAccount').value || PUB_ACCOUNTS[0]).trim();
       const deadline = ($('#hsDeadline').value || '').trim();
       if (!content) { toast('请填写出稿笔记内容', 'warn'); return; }
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0;
@@ -2020,7 +2030,7 @@ document.addEventListener('click', e => {
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
       }
-      S.publish.notes.push({ id: uid(), date: ds, item, content, type, status, deadline, quote, rebatePct, rebate, fee, net });
+      S.publish.notes.push({ id: uid(), date: ds, item, content, type, status, account, deadline, quote, rebatePct, rebate, fee, net });
       save(); closeModal(); renderHome(); toast('已保存出稿笔记 🍠'); break;
     }
     case 'hs-note-del': {
