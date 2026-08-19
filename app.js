@@ -41,7 +41,8 @@ function defaultState() {
     _modifiedAt: 0,
     home: {
       countdowns: [{ id: uid(), label: '芽芽生日', lunar: { y: 2024, m: 7, d: 7, leap: false }, date: '' }],
-      rest: []
+      rest: [],
+      hsReadCount: 0
     },
     todos: [],
     diet: { goal: 1800, profile: { weight: 0, height: 0 }, days: {} },
@@ -115,7 +116,7 @@ function load() {
   catch (e) { console.warn('load failed', e); }
   return defaultState();
 }
-function save() { S._modifiedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); }
+function save() { S._modifiedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
 
 /* ---------- 通用：toast ---------- */
 function toast(msg, kind = 'ok') {
@@ -375,8 +376,17 @@ function homeDayItems(ds) {
 function renderHome() {
   const now = new Date();
   const quote = QUOTES[dayOfYear() % QUOTES.length];
+  const pending = hsPendingCount();
+  S.home.hsReadCount = pending; /* 进入首页即标记已读 */
+  const alertBanner = pending > 0
+    ? `<div class="hs-alert-banner">
+        <span class="hs-alert-ico">🔔</span>
+        <div class="hs-alert-txt">请注意，您有${pending}条笔记今日需出稿！</div>
+      </div>`
+    : '';
 
   $('#view-home').innerHTML = `
+    ${alertBanner}
     <div class="grid cols-3" style="align-items:start">
       <div class="hero" style="grid-column:span 2">
         <span class="hero-sprout">${sproutSVG(56)}</span>
@@ -414,6 +424,7 @@ function renderHome() {
     `;
   tickClock();
   fetchWeather();
+  updateHomeBadge();
 }
 
 /* 首页：小红书运营概览模块（首页下方第二个模块） */
@@ -569,6 +580,24 @@ function normStatus(s) { return STATUS_RENAME[s] || s; }
 /* 状态优先级：未完成的排在前面，决定当天单元格的底色 */
 const PUB_STATUS_ORDER = { '待出稿': 0, '审核中': 1, '已出稿': 2 };
 let hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
+
+/* 今日待出稿提醒：deadline 为今天且状态仍为待出稿 */
+function hsPendingToday() {
+  const ds = todayStr();
+  return (S.publish.notes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿');
+}
+function hsPendingCount() { return hsPendingToday().length; }
+function hsUnreadPending() {
+  const cur = hsPendingCount();
+  const read = (S.home && S.home.hsReadCount) || 0;
+  return Math.max(0, cur - read);
+}
+function updateHomeBadge() {
+  const unread = hsUnreadPending();
+  const el = $('#navBadgeHome');
+  if (el) el.style.display = unread > 0 ? 'inline-flex' : 'none';
+  return unread;
+}
 
 function hsDayNotes(ds) { return (S.publish.notes || []).filter(n => n.date === ds); }
 function lunarDayShort(y, m, d) {
@@ -2053,7 +2082,7 @@ document.addEventListener('click', e => {
     case 'hs-note-del': {
       const n = (S.publish.notes || []).find(x => x.id === id);
       S.publish.notes = (S.publish.notes || []).filter(x => x.id !== id);
-      save(); if (n) openHongshuDayModal(n.date); toast('已删除'); break;
+      save(); renderHome(); if (n) openHongshuDayModal(n.date); toast('已删除'); break;
     }
   }
 });
