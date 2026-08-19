@@ -651,3 +651,47 @@ input,textarea,select{font-family:inherit;color:inherit}
 .icon-opt.on span{color:var(--rose-deep)}
 .icon-upload{display:flex;align-items:center;flex-wrap:wrap;margin-top:4px}
 
+/* ============ 红薯日历（出稿笔记 · 万年历含农历） ============ */
+.hs-day{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:1px;padding:5px 4px}
+.hs-day .hs-lunar{font-size:10px;color:var(--ink-faint);line-height:1.15;text-align:center;margin-top:1px}
+.hs-day .hs-badge{position:absolute;top:3px;right:3px;font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px;line-height:1.4}
+.hs-day.st-draft{background:#FBE4E2;box-shadow:inset 0 0 0 1.5px #E79B97}
+.hs-day.st-published{background:#E3F3E9;box-shadow:inset 0 0 0 1.5px #9FD4B0}
+.hs-day.st-review{background:#FBF2D8;box-shadow:inset 0 0 0 1.5px #E8CF88}
+.hs-day.st-draft .d{color:#C25851}
+.hs-day.st-published .d{color:#3C8A5E}
+.hs-day.st-review .d{color:#9C7A23}
+.hs-day.st-draft .hs-badge{background:#E38882;color:#fff}
+.hs-day.st-published .hs-badge{background:#7DC79A;color:#fff}
+.hs-day.st-review .hs-badge{background:#E6C06E;color:#5a4406}
+.cal-nav{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px}
+.hs-legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.hs-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);font-weight:600}
+.hs-lg{width:14px;height:14px;border-radius:5px;display:inline-block}
+.hs-lg.st-draft{background:#E38882}
+.hs-lg.st-published{background:#7DC79A}
+.hs-lg.st-review{background:#E6C06E}
+/* 弹窗内 */
+.hs-add{background:var(--card-2);border-radius:14px;padding:14px;margin-bottom:16px}
+.hs-add .input{width:100%}
+.hs-row{display:flex;gap:10px;margin-top:10px}
+.hs-row .input{flex:1}
+.hs-amounts{margin-top:10px;background:var(--card);border-radius:12px;padding:12px}
+.hs-amount-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.hs-amount-row label{font-size:12.5px;color:var(--ink-soft);font-weight:600;width:84px;flex-shrink:0}
+.hs-amount-row .input{flex:1}
+.hs-calc{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);margin-top:4px;font-weight:600}
+.hs-calc .hs-net{color:var(--rose-deep)}
+.hs-block-title{font-weight:700;font-size:14px;margin-bottom:10px;color:var(--ink)}
+.hs-list{display:flex;flex-direction:column;gap:10px}
+.hs-note{background:var(--card-2);border-radius:14px;padding:12px 14px}
+.hs-note-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.hs-type-tag{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(224,169,138,.22);color:var(--rose-deep);white-space:nowrap}
+.hs-status{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:auto}
+.hs-status.st-draft{background:#FBE4E2;color:#C25851}
+.hs-status.st-published{background:#E3F3E9;color:#3C8A5E}
+.hs-status.st-review{background:#FBF2D8;color:#9C7A23}
+.hs-note-content{font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.hs-money{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.hs-money .hs-net{color:var(--rose-deep);font-weight:800}
+
