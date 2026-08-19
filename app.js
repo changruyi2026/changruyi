@@ -565,7 +565,7 @@ function homeDayDetail(ds) {
 }
 
 /* ===================== 红薯日历（出稿笔记 · 万年历含农历） ===================== */
-const PUB_TYPES = ['水下置换', '水下直发', '拍单置换', '蒲公英商单', '众测招募'];
+const PUB_TYPES = ['水下置换', '水下直发', '水下探店', '拍单置换', '蒲公英商单', '众测招募'];
 const PUB_ACCOUNTS = ['芽芽Mochi', '常如意i'];
 const PUB_ACCOUNT_BADGE = { '芽芽Mochi': '芽', '常如意i': '常' };
 const PUB_STATUSES = [
