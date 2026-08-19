@@ -573,15 +573,15 @@ function homeDayDetail(ds) {
 }
 
 /* ===================== 红薯日历（出稿笔记 · 万年历含农历） ===================== */
-const PUB_TYPES = ['水下置换', '水下直发', '蒲公英商单'];
+const PUB_TYPES = ['水下置换', '水下直发', '拍单置换', '蒲公英商单'];
 const PUB_STATUSES = [
-  { key: 'draft',     label: '待初稿', cls: 'st-draft' },
+  { key: 'draft',     label: '待出稿', cls: 'st-draft' },
   { key: 'published', label: '已出稿', cls: 'st-published' },
   { key: 'review',    label: '待审核', cls: 'st-review' }
 ];
 const PUB_STATUS_MAP = Object.fromEntries(PUB_STATUSES.map(s => [s.label, s]));
 /* 状态优先级：未完成的排在前面，决定当天单元格的底色 */
-const PUB_STATUS_ORDER = { '待初稿': 0, '待审核': 1, '已出稿': 2 };
+const PUB_STATUS_ORDER = { '待出稿': 0, '待审核': 1, '已出稿': 2 };
 let hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
 
 function hsDayNotes(ds) { return (S.publish.notes || []).filter(n => n.date === ds); }
@@ -612,9 +612,11 @@ function renderHongshuCalendar() {
     const ld = lunarDayShort(y, m + 1, d);
     const top = notes.length ? notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9))[0] : null;
     const badge = top ? `<span class="hs-badge">${esc(top.status)}</span>` : '';
+    const cover = top && top.item ? `<div class="hs-cover">${esc(top.item)}</div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}</div>
       <div class="hs-lunar">${ld}</div>
+      ${cover}
       ${badge}
     </div>`;
   }
@@ -639,10 +641,11 @@ function openHongshuDayModal(ds) {
   const list = notes.length ? `<div class="hs-list">` + notes.map(n => {
     let moneyBlock = '';
     if (n.type === '蒲公英商单') {
+      const rp = (n.rebatePct != null && n.rebatePct !== '') ? `(${n.rebatePct}%)` : '';
       moneyBlock = `<div class="hs-money">
         <span>图文报价 ${money(n.quote || 0)}</span>
         <span>手续费 ${money(n.fee || 0)}</span>
-        <span>返点 ${money(n.rebate || 0)}</span>
+        <span>返点${rp} ${money(n.rebate || 0)}</span>
         <span class="hs-net">到手 ${money(n.net || 0)}</span>
       </div>`;
     }
@@ -661,6 +664,7 @@ function openHongshuDayModal(ds) {
   const html = `
     <h3>🍠 红薯日历 · ${fmtDateCN(ds)} · ${ld}</h3>
     <div class="hs-add">
+      <input class="input" id="hsItem" placeholder="物品名称（将作为封面显示在日历当天）" />
       <textarea class="input" id="hsContent" rows="2" placeholder="填写出稿笔记内容…"></textarea>
       <div class="hs-row">
         <select class="input" id="hsType">${typeOpts}</select>
@@ -668,9 +672,10 @@ function openHongshuDayModal(ds) {
       </div>
       <div class="hs-amounts" id="hsAmounts" style="display:none">
         <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
-        <div class="hs-amount-row"><label>返点金额(¥)</label><input class="input" id="hsRebate" type="number" min="0" step="0.01" placeholder="0" /></div>
+        <div class="hs-amount-row"><label>返点比例(%)</label><input class="input" id="hsRebatePct" type="number" step="0.01" placeholder="如 10 表示10%" /></div>
         <div class="hs-calc">
           <span>手续费(10%)：<b id="hsFee">¥0</b></span>
+          <span>返点金额：<b id="hsRebateAmt">-¥0</b></span>
           <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
         </div>
       </div>
@@ -686,15 +691,17 @@ function openHongshuDayModal(ds) {
   toggleAmounts();
   const recompute = () => {
     const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
-    const r = Math.max(0, parseFloat($('#hsRebate').value || '0') || 0);
+    const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
     const fee = Math.round(q * 0.1 * 100) / 100;
-    const net = Math.round((q - fee + r) * 100) / 100;
-    const feeEl = $('#hsFee'), netEl = $('#hsNet');
+    const rebate = -Math.round(q * pct / 100 * 100) / 100; /* 返点为支出，记为负数 */
+    const net = Math.round((q - fee + rebate) * 100) / 100;
+    const feeEl = $('#hsFee'), rebateEl = $('#hsRebateAmt'), netEl = $('#hsNet');
     if (feeEl) feeEl.textContent = money(fee);
+    if (rebateEl) rebateEl.textContent = money(rebate);
     if (netEl) netEl.textContent = money(net);
   };
   $('#hsQuote').addEventListener('input', recompute);
-  $('#hsRebate').addEventListener('input', recompute);
+  $('#hsRebatePct').addEventListener('input', recompute);
   recompute();
 }
 
@@ -1994,18 +2001,20 @@ document.addEventListener('click', e => {
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
     case 'hs-add-note': {
       const ds = el.dataset.date;
+      const item = ($('#hsItem').value || '').trim();
       const content = ($('#hsContent').value || '').trim();
       const type = ($('#hsType').value || PUB_TYPES[0]).trim();
-      const status = ($('#hsStatus').value || '待初稿').trim();
+      const status = ($('#hsStatus').value || '待出稿').trim();
       if (!content) { toast('请填写出稿笔记内容', 'warn'); return; }
-      let quote = 0, rebate = 0, fee = 0, net = 0;
+      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0;
       if (type === '蒲公英商单') {
         quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
-        rebate = Math.max(0, parseFloat($('#hsRebate').value || '0') || 0);
+        rebatePct = parseFloat($('#hsRebatePct').value || '0') || 0;
         fee = Math.round(quote * 0.1 * 100) / 100;
+        rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
       }
-      S.publish.notes.push({ id: uid(), date: ds, content, type, status, quote, rebate, fee, net });
+      S.publish.notes.push({ id: uid(), date: ds, item, content, type, status, quote, rebatePct, rebate, fee, net });
       save(); openHongshuDayModal(ds); toast('已保存出稿笔记 🍠'); break;
     }
     case 'hs-note-del': {
