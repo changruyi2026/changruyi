@@ -663,7 +663,6 @@ function openHongshuDayModal(ds) {
         <button class="icon-btn danger" data-action="hs-note-del" data-id="${n.id}" title="删除">${icTrash()}</button>
       </div>
       ${n.deadline ? `<div class="hs-note-meta">📅 发布最晚：${esc(n.deadline)}</div>` : ''}
-      <div class="hs-note-content">${esc(n.content)}</div>
       ${moneyBlock}
     </div>`;
   }).join('') + `</div>` : '<div class="empty">这一天还没有出稿笔记，新增一笔吧 🍠</div>';
@@ -672,7 +671,6 @@ function openHongshuDayModal(ds) {
     <h3>🍠 红薯日历 · ${fmtDateCN(ds)} · ${ld}</h3>
     <div class="hs-add">
       <input class="input" id="hsItem" placeholder="物品名称（将作为封面显示在日历当天）" />
-      <textarea class="input" id="hsContent" rows="2" placeholder="填写出稿笔记内容…"></textarea>
       <div class="hs-row">
         <select class="input" id="hsType">${typeOpts}</select>
         <select class="input" id="hsStatus">${statusOpts}</select>
@@ -2016,12 +2014,11 @@ document.addEventListener('click', e => {
     case 'hs-add-note': {
       const ds = el.dataset.date;
       const item = ($('#hsItem').value || '').trim();
-      const content = ($('#hsContent').value || '').trim();
       const type = ($('#hsType').value || PUB_TYPES[0]).trim();
       const status = ($('#hsStatus').value || '待出稿').trim();
       const account = ($('#hsAccount').value || PUB_ACCOUNTS[0]).trim();
       const deadline = ($('#hsDeadline').value || '').trim();
-      if (!content) { toast('请填写出稿笔记内容', 'warn'); return; }
+      if (!item) { toast('请填写物品名称', 'warn'); return; }
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0;
       if (type === '蒲公英商单') {
         quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
@@ -2030,7 +2027,7 @@ document.addEventListener('click', e => {
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
       }
-      S.publish.notes.push({ id: uid(), date: ds, item, content, type, status, account, deadline, quote, rebatePct, rebate, fee, net });
+      S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net });
       save(); closeModal(); renderHome(); toast('已保存出稿笔记 🍠'); break;
     }
     case 'hs-note-del': {
