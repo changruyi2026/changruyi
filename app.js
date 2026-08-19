@@ -577,13 +577,16 @@ const PUB_TYPES = ['水下置换', '水下直发', '拍单置换', '蒲公英商
 const PUB_ACCOUNTS = ['芽芽Mochi', '常如意i'];
 const PUB_ACCOUNT_BADGE = { '芽芽Mochi': '芽', '常如意i': '常' };
 const PUB_STATUSES = [
-  { key: 'draft',     label: '待出稿', cls: 'st-draft' },
-  { key: 'published', label: '已出稿', cls: 'st-published' },
-  { key: 'review',    label: '待审核', cls: 'st-review' }
+  { key: 'draft',     label: '待出稿', cls: 'st-draft',     icon: '✖' },
+  { key: 'published', label: '已出稿', cls: 'st-published', icon: '✓' },
+  { key: 'review',    label: '审核中', cls: 'st-review',    icon: '●' }
 ];
 const PUB_STATUS_MAP = Object.fromEntries(PUB_STATUSES.map(s => [s.label, s]));
+/* 旧数据兼容：待审核 → 审核中 */
+const STATUS_RENAME = { '待审核': '审核中' };
+function normStatus(s) { return STATUS_RENAME[s] || s; }
 /* 状态优先级：未完成的排在前面，决定当天单元格的底色 */
-const PUB_STATUS_ORDER = { '待出稿': 0, '待审核': 1, '已出稿': 2 };
+const PUB_STATUS_ORDER = { '待出稿': 0, '审核中': 1, '已出稿': 2 };
 let hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
 
 function hsDayNotes(ds) { return (S.publish.notes || []).filter(n => n.date === ds); }
@@ -595,7 +598,7 @@ function lunarDayShort(y, m, d) {
 function primaryStatusCls(notes) {
   if (!notes.length) return '';
   const sorted = notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9));
-  const st = PUB_STATUS_MAP[sorted[0].status];
+  const st = PUB_STATUS_MAP[normStatus(sorted[0].status)];
   return st ? st.cls : '';
 }
 
@@ -613,7 +616,8 @@ function renderHongshuCalendar() {
     const stCls = notes.length ? primaryStatusCls(notes) : '';
     const ld = lunarDayShort(y, m + 1, d);
     const top = notes.length ? notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9))[0] : null;
-    const badge = top ? `<span class="hs-badge">${esc(top.status)}</span>` : '';
+    const st = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
+    const badge = st ? `<span class="hs-badge ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>` : '';
     const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
     const cover = top && top.item ? `<div class="hs-cover">${acctBadge}${esc(top.item)}</div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
@@ -653,13 +657,13 @@ function openHongshuDayModal(ds) {
         <span class="hs-net">到手 ${money(n.net || 0)}</span>
       </div>`;
     }
-    const st = PUB_STATUS_MAP[n.status];
+    const st = PUB_STATUS_MAP[normStatus(n.status)];
     const acctLabel = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="hs-acct-tag">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
     return `<div class="hs-note">
       <div class="hs-note-top">
         <span class="hs-type-tag">${esc(n.type)}</span>
         ${acctLabel}
-        <span class="hs-status ${st ? st.cls : ''}">${esc(n.status)}</span>
+        <span class="hs-status ${st ? st.cls : ''}"><span class="hs-ico">${st ? st.icon : ''}</span>${esc(st ? st.label : n.status)}</span>
         <button class="icon-btn danger" data-action="hs-note-del" data-id="${n.id}" title="删除">${icTrash()}</button>
       </div>
       ${n.deadline ? `<div class="hs-note-meta">📅 发布最晚：${esc(n.deadline)}</div>` : ''}
