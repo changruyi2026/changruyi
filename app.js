@@ -373,21 +373,8 @@ function homeDayItems(ds) {
 }
 
 function renderHome() {
-  const h = S.home;
   const now = new Date();
   const quote = QUOTES[dayOfYear() % QUOTES.length];
-  const cdHTML = h.countdowns.length ? h.countdowns.map(c => {
-    const gdate = cdSolarDate(c);
-    const days = Math.ceil((new Date(gdate + 'T00:00:00') - new Date(todayStr() + 'T00:00:00')) / 86400000);
-    const past = days < 0;
-    const d = new Date(gdate + 'T00:00:00');
-    const ld = c.lunar ? `农历${c.lunar.leap ? '闰' : ''}${LUNAR_MONTHS[c.lunar.m - 1]}月${LUNAR_DAYS[c.lunar.d - 1]}` : lunarStr(d.getFullYear(), d.getMonth() + 1, d.getDate());
-    return `<div class="cd-item ${past ? 'cd-past' : ''}">
-      <div class="cd-days">${past ? '已过' : days}<small>${past ? '' : ' 天'}</small></div>
-      <div class="cd-meta"><div class="cd-label">${esc(c.label)}</div><div class="cd-date">${fmtDateCN(gdate)} · ${ld}</div></div>
-      <button class="icon-btn danger" data-action="del-cd" data-id="${c.id}" title="删除">${icTrash()}</button>
-    </div>`;
-  }).join('') : '<div class="empty">还没有纪念日，点下方 + 添加一个吧</div>';
 
   $('#view-home').innerHTML = `
     <div class="grid cols-3" style="align-items:start">
@@ -397,19 +384,13 @@ function renderHome() {
         <div class="hero-date" id="heroDate">${fmtDateCN(todayStr())} · ${now.getFullYear()}年</div>
         <div class="hero-quote" id="heroQuote">${esc(quote)}</div>
       </div>
-      <div class="card countdown-card">
-        <div class="card-title"><span class="dot" style="background:var(--rose)"></span>纪念日倒计时</div>
-        <div class="cd-list">${cdHTML}</div>
-        <button class="btn btn-rose btn-sm" style="margin-top:14px;width:100%" data-action="add-cd">+ 添加纪念日</button>
-      </div>
-    </div>
-
-      <div class="card weather-card" id="weatherCard" style="margin-top:20px">
+      <div class="card weather-card" id="weatherCard" data-action="weather-open" style="cursor:pointer">
         <div class="card-title"><span class="dot" style="background:var(--blue)"></span>杭州天气
           <span class="weather-loc">📍杭州</span>
         </div>
         <div class="weather-body" id="weatherBody"><div class="weather-loading">天气加载中…</div></div>
       </div>
+    </div>
 
       <div class="card" style="margin-top:20px">
         <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🍠 红薯日历 · 出稿笔记
@@ -419,7 +400,7 @@ function renderHome() {
         <div class="hs-legend">
           <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待出稿</span>
           <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
-          <span class="hs-legend-item"><i class="hs-lg st-review"></i>待审核</span>
+          <span class="hs-legend-item"><i class="hs-lg st-review"></i>审核中</span>
         </div>
       </div>
 
@@ -577,8 +558,8 @@ const PUB_TYPES = ['水下置换', '水下直发', '拍单置换', '蒲公英商
 const PUB_ACCOUNTS = ['芽芽Mochi', '常如意i'];
 const PUB_ACCOUNT_BADGE = { '芽芽Mochi': '芽', '常如意i': '常' };
 const PUB_STATUSES = [
-  { key: 'draft',     label: '待出稿', cls: 'st-draft',     icon: '✖' },
-  { key: 'published', label: '已出稿', cls: 'st-published', icon: '✓' },
+  { key: 'draft',     label: '待出稿', cls: 'st-draft',     icon: '●' },
+  { key: 'published', label: '已出稿', cls: 'st-published', icon: '●' },
   { key: 'review',    label: '审核中', cls: 'st-review',    icon: '●' }
 ];
 const PUB_STATUS_MAP = Object.fromEntries(PUB_STATUSES.map(s => [s.label, s]));
@@ -739,7 +720,7 @@ function fetchWeather() {
     const cached = JSON.parse(localStorage.getItem(WEATHER_KEY) || 'null');
     if (cached && cached.ts && Date.now() - cached.ts < 1800000) renderWeather(cached.data, box);
   } catch (e) {}
-  const url = 'https://api.open-meteo.com/v1/forecast?latitude=30.2741&longitude=120.1551&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FShanghai&forecast_days=4';
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude=30.2741&longitude=120.1551&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FShanghai&forecast_days=8';
   fetch(url).then(r => r.json()).then(d => {
     const data = {
       cur: { t: Math.round(d.current.temperature_2m), code: d.current.weather_code, hum: d.current.relative_humidity_2m, wind: Math.round(d.current.wind_speed_10m) },
@@ -755,7 +736,7 @@ function renderWeather(data, box) {
   const wk = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
   const cur = data.cur, c = wEmoji(cur.code);
   const today = data.days[0];
-  const fc = data.days.slice(1).map(x => {
+  const fc = data.days.slice(1, 4).map(x => {
     const dt = new Date(x.dt + 'T00:00:00');
     const e = wEmoji(x.code);
     return `<div class="w-fc-item"><div class="w-fc-day">${wk[dt.getDay()]}</div><div class="w-fc-ico">${e[0]}</div><div class="w-fc-t">${x.lo}°/${x.hi}°</div></div>`;
@@ -765,6 +746,40 @@ function renderWeather(data, box) {
       <div class="w-cur-main"><div class="w-cur-t">${cur.t}°</div><div class="w-cur-desc">${c[1]} · ${today.hi ? '最高' + today.hi + '° / 最低' + today.lo + '°' : ''}</div><div class="w-cur-sub">湿度 ${cur.hum}% · 风速 ${cur.wind}km/h</div></div>
     </div>
     <div class="w-fc">${fc}</div>`;
+}
+function openWeatherModal() {
+  const wk = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  let data = null;
+  try {
+    const cached = JSON.parse(localStorage.getItem(WEATHER_KEY) || 'null');
+    if (cached && cached.data) data = cached.data;
+  } catch (e) {}
+  if (!data || !data.days || !data.days.length) {
+    toast('天气数据还没加载好，请稍后再点', 'warn');
+    fetchWeather();
+    return;
+  }
+  const cur = data.cur, c = wEmoji(cur.code);
+  const rows = data.days.slice(0, 8).map((x, i) => {
+    const dt = new Date(x.dt + 'T00:00:00');
+    const e = wEmoji(x.code);
+    const label = i === 0 ? '今天' : wk[dt.getDay()];
+    return `<div class="w7-row">
+      <div class="w7-date"><b>${label}</b><span>${x.dt.slice(5)}</span></div>
+      <div class="w7-ico">${e[0]}</div>
+      <div class="w7-desc">${e[1]}</div>
+      <div class="w7-temp">${x.lo}° / ${x.hi}°</div>
+    </div>`;
+  }).join('');
+  openModal(`<h3>🌤 杭州近7日天气预报</h3>
+    <div class="w7-cur">
+      <div class="w7-cur-ico">${c[0]}</div>
+      <div>
+        <div class="w7-cur-t">当前 ${cur.t}° · ${c[1]}</div>
+        <div class="w7-cur-sub">湿度 ${cur.hum}% · 风速 ${cur.wind}km/h</div>
+      </div>
+    </div>
+    <div class="w7-list">${rows}</div>`);
 }
 
 function tickClock() {
@@ -1781,6 +1796,8 @@ document.addEventListener('click', e => {
       save(); renderHome(); break;
     }
     case 'add-cd': openCdModal(); break;
+    case 'del-cd': S.home.countdowns = S.home.countdowns.filter(c => c.id !== id); save(); renderHome(); break;
+    case 'weather-open': openWeatherModal(); break;
     case 'cd-save': {
       const label = ($('#cdLabel').value || '').trim(); if (!label) { toast('请输入纪念日名称', 'warn'); return; }
       const lunar = document.querySelector('input[name="cdMode"]:checked').value === 'lunar';
@@ -1797,7 +1814,6 @@ document.addEventListener('click', e => {
       }
       S.home.countdowns.push(item); save(); closeModal(); renderHome(); toast('已添加纪念日'); break;
     }
-    case 'del-cd': S.home.countdowns = S.home.countdowns.filter(c => c.id !== id); save(); renderHome(); break;
 
     /* 待办 */
     case 'todo-filter': todoFilter = el.dataset.cat; renderTodo(); break;
