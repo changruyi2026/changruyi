@@ -417,7 +417,7 @@ function renderHome() {
         </div>
         ${renderHongshuCalendar()}
         <div class="hs-legend">
-          <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待初稿</span>
+          <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待出稿</span>
           <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
           <span class="hs-legend-item"><i class="hs-lg st-review"></i>待审核</span>
         </div>
