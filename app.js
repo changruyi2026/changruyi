@@ -147,7 +147,7 @@ function openModal(html, cls) {
   root.classList.add('show');
   return $('.modal', root);
 }
-function closeModal() { $('#modalRoot').classList.remove('show'); $('#modalRoot').innerHTML = ''; window.__syncConflictOpen = false; }
+function closeModal() { $('#modalRoot').classList.remove('show'); $('#modalRoot').innerHTML = ''; }
 
 /* ---------- APP 图标切换（预设 + 自定义上传） ---------- */
 const ICON_PRESETS = [
@@ -2260,7 +2260,7 @@ function sproutSVG(sz) {
 }
 
 /* ===================== 云端同步（Supabase） ===================== */
-let sbClient = null, lastSaveTime = 0, syncTimer = null, cloudHasData = null, lastConflictKey = null;
+let sbClient = null, lastSaveTime = 0, syncTimer = null, cloudHasData = null;
 function setSync(state, detail) {
   const pill = $('#syncPill'); if (!pill) return;
   pill.className = 'sync-pill sync-' + state;
@@ -2282,8 +2282,7 @@ function connectSupabase() {
   try { sbClient = supabase.createClient(SUPABASE_CFG.url, SUPABASE_CFG.anon); }
   catch (e) { setSync('offline', '初始化失败'); return; }
   setSync('syncing');
-  pullSync();
-  setInterval(pullSync, 20000); /* 每 20s 拉取他端更新 */
+  pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取，避免弹窗打扰 */
 }
 async function pullSync() {
   if (!sbClient) return;
@@ -2303,18 +2302,12 @@ async function pullSync() {
         if (!localIsBlank) pushSync();
       } else if (new Date(data.updated_at).getTime() > localMtime && JSON.stringify(remote) !== JSON.stringify(S)) {
         if (isFreshDefault(S)) {
-          /* 本地为空、云端有数据：直接采用云端（相当于恢复） */
+          /* 本地为空、云端有数据：静默采用云端（换设备恢复），不再弹窗打扰 */
           S = Object.assign(defaultState(), remote);
           renderView(currentView);
-          toast('已从云端同步最新数据', 'ok');
-        } else {
-          /* 两端都有真实数据且不一致：弹窗让用户选择，绝不静默覆盖 */
-          if (!window.__syncConflictOpen && lastConflictKey !== data.updated_at) {
-            window.__syncConflictOpen = true;
-            lastConflictKey = data.updated_at;
-            showSyncConflict(remote, data.updated_at);
-          }
+          setSync('online');
         }
+        /* 否则两端都有真实数据且不一致：本地优先，静默不覆盖、不弹窗，避免打断录入 */
       }
     } else if (data === null) {
       cloudHasData = false;
@@ -2415,28 +2408,6 @@ function openCloudBackup() {
   });
 }
 /* ---------- 同步冲突弹窗（两端都有改动时让用户选择，绝不静默覆盖） ---------- */
-function showSyncConflict(remote, remoteTime) {
-  const t = new Date(remoteTime).toLocaleString('zh-CN');
-  const rb = (remote.xhs && remote.xhs.base) || {};
-  const html = `<div class="modal-title">⚠️ 同步冲突</div>
-    <p class="modal-tip">云端有一份更新的数据（${t}），但你本地也有改动，两边不一致。请选择保留哪一份：</p>
-    <div class="modal-actions">
-      <button class="btn btn-primary" data-sync="cloud">用云端<br><small style="opacity:.8">粉丝${rb.followers || 0}·笔记${rb.notes || 0}</small></button>
-      <button class="btn btn-ghost" data-sync="local">用本地（保留当前）</button>
-    </div>
-    <p class="modal-tip" style="margin-top:10px">提示：先「导出备份」把当前数据存一份，再点「用云端」更安全；恢复后可手动补齐另一边缺失内容。</p>`;
-  const m = openModal(html, 'modal-conflict');
-  m.querySelector('[data-sync="cloud"]').onclick = () => {
-    S = Object.assign(defaultState(), remote);
-    renderView(currentView); closeModal();
-    toast('已采用云端数据', 'ok');
-  };
-  m.querySelector('[data-sync="local"]').onclick = () => {
-    closeModal(); pushSync();
-    toast('已保留本地，并上传到云端', 'ok');
-  };
-}
-
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('sw.js').catch(() => {});
