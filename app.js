@@ -55,7 +55,8 @@ function defaultState() {
       rebates: []
     },
     baby: { poops: [] },
-    publish: { notes: [] }
+    publish: { notes: [] },
+    backups: []
   };
 }
 function nextBirthday() {
@@ -116,7 +117,18 @@ function load() {
   catch (e) { console.warn('load failed', e); }
   return defaultState();
 }
-function save() { S._modifiedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
+function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
+/* 每日自动备份：每天首次保存时，把当前完整状态存一份到 S.backups（保留最近 30 天）。
+   与云端同步共用同一个云端行，恢复时可选某一天「回退」。 */
+function snapshotIfNeeded() {
+  try {
+    if (!S.backups) S.backups = [];
+    const today = todayStr();
+    if (S.backups[0] && S.backups[0].date === today) return;
+    S.backups.unshift({ date: today, ts: Date.now(), data: JSON.parse(JSON.stringify(S)) });
+    if (S.backups.length > 30) S.backups = S.backups.slice(0, 30);
+  } catch (e) {}
+}
 
 /* ---------- 通用：toast ---------- */
 function toast(msg, kind = 'ok') {
@@ -135,7 +147,7 @@ function openModal(html, cls) {
   root.classList.add('show');
   return $('.modal', root);
 }
-function closeModal() { $('#modalRoot').classList.remove('show'); $('#modalRoot').innerHTML = ''; }
+function closeModal() { $('#modalRoot').classList.remove('show'); $('#modalRoot').innerHTML = ''; window.__syncConflictOpen = false; }
 
 /* ---------- APP 图标切换（预设 + 自定义上传） ---------- */
 const ICON_PRESETS = [
@@ -1697,9 +1709,10 @@ function renderXhs() {
 
     <div class="card" style="margin-top:20px">
       <div class="card-title"><span class="dot" style="background:var(--blue)"></span>数据备份
-        <span style="margin-left:auto;display:flex;gap:8px">
+        <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-sm btn-ghost" data-action="xhs-export-backup">⬇️ 导出备份</button>
           <button class="btn btn-sm btn-ghost" data-action="xhs-import-backup">⬆️ 导入备份</button>
+          <button class="btn btn-sm btn-ghost" data-action="xhs-cloud-backup">🛡 恢复云端备份</button>
         </span>
       </div>
       <div style="color:var(--ink-soft);font-size:13px">建议定期点「导出备份」把数据下载到电脑。换浏览器、清缓存或同步异常时，可用「导入备份」恢复。</div>
@@ -1949,6 +1962,7 @@ document.addEventListener('click', e => {
     case 'xhs-open-limit': openXhsLimitModal(); break;
     case 'xhs-export-backup': exportBackup(); break;
     case 'xhs-import-backup': openImportPicker(); break;
+    case 'xhs-cloud-backup': openCloudBackup(); break;
     case 'xhs-save-limit': {
       const count = Math.max(0, parseInt($('#xLimitCount').value || '0', 10) || 0);
       const names = ($('#xLimitNames').value || '').trim();
@@ -2173,7 +2187,7 @@ function sproutSVG(sz) {
 }
 
 /* ===================== 云端同步（Supabase） ===================== */
-let sbClient = null, lastSaveTime = 0, syncTimer = null, cloudHasData = null;
+let sbClient = null, lastSaveTime = 0, syncTimer = null, cloudHasData = null, lastConflictKey = null;
 function setSync(state, detail) {
   const pill = $('#syncPill'); if (!pill) return;
   pill.className = 'sync-pill sync-' + state;
@@ -2215,9 +2229,19 @@ async function pullSync() {
       if (remoteIsBlank) {
         if (!localIsBlank) pushSync();
       } else if (new Date(data.updated_at).getTime() > localMtime && JSON.stringify(remote) !== JSON.stringify(S)) {
-        S = Object.assign(defaultState(), remote);
-        renderView(currentView);
-        toast('已从云端同步最新数据', 'ok');
+        if (isFreshDefault(S)) {
+          /* 本地为空、云端有数据：直接采用云端（相当于恢复） */
+          S = Object.assign(defaultState(), remote);
+          renderView(currentView);
+          toast('已从云端同步最新数据', 'ok');
+        } else {
+          /* 两端都有真实数据且不一致：弹窗让用户选择，绝不静默覆盖 */
+          if (!window.__syncConflictOpen && lastConflictKey !== data.updated_at) {
+            window.__syncConflictOpen = true;
+            lastConflictKey = data.updated_at;
+            showSyncConflict(remote, data.updated_at);
+          }
+        }
       }
     } else if (data === null) {
       cloudHasData = false;
@@ -2289,6 +2313,55 @@ function openImportPicker() {
   inp.type = 'file'; inp.accept = '.json,application/json';
   inp.onchange = () => { if (inp.files && inp.files[0]) importBackup(inp.files[0]); };
   inp.click();
+}
+/* ---------- 云端自动备份恢复（每日快照） ---------- */
+function restoreFromBackup(idx) {
+  const snap = (S.backups || [])[idx];
+  if (!snap) return;
+  S = Object.assign(defaultState(), JSON.parse(JSON.stringify(snap.data)));
+  save(); renderView(currentView); closeModal();
+  toast('已恢复到 ' + snap.date + ' 的备份', 'ok');
+}
+function openCloudBackup() {
+  const list = (S.backups || []).slice();
+  if (!list.length) { toast('暂无可恢复的备份（仅保留最近 30 天）', 'warn'); return; }
+  const rows = list.map((b, i) => `
+    <div class="bk-row">
+      <div class="bk-info">
+        <div class="bk-date">${b.date}</div>
+        <div class="bk-sub">${new Date(b.ts).toLocaleString('zh-CN')}</div>
+      </div>
+      <button class="btn btn-sm btn-primary" data-restore="${i}">恢复此份</button>
+    </div>`).join('');
+  const html = `<div class="modal-title">🛡 云端备份恢复</div>
+    <p class="modal-tip">这是最近 ${list.length} 天的自动备份（每天首次保存时自动生成，最多留 30 天）。恢复会把当前数据替换为所选那天的状态。建议先「导出备份」留存当前数据再恢复。</p>
+    <div class="bk-list">${rows}</div>`;
+  const m = openModal(html, 'modal-backup');
+  m.querySelectorAll('[data-restore]').forEach(btn => {
+    btn.onclick = () => restoreFromBackup(+btn.getAttribute('data-restore'));
+  });
+}
+/* ---------- 同步冲突弹窗（两端都有改动时让用户选择，绝不静默覆盖） ---------- */
+function showSyncConflict(remote, remoteTime) {
+  const t = new Date(remoteTime).toLocaleString('zh-CN');
+  const rb = (remote.xhs && remote.xhs.base) || {};
+  const html = `<div class="modal-title">⚠️ 同步冲突</div>
+    <p class="modal-tip">云端有一份更新的数据（${t}），但你本地也有改动，两边不一致。请选择保留哪一份：</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" data-sync="cloud">用云端<br><small style="opacity:.8">粉丝${rb.followers || 0}·笔记${rb.notes || 0}</small></button>
+      <button class="btn btn-ghost" data-sync="local">用本地（保留当前）</button>
+    </div>
+    <p class="modal-tip" style="margin-top:10px">提示：先「导出备份」把当前数据存一份，再点「用云端」更安全；恢复后可手动补齐另一边缺失内容。</p>`;
+  const m = openModal(html, 'modal-conflict');
+  m.querySelector('[data-sync="cloud"]').onclick = () => {
+    S = Object.assign(defaultState(), remote);
+    renderView(currentView); closeModal();
+    toast('已采用云端数据', 'ok');
+  };
+  m.querySelector('[data-sync="local"]').onclick = () => {
+    closeModal(); pushSync();
+    toast('已保留本地，并上传到云端', 'ok');
+  };
 }
 
 function registerSW() {
