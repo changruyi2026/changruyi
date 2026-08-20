@@ -2208,7 +2208,13 @@ async function pullSync() {
       cloudHasData = true;
       const remote = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
       const localMtime = S._modifiedAt || 0;
-      if (new Date(data.updated_at).getTime() > localMtime && JSON.stringify(remote) !== JSON.stringify(S)) {
+      const remoteIsBlank = isFreshDefault(remote);
+      const localIsBlank = isFreshDefault(S);
+      /* 关键防护：云端若是「空白默认」，绝不覆盖本地真实数据（避免空白设备把真数据清空）。
+         若本地有真实数据，则回写云端修复备份；若两端皆空，无操作。 */
+      if (remoteIsBlank) {
+        if (!localIsBlank) pushSync();
+      } else if (new Date(data.updated_at).getTime() > localMtime && JSON.stringify(remote) !== JSON.stringify(S)) {
         S = Object.assign(defaultState(), remote);
         renderView(currentView);
         toast('已从云端同步最新数据', 'ok');
@@ -2227,6 +2233,9 @@ function isFreshDefault(s) {
   return (s.todos || []).length === 0
     && (s.ledger || []).length === 0
     && Object.keys(s.diet.days || {}).length === 0
+    && (s.baby && s.baby.poops || []).length === 0
+    && (s.publish && s.publish.notes || []).length === 0
+    && (s.home && s.home.rest || []).length === 0
     && (x.records || []).length === 0
     && (x.noteExpenses || []).length === 0
     && (x.rebates || []).length === 0
