@@ -665,7 +665,7 @@ function openHongshuDayModal(ds) {
   const dt = new Date(ds + 'T00:00:00');
   const ld = lunarStr(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
   const notes = hsDayNotes(ds).slice().sort((a, b) => (b.id || '').localeCompare(a.id || ''));
-  const typeOpts = PUB_TYPES.map(t => `<option value="${t}"${t === '蒲公英商单' ? ' selected' : ''}>${t}</option>`).join('');
+  const typeOpts = PUB_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
   const statusOpts = PUB_STATUSES.map(s => `<option value="${s.label}">${s.label}</option>`).join('');
   const accountOpts = PUB_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
   const list = notes.length ? `<div class="hs-list">` + notes.map(n => {
@@ -686,6 +686,7 @@ function openHongshuDayModal(ds) {
         <span class="hs-type-tag">${esc(n.type)}</span>
         ${acctLabel}
         <span class="hs-status ${st ? st.cls : ''}"><span class="hs-ico">${st ? st.icon : ''}</span>${esc(st ? st.label : n.status)}</span>
+        <button class="icon-btn" data-action="hs-note-edit" data-id="${n.id}" title="编辑">✏️</button>
         <button class="icon-btn danger" data-action="hs-note-del" data-id="${n.id}" title="删除">${icTrash()}</button>
       </div>
       ${n.deadline ? `<div class="hs-note-meta">📅 发布最晚：${esc(n.deadline)}</div>` : ''}
@@ -696,6 +697,7 @@ function openHongshuDayModal(ds) {
   const html = `
     <h3>🍠 红薯日历 · ${fmtDateCN(ds)} · ${ld}</h3>
     <div class="hs-add">
+      <input type="hidden" id="hsEditId" />
       <input class="input" id="hsItem" placeholder="物品名称（将作为封面显示在日历当天）" />
       <div class="hs-row">
         <select class="input" id="hsType">${typeOpts}</select>
@@ -717,7 +719,8 @@ function openHongshuDayModal(ds) {
           <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
         </div>
       </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:10px" data-action="hs-add-note" data-date="${ds}">+ 保存出稿笔记</button>
+      <button class="btn btn-primary" id="hsSaveBtn" style="width:100%;margin-top:10px" data-action="hs-note-save" data-date="${ds}">+ 保存出稿笔记</button>
+      <button class="btn btn-ghost" id="hsCancelEditBtn" style="width:100%;margin-top:8px;display:none" data-action="hs-note-cancel-edit" data-date="${ds}">取消编辑</button>
     </div>
     <div class="hs-block-title">📝 当天出稿笔记（${notes.length}）</div>
     ${list}`;
@@ -741,6 +744,8 @@ function openHongshuDayModal(ds) {
   $('#hsQuote').addEventListener('input', recompute);
   $('#hsRebatePct').addEventListener('input', recompute);
   recompute();
+  $('#hsType').value = PUB_TYPES.includes('蒲公英商单') ? '蒲公英商单' : PUB_TYPES[0];
+  $('#hsType').dispatchEvent(new Event('change'));
 }
 
 /* ===================== 首页天气（杭州，Open-Meteo 免费接口，无需密钥） ===================== */
@@ -2074,8 +2079,9 @@ document.addEventListener('click', e => {
     case 'hs-cal-next': hongshuCal.m++; if (hongshuCal.m > 11) { hongshuCal.m = 0; hongshuCal.y++; } renderHome(); break;
     case 'hs-cal-today': hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() }; renderHome(); break;
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
-    case 'hs-add-note': {
+    case 'hs-note-save': {
       const ds = el.dataset.date;
+      const editId = ($('#hsEditId').value || '').trim();
       const item = ($('#hsItem').value || '').trim();
       const type = ($('#hsType').value || PUB_TYPES[0]).trim();
       const status = ($('#hsStatus').value || '待出稿').trim();
@@ -2090,8 +2096,49 @@ document.addEventListener('click', e => {
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
       }
-      S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net });
-      save(); closeModal(); renderHome(); toast('已保存出稿笔记 🍠'); break;
+      if (editId) {
+        const idx = (S.publish.notes || []).findIndex(x => x.id === editId);
+        if (idx > -1) {
+          S.publish.notes[idx] = { ...S.publish.notes[idx], date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net };
+          toast('已修改出稿笔记 🍠');
+        }
+      } else {
+        S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net });
+        toast('已保存出稿笔记 🍠');
+      }
+      save(); closeModal(); renderHome(); break;
+    }
+    case 'hs-note-edit': {
+      const n = (S.publish.notes || []).find(x => x.id === id);
+      if (!n) { toast('笔记不存在', 'warn'); break; }
+      $('#hsEditId').value = n.id;
+      $('#hsItem').value = n.item || '';
+      $('#hsType').value = n.type || PUB_TYPES[0];
+      $('#hsStatus').value = n.status || '待出稿';
+      $('#hsAccount').value = n.account || PUB_ACCOUNTS[0];
+      $('#hsDeadline').value = n.deadline || '';
+      $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
+      $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
+      $('#hsSaveBtn').textContent = '💾 保存修改';
+      $('#hsCancelEditBtn').style.display = 'block';
+      $('#hsType').dispatchEvent(new Event('change'));
+      if ($('#hsQuote')) $('#hsQuote').dispatchEvent(new Event('input'));
+      break;
+    }
+    case 'hs-note-cancel-edit': {
+      $('#hsEditId').value = '';
+      $('#hsItem').value = '';
+      $('#hsType').value = PUB_TYPES.includes('蒲公英商单') ? '蒲公英商单' : PUB_TYPES[0];
+      $('#hsStatus').value = '待出稿';
+      $('#hsAccount').value = PUB_ACCOUNTS[0];
+      $('#hsDeadline').value = '';
+      $('#hsQuote').value = '';
+      $('#hsRebatePct').value = '';
+      $('#hsSaveBtn').textContent = '+ 保存出稿笔记';
+      $('#hsCancelEditBtn').style.display = 'none';
+      $('#hsType').dispatchEvent(new Event('change'));
+      if ($('#hsQuote')) $('#hsQuote').dispatchEvent(new Event('input'));
+      break;
     }
     case 'hs-note-del': {
       const n = (S.publish.notes || []).find(x => x.id === id);
