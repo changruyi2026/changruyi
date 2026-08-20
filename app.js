@@ -678,6 +678,10 @@ function openHongshuDayModal(ds) {
         <span>返点${rp} ${money(n.rebate || 0)}</span>
         <span class="hs-net">到手 ${money(n.net || 0)}</span>
       </div>`;
+    } else if (n.type === '众测招募' && (n.orderAmount != null && n.orderAmount !== 0)) {
+      moneyBlock = `<div class="hs-money">
+        <span class="hs-net">订单金额 ${money(n.orderAmount || 0)}</span>
+      </div>`;
     }
     const st = PUB_STATUS_MAP[normStatus(n.status)];
     const acctLabel = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="hs-acct-tag">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
@@ -711,12 +715,17 @@ function openHongshuDayModal(ds) {
         <input class="input" id="hsDeadline" type="date" />
       </div>
       <div class="hs-amounts" id="hsAmounts" style="display:none">
-        <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
-        <div class="hs-amount-row"><label>返点比例(%)</label><input class="input" id="hsRebatePct" type="number" step="0.01" placeholder="如 10 表示10%" /></div>
-        <div class="hs-calc">
-          <span>手续费(10%)：<b id="hsFee">¥0</b></span>
-          <span>返点金额：<b id="hsRebateAmt">-¥0</b></span>
-          <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
+        <div id="hsPgArea">
+          <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
+          <div class="hs-amount-row"><label>返点比例(%)</label><input class="input" id="hsRebatePct" type="number" step="0.01" placeholder="如 10 表示10%" /></div>
+          <div class="hs-calc">
+            <span>手续费(10%)：<b id="hsFee">¥0</b></span>
+            <span>返点金额：<b id="hsRebateAmt">-¥0</b></span>
+            <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
+          </div>
+        </div>
+        <div id="hsOrderArea" style="display:none">
+          <div class="hs-amount-row"><label>订单金额(¥)</label><input class="input" id="hsOrderAmount" type="number" min="0" step="0.01" placeholder="0" /></div>
         </div>
       </div>
       <button class="btn btn-primary" id="hsSaveBtn" style="width:100%;margin-top:10px" data-action="hs-note-save" data-date="${ds}">+ 保存出稿笔记</button>
@@ -727,10 +736,23 @@ function openHongshuDayModal(ds) {
   openModal(html, 'hongshu');
   const typeSel = $('#hsType');
   const amounts = $('#hsAmounts');
-  const toggleAmounts = () => { amounts.style.display = (typeSel.value === '蒲公英商单') ? 'block' : 'none'; };
+  const toggleAmounts = () => {
+    const t = typeSel.value;
+    amounts.style.display = (t === '蒲公英商单' || t === '众测招募') ? 'block' : 'none';
+    const pg = $('#hsPgArea'), ord = $('#hsOrderArea');
+    if (pg) pg.style.display = (t === '蒲公英商单') ? 'block' : 'none';
+    if (ord) ord.style.display = (t === '众测招募') ? 'block' : 'none';
+  };
   typeSel.addEventListener('change', toggleAmounts);
   toggleAmounts();
   const recompute = () => {
+    if (typeSel.value !== '蒲公英商单') {
+      const feeEl = $('#hsFee'), rebateEl = $('#hsRebateAmt'), netEl = $('#hsNet');
+      if (feeEl) feeEl.textContent = money(0);
+      if (rebateEl) rebateEl.textContent = money(0);
+      if (netEl) netEl.textContent = money(0);
+      return;
+    }
     const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
     const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
     const fee = Math.round(q * 0.1 * 100) / 100;
@@ -2088,22 +2110,24 @@ document.addEventListener('click', e => {
       const account = ($('#hsAccount').value || PUB_ACCOUNTS[0]).trim();
       const deadline = ($('#hsDeadline').value || '').trim();
       if (!item) { toast('请填写物品名称', 'warn'); return; }
-      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0;
+      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0;
       if (type === '蒲公英商单') {
         quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
         rebatePct = parseFloat($('#hsRebatePct').value || '0') || 0;
         fee = Math.round(quote * 0.1 * 100) / 100;
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
+      } else if (type === '众测招募') {
+        orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
       }
       if (editId) {
         const idx = (S.publish.notes || []).findIndex(x => x.id === editId);
         if (idx > -1) {
-          S.publish.notes[idx] = { ...S.publish.notes[idx], date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net };
+          S.publish.notes[idx] = { ...S.publish.notes[idx], date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount };
           toast('已修改出稿笔记 🍠');
         }
       } else {
-        S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net });
+        S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount });
         toast('已保存出稿笔记 🍠');
       }
       save(); closeModal(); renderHome(); break;
@@ -2119,6 +2143,7 @@ document.addEventListener('click', e => {
       $('#hsDeadline').value = n.deadline || '';
       $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
       $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
+      $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
       $('#hsSaveBtn').textContent = '💾 保存修改';
       $('#hsCancelEditBtn').style.display = 'block';
       $('#hsType').dispatchEvent(new Event('change'));
@@ -2134,6 +2159,7 @@ document.addEventListener('click', e => {
       $('#hsDeadline').value = '';
       $('#hsQuote').value = '';
       $('#hsRebatePct').value = '';
+      $('#hsOrderAmount').value = '';
       $('#hsSaveBtn').textContent = '+ 保存出稿笔记';
       $('#hsCancelEditBtn').style.display = 'none';
       $('#hsType').dispatchEvent(new Event('change'));
