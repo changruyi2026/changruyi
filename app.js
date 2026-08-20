@@ -586,8 +586,8 @@ const PUB_STATUSES = [
   { key: 'review',    label: '审核中', cls: 'st-review',    icon: '●' }
 ];
 const PUB_STATUS_MAP = Object.fromEntries(PUB_STATUSES.map(s => [s.label, s]));
-/* 旧数据兼容：待审核 → 审核中 */
-const STATUS_RENAME = { '待审核': '审核中' };
+/* 旧数据兼容：待审核 → 审核中；待初稿（改名前）→ 待出稿 */
+const STATUS_RENAME = { '待审核': '审核中', '待初稿': '待出稿' };
 function normStatus(s) { return STATUS_RENAME[s] || s; }
 /* 状态优先级：未完成的排在前面，决定当天单元格的底色 */
 const PUB_STATUS_ORDER = { '待出稿': 0, '审核中': 1, '已出稿': 2 };
@@ -641,7 +641,7 @@ function renderHongshuCalendar() {
     const st = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
     const badge = st ? `<span class="hs-badge ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>` : '';
     const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
-    const cover = top && top.item ? `<div class="hs-cover">${acctBadge}${esc(top.item)}</div>` : '';
+    const cover = top ? `<div class="hs-cover ${top.item ? '' : 'no-item'}">${acctBadge}${top.item ? esc(top.item) : '未命名'}</div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}</div>
       <div class="hs-lunar">${ld}</div>
@@ -2114,7 +2114,7 @@ document.addEventListener('click', e => {
       $('#hsEditId').value = n.id;
       $('#hsItem').value = n.item || '';
       $('#hsType').value = n.type || PUB_TYPES[0];
-      $('#hsStatus').value = n.status || '待出稿';
+      $('#hsStatus').value = normStatus(n.status) || '待出稿';
       $('#hsAccount').value = n.account || PUB_ACCOUNTS[0];
       $('#hsDeadline').value = n.deadline || '';
       $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
