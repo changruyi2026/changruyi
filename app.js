@@ -2434,9 +2434,15 @@ function sproutSVG(sz) {
 /* 同步铁律（吸取多次「空白覆盖真实数据」教训）：
    1) 云端状态未知前（cloudReady=false）绝不推送，先等首次 pull 完成；
    2) 本地记录数 < 云端记录数时，绝不覆盖云端（防止近空/空白状态清掉真实数据）；
-   3) 本地为空且云端有数据时，由 pullSync 静默采用云端恢复，绝不反向清空。 */
-let sbClient = null, lastSaveTime = 0, syncTimer = null;
-let cloudHasData = null, cloudReady = false, cloudRecordCount = 0, pendingPush = false;
+   3) 本地为空且云端有数据时，由 pullSync 静默采用云端恢复，绝不反向清空。
+   4) Supabase 客户端优先使用本地缓存文件，避免 jsDelivr 在国内偶发被墙导致「未连接」。 */
+let sbClient = null, lastSaveTime = 0, syncTimer = null, pullAttempts = 0;
+let cloudHasData = null, cloudReady = false, cloudRecordCount = 0, pendingPush = false, lastSyncErr = '';
+const SUPABASE_CDNS = [
+  'supabase.min.js',                               // 本地缓存（PWA 优先）
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
+  'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+];
 function totalRecords(s) {
   const x = s.xhs || {};
   let n = 0;
@@ -2457,15 +2463,22 @@ function setSync(state, detail) {
   pill.className = 'sync-pill sync-' + state;
   const map = { online: '已同步', offline: '未连接', syncing: '同步中' };
   $('#syncTxt').textContent = map[state] + (detail ? ' · ' + detail : '');
+  lastSyncErr = (state === 'offline' ? (detail || '') : '');
 }
 function initSync() {
   if (!SUPABASE_CFG.url || !SUPABASE_CFG.anon) { setSync('offline', '未配置云端'); return; }
   if (typeof supabase !== 'undefined') { connectSupabase(); return; }
-  /* 已配置但未加载客户端：动态加载（避免阻塞首屏） */
+  loadSupabaseFromCdn(0);
+}
+function loadSupabaseFromCdn(idx) {
+  if (idx >= SUPABASE_CDNS.length) { setSync('offline', '客户端全部加载失败'); return; }
+  if (typeof supabase !== 'undefined') { connectSupabase(); return; }
+  const src = SUPABASE_CDNS[idx];
+  if (src === 'supabase.min.js') { /* 本地文件已在 index.html 引用，若未定义说明缓存缺失，直接试下一个 */ loadSupabaseFromCdn(idx + 1); return; }
   const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  s.src = src;
   s.onload = connectSupabase;
-  s.onerror = () => setSync('offline', '客户端未加载');
+  s.onerror = () => loadSupabaseFromCdn(idx + 1);
   document.head.appendChild(s);
 }
 function connectSupabase() {
@@ -2473,11 +2486,19 @@ function connectSupabase() {
   try { sbClient = supabase.createClient(SUPABASE_CFG.url, SUPABASE_CFG.anon); }
   catch (e) { setSync('offline', '初始化失败'); return; }
   setSync('syncing');
+  pullAttempts = 0;
   pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取，避免弹窗打扰 */
+}
+function retrySync() {
+  if (!sbClient) { initSync(); return; }
+  setSync('syncing');
+  pullAttempts = 0;
+  pullSync();
 }
 async function pullSync() {
   if (!sbClient) return;
   try {
+    pullAttempts++;
     const { data, error } = await sbClient.from('workbench')
       .select('data, updated_at').eq('user_id', SUPABASE_CFG.userId).maybeSingle();
     if (error) throw error;
@@ -2498,10 +2519,23 @@ async function pullSync() {
       cloudRecordCount = 0;
     }
     cloudReady = true;
+    pullAttempts = 0;
     setSync('online');
     /* 首次 pull 完成后，补推此前因 cloudReady=false 而延迟的保存 */
     if (pendingPush) { pendingPush = false; pushSync(); }
-  } catch (e) { cloudReady = true; setSync('offline', '同步失败'); }
+  } catch (e) {
+    if (pullAttempts < 3) {
+      const wait = pullAttempts * 2000;
+      setSync('syncing', `重试(${pullAttempts})`);
+      setTimeout(pullSync, wait);
+      return;
+    }
+    cloudReady = true;
+    pullAttempts = 0;
+    const msg = (e && e.message) || '';
+    const detail = /fetch|network|timeout|failed/i.test(msg) ? '网络不通' : '同步失败';
+    setSync('offline', detail);
+  }
 }
 /* 判断当前状态是否是「空白默认」（除了种子纪念日外没有任何真实录入）。
    用于防止空白设备把云端已有的真实数据覆盖成空。 */
@@ -2696,3 +2730,5 @@ showView('home');
 applyAppIcon();
 initSync();
 registerSW();
+/* 点击顶部同步状态可手动重试 */
+$('#syncPill').addEventListener('click', () => { retrySync(); });
