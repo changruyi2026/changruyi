@@ -2411,7 +2411,27 @@ function sproutSVG(sz) {
 }
 
 /* ===================== 云端同步（Supabase） ===================== */
-let sbClient = null, lastSaveTime = 0, syncTimer = null, cloudHasData = null;
+/* 同步铁律（吸取多次「空白覆盖真实数据」教训）：
+   1) 云端状态未知前（cloudReady=false）绝不推送，先等首次 pull 完成；
+   2) 本地记录数 < 云端记录数时，绝不覆盖云端（防止近空/空白状态清掉真实数据）；
+   3) 本地为空且云端有数据时，由 pullSync 静默采用云端恢复，绝不反向清空。 */
+let sbClient = null, lastSaveTime = 0, syncTimer = null;
+let cloudHasData = null, cloudReady = false, cloudRecordCount = 0, pendingPush = false;
+function totalRecords(s) {
+  const x = s.xhs || {};
+  let n = 0;
+  n += (s.todos || []).length;
+  n += (s.ledger || []).length;
+  n += Object.keys((s.diet && s.diet.days) || {}).length;
+  n += (s.baby && s.baby.poops || []).length;
+  n += (s.baby && s.baby.meds || []).length;
+  n += (s.publish && s.publish.notes || []).length;
+  n += (s.home && s.home.rest || []).length;
+  n += (x.records || []).length;
+  n += (x.noteExpenses || []).length;
+  n += (x.rebates || []).length;
+  return n;
+}
 function setSync(state, detail) {
   const pill = $('#syncPill'); if (!pill) return;
   pill.className = 'sync-pill sync-' + state;
@@ -2442,30 +2462,26 @@ async function pullSync() {
       .select('data, updated_at').eq('user_id', SUPABASE_CFG.userId).maybeSingle();
     if (error) throw error;
     if (data && data.data) {
-      cloudHasData = true;
       const remote = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
-      const localMtime = S._modifiedAt || 0;
-      const remoteIsBlank = isFreshDefault(remote);
+      cloudHasData = true;
+      cloudRecordCount = totalRecords(remote);
       const localIsBlank = isFreshDefault(S);
-      /* 关键防护：云端若是「空白默认」，绝不覆盖本地真实数据（避免空白设备把真数据清空）。
-         若本地有真实数据，则回写云端修复备份；若两端皆空，无操作。 */
-      if (remoteIsBlank) {
-        if (!localIsBlank) pushSync();
-      } else if (new Date(data.updated_at).getTime() > localMtime && JSON.stringify(remote) !== JSON.stringify(S)) {
-        if (isFreshDefault(S)) {
-          /* 本地为空、云端有数据：静默采用云端（换设备恢复），不再弹窗打扰 */
-          S = Object.assign(defaultState(), remote);
-          renderView(currentView);
-          setSync('online');
-        }
-        /* 否则两端都有真实数据且不一致：本地优先，静默不覆盖、不弹窗，避免打断录入 */
+      /* 关键防护：云端有真实数据且本地为空 → 静默采用云端恢复（换设备/清缓存后找回）；
+         本地有数据则本地优先，绝不反向覆盖（避免清掉录入）。 */
+      if (localIsBlank && !isFreshDefault(remote)) {
+        S = Object.assign(defaultState(), remote);
+        renderView(currentView);
+        setSync('online');
       }
     } else if (data === null) {
       cloudHasData = false;
-      pushSync(); /* 云端暂无本机数据：首次打开即上传本地备份 */
+      cloudRecordCount = 0;
     }
+    cloudReady = true;
     setSync('online');
-  } catch (e) { setSync('offline', '同步失败'); }
+    /* 首次 pull 完成后，补推此前因 cloudReady=false 而延迟的保存 */
+    if (pendingPush) { pendingPush = false; pushSync(); }
+  } catch (e) { cloudReady = true; setSync('offline', '同步失败'); }
 }
 /* 判断当前状态是否是「空白默认」（除了种子纪念日外没有任何真实录入）。
    用于防止空白设备把云端已有的真实数据覆盖成空。 */
@@ -2486,8 +2502,15 @@ function isFreshDefault(s) {
 }
 function pushSync() {
   if (!sbClient) { setSync('offline', '未配置云端'); return; }
-  /* 安全护栏：空白设备不要覆盖云端已有数据（避免误清空真实记录） */
-  if (isFreshDefault(S) && cloudHasData === true) return;
+  /* 云端状态未知前先延迟，避免空白/近空状态误覆盖（首次 pull 完成后会补推 pendingPush） */
+  if (!cloudReady) { pendingPush = true; return; }
+  const localCount = totalRecords(S);
+  /* 铁律：本地记录数 < 云端记录数时，绝不覆盖云端（防止近空/空白状态清掉真实数据）。
+     仅当本地数据不少于云端时才允许上传。 */
+  if (cloudHasData && localCount < cloudRecordCount) {
+    setSync('online');
+    return;
+  }
   clearTimeout(syncTimer);
   syncTimer = setTimeout(async () => {
     try {
