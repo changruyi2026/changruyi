@@ -2365,14 +2365,51 @@ function importBackup(file) {
     try {
       const raw = JSON.parse(fr.result);
       if (!raw || typeof raw !== 'object' || !raw.xhs) throw new Error('文件格式不对');
-      if (!confirm('导入备份会覆盖当前所有数据（笔记支出、返款、历史记录等）。确定继续？')) return;
-      S = Object.assign(defaultState(), raw);
+      if (!confirm('这将把备份中的数据「合并」进当前应用：只补充当前缺失的记录（如芽芽记录、小红书支出、粉丝记录等），不会删除或覆盖你已录入的红薯日历笔记等内容。确认继续？')) return;
+      mergeImport(raw);
       save(); renderView(currentView);
-      toast('备份已导入', 'ok');
+      toast('备份已合并导入 🎉', 'ok');
     } catch (e) { toast('导入失败：' + e.message, 'warn'); }
   };
   fr.onerror = () => toast('读取文件失败', 'warn');
   fr.readAsText(file);
+}
+/* 按 id（无 id 则按内容）合并数组：保留当前全部，补充当前没有的部分，绝不删除现有数据 */
+function mergeArr(cur, inc) {
+  cur = Array.isArray(cur) ? cur.slice() : [];
+  if (!Array.isArray(inc)) return cur;
+  const hasId = inc.length && inc[0] && typeof inc[0] === 'object' && inc[0].id;
+  if (hasId) {
+    const m = new Map(cur.map(x => [x.id, x]));
+    inc.forEach(x => { if (x && x.id && !m.has(x.id)) m.set(x.id, x); });
+    return Array.from(m.values());
+  }
+  const seen = new Set(cur.map(x => JSON.stringify(x)));
+  inc.forEach(x => { const k = JSON.stringify(x); if (!seen.has(k)) { seen.add(k); cur.push(x); } });
+  return cur;
+}
+/* 智能合并导入：找回备份中当前缺失的历史数据，同时完整保留当前已录入内容 */
+function mergeImport(raw) {
+  const def = defaultState();
+  const src = Object.assign(def, raw);
+  S.baby.poops = mergeArr(S.baby.poops, src.baby.poops);
+  S.xhs.noteExpenses = mergeArr(S.xhs.noteExpenses, src.xhs.noteExpenses);
+  S.xhs.records = mergeArr(S.xhs.records, src.xhs.records);
+  S.xhs.rebates = mergeArr(S.xhs.rebates, src.xhs.rebates);
+  S.ledger = mergeArr(S.ledger, src.ledger);
+  S.todos = mergeArr(S.todos, src.todos);
+  if (src.diet && src.diet.days) S.diet.days = Object.assign({}, src.diet.days, S.diet.days);
+  if (Array.isArray(src.home && src.home.rest)) S.home.rest = mergeArr(S.home.rest, src.home.rest);
+  /* 红薯日历笔记：仅当当前为空才用备份（当前已有则保留，不回退到备份的 0） */
+  if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
+  /* 粉丝/笔记/赞藏汇总：若当前为空且备份 records 有数据，自动取最新一条补全 */
+  const b = S.xhs.base || {};
+  if (!b.followers && !b.notes && !b.zanCang && (S.xhs.records || []).length) {
+    const latest = S.xhs.records.slice().sort((a, c) => (c.date || '').localeCompare(a.date || ''))[0];
+    if (latest) S.xhs.base = { followers: latest.f || 0, notes: latest.n || 0, zanCang: latest.z || 0 };
+  } else if ((src.xhs.base && (src.xhs.base.followers || src.xhs.base.notes || src.xhs.base.zanCang)) && !b.followers && !b.notes && !b.zanCang) {
+    S.xhs.base = src.xhs.base;
+  }
 }
 function openImportPicker() {
   const inp = document.createElement('input');
