@@ -411,6 +411,15 @@ input,textarea,select{font-family:inherit;color:inherit}
 .xhs-cell-limit:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:rgba(204,140,120,.25)}
 .limit-mini{margin-top:8px;font-size:12px;font-weight:700;color:var(--rose-deep);background:rgba(204,140,120,.12);display:inline-flex;padding:3px 10px;border-radius:20px}
 .limit-mini.ok{color:var(--sage-deep);background:rgba(168,181,140,.16)}
+.xhs-accounts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.xhs-accounts{grid-template-columns:1fr}}
+.xhs-account-block{border-radius:18px;padding:14px}
+.xhs-account-title{font-weight:800;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.xhs-stat-compact{gap:10px}
+.xhs-stat-compact .xhs-cell{padding:12px 8px}
+.xhs-stat-compact .xhs-cell .big{font-size:26px}
+.acct-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:900;color:#fff}
+.xhs-acct-tag{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:12px;font-weight:900;color:#fff;margin-right:5px;vertical-align:middle}
 
 /* 金额统计表：汇总标签 + 近6月柱状图 */
 .stat-pills{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
@@ -573,6 +582,7 @@ input,textarea,select{font-family:inherit;color:inherit}
 /* ===================== 小红书：数据增长统计弹窗 ===================== */
 .modal-wide{width:min(560px,100%)}
 .xhs-hist{overflow-x:auto;margin:0 -2px;padding:0 2px}
+.xhs-hist-title{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;padding:8px 10px;border-radius:10px;margin-bottom:8px}
 .xhs-hist-table{display:grid;grid-template-columns:1.3fr repeat(3,1fr) 36px;min-width:440px;align-items:stretch}
 .xhs-hist-table > div{padding:11px 8px;border-bottom:1px solid var(--line);display:flex;align-items:center}
 .xhs-hist-hc{font-size:12.5px;font-weight:800;color:var(--ink-soft);justify-content:center}
@@ -604,6 +614,8 @@ input,textarea,select{font-family:inherit;color:inherit}
 .note-cover:hover{transform:scale(1.04)}
 .note-cover img{width:100%;height:100%;object-fit:cover}
 .note-cover.no-cover .cover-ph{font-size:12px;text-align:center;color:var(--sand-deep);line-height:1.5}
+.note-cover{position:relative}
+.note-cover-acct{position:absolute;right:4px;bottom:4px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .note-info{flex:1;min-width:0}
 .note-name{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .note-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
@@ -638,12 +650,18 @@ input,textarea,select{font-family:inherit;color:inherit}
 .cal-day.poop{background:rgba(217,142,94,.16);box-shadow:inset 0 0 0 1px rgba(217,142,94,.32)}
 .cal-day.poop .d{color:var(--rose-deep)}
 .poop-badge{display:block;font-size:13px;line-height:1;margin-top:2px}
-.bp-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 10px}
+.bp-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 8px}
+.bp-med-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 12px;padding:8px 10px;border-radius:10px;background:rgba(182,173,161,.12)}
+.bp-med-check{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
+.bp-med-check input{width:18px;height:18px;accent-color:var(--sage-deep)}
 .bp-list{display:flex;flex-direction:column;gap:6px}
 .bp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--card-2)}
 .bp-time{font-weight:700;font-size:13px;color:var(--ink);min-width:44px}
 .bp-type{font-size:12.5px;color:var(--rose-deep);background:rgba(217,142,94,.16);border-radius:8px;padding:2px 8px;white-space:nowrap}
+.bp-med{font-size:12px;color:#fff;background:#7A6BFF;border-radius:8px;padding:2px 8px;white-space:nowrap;font-weight:700}
 .bp-note{flex:1;font-size:12.5px;color:var(--ink-soft);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.med-badge{display:block;font-size:12px;line-height:1;margin-top:2px;font-weight:700;color:#7A6BFF}
+.hist-med{font-size:11px;color:#fff;background:#7A6BFF;border-radius:10px;padding:1px 8px;margin-left:4px;font-weight:700}
 .hist-block{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .hist-head{font-weight:700;font-size:14px;margin-bottom:10px;color:var(--ink)}
 .hist-scroll{max-height:300px;overflow:auto;display:flex;flex-direction:column;gap:8px}
@@ -677,9 +695,10 @@ input,textarea,select{font-family:inherit;color:inherit}
 .hs-day.st-draft .hs-badge{background:#fff;color:#C0392B;box-shadow:inset 0 0 0 1px rgba(192,57,43,.35)}
 .hs-day.st-published .hs-badge{background:#fff;color:#1E8B4E;box-shadow:inset 0 0 0 1px rgba(30,139,78,.35)}
 .hs-day.st-review .hs-badge{background:#fff;color:#C99700;box-shadow:inset 0 0 0 1px rgba(201,151,0,.4)}
-.hs-day .hs-cover{font-size:20px;font-weight:900;color:#6E1B17;background:#F7B2AB;border-radius:10px;padding:8px 6px;margin-top:2px;text-align:center;white-space:normal;word-break:break-word;line-height:1.15;box-shadow:inset 0 0 0 1.5px rgba(174,48,41,.25)}
+.hs-day .hs-cover{position:relative;font-size:20px;font-weight:900;color:#6E1B17;background:#F7B2AB;border-radius:10px;padding:8px 6px;margin-top:2px;text-align:center;white-space:normal;word-break:break-word;line-height:1.15;box-shadow:inset 0 0 0 1.5px rgba(174,48,41,.25)}
 .hs-day .hs-cover.no-item{font-size:14px;font-weight:600;color:#8A5A55;background:transparent;box-shadow:inset 0 0 0 1.5px rgba(174,48,41,.3);font-style:italic}
 .hs-day .hs-cover .hs-cover-acct{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#AE3029;color:#fff;font-size:13px;font-weight:900;margin-right:5px;vertical-align:middle;flex-shrink:0}
+.hs-day .hs-cover .hs-cover-amt{position:absolute;right:5px;bottom:4px;font-size:11px;font-weight:900;color:#fff;background:rgba(0,0,0,.42);border-radius:6px;padding:1px 5px;line-height:1.2;white-space:nowrap}
 .hs-day.st-published .hs-cover{background:#B8E7CD;color:#14764A;box-shadow:inset 0 0 0 1.5px rgba(20,118,74,.22)}
 .hs-day.st-published .hs-cover .hs-cover-acct{background:#1E8B4E}
 .hs-day.st-review .hs-cover{background:#F5E5B8;color:#6B5210;box-shadow:inset 0 0 0 1.5px rgba(107,82,16,.18)}
