@@ -44,8 +44,6 @@ function defaultState() {
       rest: [],
       hsReadCount: 0
     },
-    todos: [],
-    diet: { goal: 1800, profile: { weight: 0, height: 0 }, days: {} },
     ledger: [],
     xhs: {
       base: { followers: 0, notes: 0, zanCang: 0 },
@@ -303,8 +301,6 @@ function compressImage(file, cb) {
 /* ===================== 路由 ===================== */
 const TITLES = {
   home: ['首页', '今天也要闪闪发光呀'],
-  todo: ['工作待办', '一件一件来，慢慢推进'],
-  diet: ['饮食记录', '好好吃饭，才有力气带娃'],
   ledger: ['记账', '每一笔，都是生活的痕迹'],
   xhs: ['小红书', '发芽芽的日常 · 常如意i'],
   baby: ['芽芽', '发芽芽的日常 · 拉屎打卡 💩']
@@ -323,8 +319,6 @@ function showView(v) {
 
 function renderView(v) {
   if (v === 'home') renderHome();
-  else if (v === 'todo') renderTodo();
-  else if (v === 'diet') renderDiet();
   else if (v === 'ledger') renderLedger();
   else if (v === 'xhs') renderXhs();
   else if (v === 'baby') renderBaby();
@@ -358,8 +352,6 @@ const REST_SET = () => (S.home.rest || []);
 let babyCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
 
 const HOME_DOT = {
-  todo:   { color: 'var(--sage-deep)', label: '待办' },
-  diet:   { color: '#7FA97C',          label: '饮食' },
   ledger: { color: 'var(--blue-deep)', label: '记账' },
   exp:    { color: 'var(--rose-deep)', label: '小红书支出' },
   rebate: { color: 'var(--lilac)',     label: '待返款' }
@@ -368,12 +360,6 @@ const HOME_DOT = {
 /* 聚合某一天在全站各模块中的带日期事项 */
 function homeDayItems(ds) {
   const items = [];
-  (S.todos || []).filter(t => (t.date || '') === ds).forEach(t => items.push({ type: 'todo', title: t.text, sub: t.done ? '已完成' : '待完成' }));
-  const day = (S.diet.days || {})[ds];
-  if (day && day.length) {
-    const k = day.reduce((s, f) => s + (f.kcal || 0), 0);
-    items.push({ type: 'diet', title: `${day.length} 条饮食记录`, sub: `${k} kcal` });
-  }
   const led = (S.ledger || []).filter(r => r.date === ds);
   if (led.length) {
     const inc = led.filter(r => r.type === 'in').reduce((s, r) => s + r.amount, 0);
@@ -922,203 +908,6 @@ function tickClock() {
   if (hd) hd.textContent = `${fmtDateCN(todayStr())} · ${n.getFullYear()}年`;
 }
 setInterval(tickClock, 1000);
-
-/* ===================== 1. 工作待办 ===================== */
-const CATS = ['工作', '生活', '带娃', '其他'];
-const PRIO = { high: '高', mid: '中', low: '低' };
-let todoFilter = '全部';
-
-function renderTodo() {
-  const seg = ['全部', ...CATS].map(c => `<button class="pill ${todoFilter === c ? 'on' : ''}" data-action="todo-filter" data-cat="${c}">${c}</button>`).join('');
-  const list = S.todos
-    .filter(t => todoFilter === '全部' || t.cat === todoFilter)
-    .sort((a, b) => (a.done - b.done) || (a.order - b.order));
-  const items = list.length ? list.map(t => `
-    <div class="todo ${t.done ? 'done' : ''}" draggable="true" data-id="${t.id}">
-      <div class="check ${t.done ? 'on' : ''}" data-action="todo-toggle" data-id="${t.id}">${t.done ? icCheck() : ''}</div>
-      <span class="prio ${t.prio}"></span>
-      <div class="todo-text" contenteditable="true" data-edit="todo-text" data-id="${t.id}">${esc(t.text)}</div>
-      <span class="date-chip">${esc(t.date || todayStr())}</span>
-      <span class="cat-chip">${esc(t.cat)}</span>
-      <button class="icon-btn danger" data-action="todo-del" data-id="${t.id}" title="删除">${icTrash()}</button>
-    </div>`).join('') : '<div class="empty">还没有待办，添加一个小目标吧 🌱</div>';
-
-  const remain = S.todos.filter(t => !t.done).length;
-  $('#view-todo').innerHTML = `
-    <form class="card" data-form="todo-add" style="margin-bottom:18px">
-      <div class="todo-head" style="margin:0 0 12px">
-        <input class="input" name="text" placeholder="添加一项待办，回车确认…" style="flex:1;min-width:200px" />
-        <input class="input" name="date" type="date" value="${todayStr()}" style="width:auto" title="日期" />
-        <select class="select" name="cat" style="width:auto">${CATS.map(c => `<option>${c}</option>`).join('')}</select>
-        <select class="select" name="prio" style="width:auto">
-          <option value="high">优先级 高</option><option value="mid" selected>优先级 中</option><option value="low">优先级 低</option>
-        </select>
-        <button class="btn btn-primary" type="submit">+ 添加</button>
-      </div>
-      <div style="color:var(--ink-soft);font-size:13px">待完成 <b style="color:var(--sage-deep)">${remain}</b> 项 · 共 ${S.todos.length} 项 · 拖动卡片可排序</div>
-    </form>
-    <div class="filter-pills" style="margin-bottom:14px">${seg}</div>
-    <div class="todo-list" id="todoList">${items}</div>`;
-}
-
-/* ===================== 2. 饮食记录 ===================== */
-const MEALS = [
-  { key: 'breakfast', name: '早餐', emoji: '🌅' },
-  { key: 'lunch', name: '午餐', emoji: '🍱' },
-  { key: 'dinner', name: '晚餐', emoji: '🌙' },
-  { key: 'snack', name: '加餐', emoji: '🍓' }
-];
-const FOOD_DB = {
-  '米饭': 116, '面条': 110, '馒头': 223, '面包': 265, '粥': 46, '燕麦': 367, '饺子': 198, '包子': 220, '披萨': 266, '油条': 388,
-  '苹果': 52, '香蕉': 89, '草莓': 32, '橙子': 47, '蓝莓': 57, '牛油果': 160, '西瓜': 30,
-  '鸡蛋': 144, '牛奶': 54, '酸奶': 72, '豆浆': 31, '奶酪': 328,
-  '鸡胸肉': 133, '牛肉': 250, '猪肉': 395, '鱼': 120, '虾': 99, '三文鱼': 208, '豆腐': 81,
-  '鸡腿': 185, '鸡腿饭': 260, '炸鸡': 280, '汉堡': 295, '牛肉面': 230, '凉皮': 150, '麻辣烫': 180, '寿司': 150, '蛋炒饭': 215, '炒饭': 220, '三明治': 250, '馄饨': 220, '米线': 200, '螺蛳粉': 240, '热干面': 230,
-  '西兰花': 34, '番茄': 18, '黄瓜': 15, '土豆': 77, '红薯': 99, '菠菜': 23, '沙拉': 60, '玉米': 112,
-  '咖啡': 2, '奶茶': 300, '果汁': 45, '可乐': 43, '坚果': 600,
-  '饼干': 433, '蛋糕': 350, '巧克力': 589, '冰淇淋': 207
-};
-let dietDate = todayStr();
-let dietModal = { meal: 'breakfast', photo: null, kcal: 0, content: '' };
-
-function bmiLabel(b) { if (b < 18.5) return '偏瘦'; if (b < 24) return '正常'; if (b < 28) return '偏重'; return '肥胖'; }
-/* 标准每日热量目标 = 基础代谢 BMR（Mifflin-St Jeor，女性，默认年龄 30） */
-function calcBMR(p) {
-  if (!(p.weight > 0) || !(p.height > 0)) return 0;
-  const age = 30; /* 默认年龄；如需要可在档案里加年龄字段 */
-  return Math.round(10 * p.weight + 6.25 * p.height - 5 * age + 5);
-}
-/* 体重/身高齐全时，自动把目标同步为 BMR 标准值（仍可手动改） */
-function syncGoalFromProfile() {
-  const p = S.diet.profile || { weight: 0, height: 0 };
-  if (p.weight > 0 && p.height > 0) S.diet.goal = calcBMR(p);
-}
-/* AI 智能估算：基于本地食物库做子串/字符重叠匹配，避免错配（如鸡腿饭→豆腐） */
-function aiEstimate(name) {
-  name = (name || '').trim();
-  if (!name) return null;
-  const keys = Object.keys(FOOD_DB);
-  let best = null, bestScore = 0;
-  for (const k of keys) {
-    let score = 0;
-    if (name.includes(k)) score = k.length * 3;
-    else if (k.includes(name)) score = name.length * 2;
-    else {
-      let overlap = 0; for (const ch of name) if (k.includes(ch)) overlap++;
-      if (overlap >= 2) score = overlap;
-    }
-    if (score > bestScore) { bestScore = score; best = k; }
-  }
-  return best ? { name: best, kcal: FOOD_DB[best] } : null;
-}
-function renderDiet() {
-  const day = S.diet.days[dietDate] || [];
-  const total = day.reduce((s, f) => s + (f.kcal || 0), 0);
-  const goal = S.diet.goal;
-  const pct = Math.min(100, Math.round(total / goal * 100));
-
-  const mealCards = MEALS.map(m => {
-    const items = day.filter(f => f.meal === m.key);
-    const sum = items.reduce((s, f) => s + (f.kcal || 0), 0);
-    const list = items.length ? items.map(f => `
-      <div class="food-item">
-        ${f.photo ? `<img class="food-photo" src="${f.photo}" alt="">` : `<div class="food-photo" style="display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:18px">🍽️</div>`}
-        <div class="food-main">
-          <div class="food-row1">
-            <div class="food-content" contenteditable="true" data-edit="food-content" data-id="${f.id}">${esc(f.content)}</div>
-            <div class="food-kcal">${f.kcal || 0} kcal</div>
-          </div>
-          <div class="food-meta">${f.time || ''}${f.note ? ' · ' + esc(f.note) : ''}</div>
-        </div>
-        <button class="icon-btn danger" data-action="food-del" data-id="${f.id}" title="删除">${icTrash()}</button>
-      </div>`).join('') : '<div style="color:var(--ink-faint);font-size:12.5px;padding:6px 2px">还没记录～</div>';
-    return `<div class="card card-pad-sm meal-card">
-      <div class="meal-head">
-        <div class="meal-name"><span class="meal-emoji">${m.emoji}</span>${m.name}</div>
-        <div class="meal-kcal">${sum} kcal</div>
-      </div>
-      ${list}
-      <button class="btn btn-sm" style="width:100%;margin-top:6px" data-action="add-food" data-meal="${m.key}">+ 记录${m.name}</button>
-    </div>`;
-  }).join('');
-
-  const prof = S.diet.profile || { weight: 0, height: 0 };
-  const bmi = (prof.weight > 0 && prof.height > 0) ? (prof.weight / Math.pow(prof.height / 100, 2)) : 0;
-  const bmiTxt = bmi ? `${bmi.toFixed(1)} · ${bmiLabel(bmi)}` : '—';
-
-  $('#view-diet').innerHTML = `
-    <div class="grid cols-2" style="margin-bottom:18px;align-items:stretch">
-      <div class="card profile-card">
-        <div class="card-title"><span class="dot" style="background:var(--sand)"></span>身体数据</div>
-        <div class="profile-row">
-          <label>体重 (kg)<input class="input" id="weightInput" type="number" min="0" step="0.1" value="${prof.weight || ''}" placeholder="如 58" /></label>
-          <label>身高 (cm)<input class="input" id="heightInput" type="number" min="0" step="0.1" value="${prof.height || ''}" placeholder="如 165" /></label>
-          <div class="bmi-box"><span class="bmi-lbl">BMI</span><span class="bmi-val">${bmiTxt}</span></div>
-        </div>
-      </div>
-      <div class="card goal-card">
-        <div class="card-title"><span class="dot" style="background:var(--rose)"></span>每日热量目标</div>
-        <div class="goal-row">
-          <span>目标</span>
-          <input class="input goal-input" id="goalInput" type="number" min="0" step="50" value="${goal}" />
-          <span>kcal</span>
-        </div>
-        <div class="day-kcal-total" style="margin-top:10px">今日合计 <b style="color:var(--sand-deep)">${total}</b> / ${goal} kcal</div>
-        <div class="kcal-bar"><i style="width:${pct}%"></i></div>
-        <div class="goal-note">
-          标准目标 = 基础代谢 BMR <b>≈ ${calcBMR(prof)} kcal</b>（按女/30岁，由身高体重换算；可手动改）
-          <button class="btn btn-sm btn-ghost" style="margin-top:6px" data-action="recalc-goal">↻ 按身高体重重算</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div class="todo-head" style="margin:0">
-        <button class="icon-btn" data-action="diet-prev">${icPrev()}</button>
-        <div style="font-weight:700;font-size:15px">${fmtDateCN(dietDate)}</div>
-        <button class="icon-btn" data-action="diet-next">${icNext()}</button>
-        ${dietDate !== todayStr() ? `<button class="btn btn-sm btn-ghost" data-action="diet-today">回到今天</button>` : ''}
-      </div>
-    </div>
-    <div class="meal-grid">${mealCards}</div>`;
-}
-
-function openFoodModal(meal) {
-  dietModal = { meal, photo: null, kcal: 0, content: '' };
-  const m = MEALS.find(x => x.key === meal);
-  openModal(`
-    <h3>${m.emoji} 记录${m.name}</h3>
-    <div class="field"><label>拍照 / 上传图片（可选）</label>
-      <input type="file" id="foodImg" accept="image/*" />
-      <img class="photo-prev" id="foodPrev" alt="">
-    </div>
-    <div class="field"><label>食物内容</label>
-      <input class="input" id="foodContent" placeholder="如：一碗米饭 + 鸡蛋" />
-    </div>
-    <div class="field"><label>热量（kcal）<span style="color:var(--ink-faint);font-weight:400">· 可让 AI 智能估算</span></label>
-      <input class="input" id="foodKcal" type="number" min="0" placeholder="0" />
-    </div>
-    <div class="recog-box" id="recogBox">
-      <div id="recogState"></div>
-    </div>
-    <div class="field"><label>备注（时间/心得）</label>
-      <input class="input" id="foodNote" placeholder="如：芽芽也吃了半碗" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" data-action="ai-kcal">✨ AI 智能估算</button>
-      <button class="btn btn-primary" data-action="food-save">保存</button>
-    </div>
-    <p style="color:var(--ink-faint);font-size:11.5px;margin-top:10px">* AI 估算为演示功能，基于本地食物库智能匹配，真实热量请参考营养标签。</p>`);
-
-  const img = $('#foodImg');
-  img.addEventListener('change', () => {
-    const f = img.files[0]; if (!f) return;
-    compressImage(f, d => {
-      if (!d) { toast('图片读取失败', 'warn'); return; }
-      dietModal.photo = d; const p = $('#foodPrev'); p.src = d; p.style.display = 'block';
-    });
-  });
-}
 
 /* ===================== 3. 记账 ===================== */
 const EXP_CATS = ['餐饮', '母婴', '交通', '居家', '娱乐', '医疗', '其他', '小红书'];
@@ -2039,51 +1828,6 @@ document.addEventListener('click', e => {
       S.home.countdowns.push(item); save(); closeModal(); renderHome(); toast('已添加纪念日'); break;
     }
 
-    /* 待办 */
-    case 'todo-filter': todoFilter = el.dataset.cat; renderTodo(); break;
-    case 'todo-toggle': { const t = S.todos.find(x => x.id === id); if (t) { t.done = !t.done; save(); renderTodo(); } break; }
-    case 'todo-del': S.todos = S.todos.filter(x => x.id !== id); save(); renderTodo(); break;
-
-    /* 饮食 */
-    case 'diet-prev': dietDate = addDays(dietDate, -1); renderDiet(); break;
-    case 'diet-next': dietDate = addDays(dietDate, 1); renderDiet(); break;
-    case 'diet-today': dietDate = todayStr(); renderDiet(); break;
-    case 'add-food': openFoodModal(el.dataset.meal); break;
-    case 'ai-kcal': {
-      const box = $('#recogBox'), st = $('#recogState');
-      const name = ($('#foodContent').value || '').trim();
-      if (!name) { toast('先填写食物内容再估算哦', 'warn'); return; }
-      box.classList.add('show'); st.innerHTML = `<span class="spinner"></span>正在识别「${esc(name)}」…`;
-      setTimeout(() => {
-        const r = aiEstimate(name);
-        if (!r) {
-          st.innerHTML = `🌿 未匹配到「${esc(name)}」，请手动填写热量（可参考包装营养标签）`;
-          toast('未识别，请手动输入', 'warn');
-          return;
-        }
-        $('#foodContent').value = r.name;
-        $('#foodKcal').value = r.kcal;
-        dietModal.content = r.name; dietModal.kcal = r.kcal;
-        st.innerHTML = `🌿 识别为 <b>${esc(r.name)}</b>，约 <b>${r.kcal}</b> kcal（演示估算，仅供参考）`;
-        toast('已智能估算热量');
-      }, 1100);
-      break;
-    }
-    case 'food-save': {
-      const content = ($('#foodContent').value || '').trim() || dietModal.content || '未命名';
-      const kcal = Math.max(0, parseInt($('#foodKcal').value || '0', 10) || dietModal.kcal || 0);
-      const note = ($('#foodNote').value || '').trim();
-      const now = new Date();
-      const rec = { id: uid(), meal: dietModal.meal, time: `${pad(now.getHours())}:${pad(now.getMinutes())}`, content, kcal, note, photo: dietModal.photo };
-      (S.diet.days[dietDate] = S.diet.days[dietDate] || []).push(rec);
-      save(); closeModal(); renderDiet(); toast('已记录～'); break;
-    }
-    case 'recalc-goal': syncGoalFromProfile(); save(); renderDiet(); toast('已按身高体重重算目标'); break;
-    case 'food-del': {
-      const arr = S.diet.days[dietDate] || [];
-      S.diet.days[dietDate] = arr.filter(f => f.id !== id); save(); renderDiet(); break;
-    }
-
     /* 记账 */
     case 'cal-prev': ledgerMonth.m--; if (ledgerMonth.m < 0) { ledgerMonth.m = 11; ledgerMonth.y--; } renderLedger(); break;
     case 'cal-next': ledgerMonth.m++; if (ledgerMonth.m > 11) { ledgerMonth.m = 0; ledgerMonth.y++; } renderLedger(); break;
@@ -2359,71 +2103,6 @@ document.addEventListener('click', e => {
   }
 });
 
-/* 表单提交（待办新增 / 便签新增） */
-document.addEventListener('submit', e => {
-  const f = e.target.closest('[data-form]'); if (!f) return;
-  e.preventDefault();
-  if (f.dataset.form === 'todo-add') {
-    const text = f.elements.text.value.trim(); if (!text) return;
-    const order = S.todos.reduce((m, t) => Math.min(m, t.order), 9999) - 1;
-    S.todos.push({ id: uid(), text, date: f.elements.date.value || todayStr(), cat: f.elements.cat.value, prio: f.elements.prio.value, done: false, order });
-    save(); renderTodo();
-  }
-});
-
-/* 失焦保存（可编辑文本） */
-document.addEventListener('blur', e => {
-  const el = e.target.closest('[data-edit]'); if (!el) return;
-  const id = el.dataset.id, val = el.textContent.trim();
-  const kind = el.dataset.edit;
-  if (kind === 'todo-text') { const t = S.todos.find(x => x.id === id); if (t && val) { t.text = val; save(); } }
-  else if (kind === 'food-content') {
-    const day = S.diet.days[dietDate] || []; const f = day.find(x => x.id === id);
-    if (f) { f.content = val; save(); }
-  }
-}, true);
-
-/* 饮食身体数据（change 即时保存 + 自动换算目标） */
-document.addEventListener('change', e => {
-  if (e.target.id === 'weightInput') { S.diet.profile = S.diet.profile || { weight: 0, height: 0 }; S.diet.profile.weight = parseFloat(e.target.value) || 0; syncGoalFromProfile(); save(); renderDiet(); }
-  else if (e.target.id === 'heightInput') { S.diet.profile = S.diet.profile || { weight: 0, height: 0 }; S.diet.profile.height = parseFloat(e.target.value) || 0; syncGoalFromProfile(); save(); renderDiet(); }
-  else if (e.target.id === 'goalInput') { S.diet.goal = Math.max(0, parseInt(e.target.value, 10) || 0); save(); renderDiet(); }
-});
-
-/* 待办拖拽排序 */
-(() => {
-  const list = $('#view-todo');
-  let dragId = null;
-  list.addEventListener('dragstart', e => {
-    const item = e.target.closest('.todo'); if (!item) return;
-    dragId = item.dataset.id; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
-  });
-  list.addEventListener('dragend', e => { const it = e.target.closest('.todo'); if (it) it.classList.remove('dragging'); });
-  list.addEventListener('dragover', e => { e.preventDefault(); });
-  list.addEventListener('drop', e => {
-    e.preventDefault(); if (!dragId) return;
-    const after = getDragAfter(list, e.clientY);
-    const ids = [...list.querySelectorAll('.todo')].map(n => n.dataset.id);
-    const from = ids.indexOf(dragId);
-    ids.splice(from, 1);
-    const afterId = after ? after.dataset.id : null;
-    const insertAt = afterId ? ids.indexOf(afterId) : ids.length;
-    ids.splice(insertAt, 0, dragId);
-    // 重新编号 order
-    ids.forEach((iid, idx) => { const t = S.todos.find(x => x.id === iid); if (t) t.order = idx; });
-    save(); renderTodo(); dragId = null;
-  });
-  function getDragAfter(container, y) {
-    const els = [...container.querySelectorAll('.todo:not(.dragging)')];
-    return els.reduce((closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) return { offset, el: child };
-      return closest;
-    }, { offset: -Infinity, el: null }).el;
-  }
-})();
-
 /* 导航点击 */
 $('#nav').addEventListener('click', e => {
   const b = e.target.closest('.nav-item'); if (!b) return;
@@ -2460,9 +2139,7 @@ const SUPABASE_CDNS = [
 function totalRecords(s) {
   const x = s.xhs || {};
   let n = 0;
-  n += (s.todos || []).length;
   n += (s.ledger || []).length;
-  n += Object.keys((s.diet && s.diet.days) || {}).length;
   n += (s.baby && s.baby.poops || []).length;
   n += (s.baby && s.baby.meds || []).length;
   n += (s.publish && s.publish.notes || []).length;
@@ -2555,9 +2232,7 @@ async function pullSync() {
    用于防止空白设备把云端已有的真实数据覆盖成空。 */
 function isFreshDefault(s) {
   const x = s.xhs || {};
-  return (s.todos || []).length === 0
-    && (s.ledger || []).length === 0
-    && Object.keys(s.diet.days || {}).length === 0
+  return (s.ledger || []).length === 0
     && (s.baby && s.baby.poops || []).length === 0
     && (s.baby && s.baby.meds || []).length === 0
     && (s.publish && s.publish.notes || []).length === 0
@@ -2641,8 +2316,6 @@ function mergeImport(raw) {
   S.xhs.noteExpenses = mergeArr(S.xhs.noteExpenses, src.xhs.noteExpenses);
   S.xhs.rebates = mergeArr(S.xhs.rebates, src.xhs.rebates);
   S.ledger = mergeArr(S.ledger, src.ledger);
-  S.todos = mergeArr(S.todos, src.todos);
-  if (src.diet && src.diet.days) S.diet.days = Object.assign({}, src.diet.days, S.diet.days);
   if (Array.isArray(src.home && src.home.rest)) S.home.rest = mergeArr(S.home.rest, src.home.rest);
   /* 红薯日历笔记：仅当当前为空才用备份（当前已有则保留，不回退到备份的 0） */
   if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
