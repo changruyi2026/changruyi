@@ -456,10 +456,14 @@ function renderBabyCalendar() {
   for (let i = 0; i < startDow; i++) cal += '<div class="cal-day out"></div>';
   for (let d = 1; d <= daysIn; d++) {
     const ds = `${y}-${pad(m + 1)}-${pad(d)}`;
-    const cnt = (S.baby.poops || []).filter(p => p.date === ds).length;
+    const recs = (S.baby.poops || []).filter(p => p.date === ds);
+    const cnt = recs.length;
+    const hasMed = recs.some(r => r.med);
+    const medMg = hasMed ? recs.filter(r => r.med).reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0) : 0;
     const mark = cnt ? `<span class="poop-badge">💩${cnt > 1 ? cnt : ''}</span>` : '';
+    const medMark = hasMed ? `<span class="med-badge">💊${medMg > 0 ? medMg + 'mg' : ''}</span>` : '';
     cal += `<div class="cal-day ${cnt ? 'poop' : ''} ${ds === todayStr() ? 'today' : ''}" data-action="baby-pick" data-date="${ds}">
-      <div class="d">${d}</div>${mark}</div>`;
+      <div class="d">${d}</div>${mark}${medMark}</div>`;
   }
   const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
   return `<div class="cal-head">${y}年 ${m + 1}月</div><div class="cal">${dows}${cal}</div>`;
@@ -472,10 +476,12 @@ function openBabyDayModal(ds) {
   const now = new Date();
   const curTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const typeOpts = BABY_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
+  const medInfo = r => (r.med ? `💊 ${r.medMg || 0}mg` : '');
   const list = recs.length ? `<div class="bp-list">` + recs.map(r => `
     <div class="bp-item">
       <span class="bp-time">${esc(r.time || '')}</span>
       <span class="bp-type">${esc(r.type || '')}</span>
+      <span class="bp-med">${medInfo(r)}</span>
       <span class="bp-note">${esc(r.note || '')}</span>
       <button class="icon-btn danger" data-action="baby-del" data-id="${r.id}" title="删除这条">${icTrash()}</button>
     </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录，记一笔吧 💩</div>';
@@ -485,6 +491,10 @@ function openBabyDayModal(ds) {
       <input class="input" type="time" id="bpTime" value="${curTime}" style="width:108px" />
       <select class="input" id="bpType" style="flex:1;min-width:120px">${typeOpts}</select>
       <input class="input" id="bpNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
+    </div>
+    <div class="bp-med-row">
+      <label class="bp-med-check"><input type="checkbox" id="bpMed" /> 是否用药</label>
+      <input class="input" id="bpMedMg" type="number" min="0" step="0.1" placeholder="用药克数/mg" style="flex:1;min-width:100px" />
     </div>
     <button class="btn btn-primary" style="width:100%;margin:4px 0 14px" data-action="baby-save" data-date="${ds}">记一笔</button>
     ${list}`;
@@ -510,9 +520,10 @@ function renderBaby() {
     const recs = byDay[ds].slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
     const d = new Date(ds + 'T00:00:00');
     const wk = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
+    const medTotal = recs.filter(r => r.med).reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0);
     return `<div class="hist-day">
-      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span> <span class="hist-cnt">${recs.length} 次</span></div>
-      <div class="hist-items">${recs.map(r => `<span class="hist-tag">${esc(r.time || '')} · ${esc(r.type || '')}</span>`).join('')}</div>
+      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span> <span class="hist-cnt">${recs.length} 次</span>${medTotal > 0 ? ` <span class="hist-med">💊 ${medTotal}mg</span>` : ''}</div>
+      <div class="hist-items">${recs.map(r => `<span class="hist-tag">${esc(r.time || '')} · ${esc(r.type || '')}${r.med ? ` · 💊${r.medMg || 0}mg` : ''}</span>`).join('')}</div>
     </div>`;
   }).join('') : '<div class="empty">还没有拉屎记录，点日历上的日期记一笔吧 💩</div>';
 
@@ -641,7 +652,10 @@ function renderHongshuCalendar() {
     const st = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
     const badge = st ? `<span class="hs-badge ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>` : '';
     const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
-    const cover = top ? `<div class="hs-cover ${top.item ? '' : 'no-item'}">${acctBadge}${top.item ? esc(top.item) : '未命名'}</div>` : '';
+    let coverAmt = '';
+    if (top && top.type === '蒲公英商单' && top.net != null && top.net !== 0) coverAmt = money(top.net);
+    else if (top && top.type === '众测招募' && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
+    const cover = top ? `<div class="hs-cover ${top.item ? '' : 'no-item'}">${acctBadge}${top.item ? esc(top.item) : '未命名'}${coverAmt ? `<span class="hs-cover-amt">${coverAmt}</span>` : ''}</div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}</div>
       <div class="hs-lunar">${ld}</div>
@@ -1118,8 +1132,9 @@ function readImageResized(file, maxDim, cb) {
 function openXhsNoteExpModal(editId) {
   const list = S.xhs.noteExpenses || [];
   const editing = editId ? list.find(n => n.id === editId) : null;
-  const t = editing || { type: 'note', name: '', date: todayStr(), cover: '', items: [{ id: uid(), desc: '', amount: '' }] };
+  const t = editing || { type: 'note', account: XHS_ACCOUNTS[0], name: '', date: todayStr(), cover: '', items: [{ id: uid(), desc: '', amount: '' }] };
   const type = t.type || 'note';
+  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}"${a === (t.account || XHS_ACCOUNTS[0]) ? ' selected' : ''}>${a}</option>`).join('');
   const rowsHtml = (t.items || []).map(it => `
     <div class="exp-item-row" data-iid="${it.id}">
       <select class="input exp-kind" data-action="xhs-item-kind">
@@ -1133,6 +1148,7 @@ function openXhsNoteExpModal(editId) {
     </div>`).join('');
   openModal(`
     <h3>${editing ? '✏️ 编辑笔记支出' : '🧾 记一笔笔记支出'}</h3>
+    <div class="field"><label>发布账号</label><select class="input" id="neAccount">${acctOpts}</select></div>
     <div class="field"><label>类型</label>
       <div class="seg" id="neType">
         <button class="${type === 'note' ? 'on' : ''}" data-type="note">笔记支出</button>
@@ -1421,9 +1437,11 @@ function openLedgerModal(date) {
 
 /* 小红书：记录当前累计数据（每条是「当前总数快照」，只填变动项即可，其余自动沿用上一次） */
 function openXhsAddModal() {
+  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
   openModal(`
     <h3>📈 记录当前数据</h3>
     <p class="modal-tip">填「当前的累计总数」。只改动的那一项就填，没动的留空——会自动沿用上一次的数值，不会变成 0。</p>
+    <div class="field"><label>账号</label><select class="input" id="xAccount">${acctOpts}</select></div>
     <div class="field"><label>日期</label><input class="input" id="xDate" type="date" value="${todayStr()}" /></div>
     <div class="field"><label>粉丝量（当前总粉丝）</label><input class="input" id="xFollowers" type="number" min="0" placeholder="如 1500" /></div>
     <div class="field"><label>笔记数量（当前总篇数）</label><input class="input" id="xNotes" type="number" min="0" placeholder="如 86" /></div>
@@ -1447,8 +1465,10 @@ function openXhsLimitModal() {
 }
 /* 小红书：待返款 / 蒲公英商单 */
 function openRebrateModal(presetSrc) {
+  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
   openModal(`
     <h3>💸 添加待返款</h3>
+    <div class="field"><label>发布账号</label><select class="input" id="rbAccount">${acctOpts}</select></div>
     <div class="field"><label>来源</label>
       <div class="seg" id="rbSrc">
         <button class="on" data-type="rebate">普通返款</button><button data-type="pgy">🌼 蒲公英商单</button>
@@ -1576,17 +1596,33 @@ function openCdModal() {
 }
 
 /* ===================== 5. 小红书 ===================== */
-/* 小红书：每条 records 是「累计总数快照」(可只填部分字段)。
-   当前值 = 最新一条含该字段的记录(向上沿用); 增长 = 最新 − 上一条含该字段的记录(日常即对比昨天)。 */
-function xhsBaseVal(m) { const b = S.xhs.base || {}; return m === 'f' ? (b.followers || 0) : m === 'n' ? (b.notes || 0) : (b.zanCang || 0); }
-function xhsRecsWith(m) {
-  return (S.xhs.records || []).filter(r => r[m] != null).slice().sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+const XHS_ACCOUNTS = ['常如意i', '芽芽Mochi'];
+const XHS_ACCOUNT_BADGE = { '常如意i': '常', '芽芽Mochi': '芽' };
+/* 账号 themed 底色：用于统计卡片区分 */
+const XHS_ACCOUNT_THEME = { '常如意i': { bg: '#F8E8DF', soft: '#C4886E' }, '芽芽Mochi': { bg: '#F0E6F7', soft: '#9B6BC2' } };
+/* 数据迁移：单账号旧结构 -> 多账号结构（以「常如意i」承继旧数据） */
+function migrateXhsAccounts() {
+  if (!S.xhs) S.xhs = defaultState().xhs;
+  if (S.xhs.accounts) return;
+  S.xhs.accounts = {};
+  XHS_ACCOUNTS.forEach((acct, i) => {
+    if (i === 0) {
+      S.xhs.accounts[acct] = { base: S.xhs.base || { followers: 0, notes: 0, zanCang: 0 }, records: S.xhs.records || [] };
+    } else {
+      S.xhs.accounts[acct] = { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
+    }
+  });
 }
-function xhsCurrent(m) { const L = xhsRecsWith(m); return L.length ? L[0][m] : xhsBaseVal(m); }
-function xhsDelta(m) {
-  const L = xhsRecsWith(m);
-  if (L.length < 2) return null;          // 不足两条记录时暂不显示增长
-  return L[0][m] - L[1][m];               // 最新 − 上一条(日常即对比昨天；同日多次填写取最新)
+function xhsAccountData(account) { migrateXhsAccounts(); return S.xhs.accounts[account] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] }; }
+function xhsBaseVal(m, account) { const b = xhsAccountData(account).base || {}; return m === 'f' ? (b.followers || 0) : m === 'n' ? (b.notes || 0) : (b.zanCang || 0); }
+function xhsRecsWith(m, account) {
+  return (xhsAccountData(account).records || []).filter(r => r[m] != null).slice().sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+}
+function xhsCurrent(m, account) { const L = xhsRecsWith(m, account); return L.length ? L[0][m] : xhsBaseVal(m, account); }
+function xhsDelta(m, account) {
+  const L = xhsRecsWith(m, account);
+  if (L.length < 2) return null;
+  return L[0][m] - L[1][m];
 }
 function deltaHTML(delta) {
   if (delta == null) return `<span class="delta flat">— 暂无对比</span>`;
@@ -1617,7 +1653,29 @@ function xhsMonthChart() {
 }
 
 function renderXhs() {
-  const cur = { f: xhsCurrent('f'), n: xhsCurrent('n'), z: xhsCurrent('z') };
+  migrateXhsAccounts();
+
+  // 账号统计卡片（双账号：常如意i / 芽芽Mochi）
+  const L = S.xhs.limit || { count: 0, names: '' };
+  const accountBlocks = XHS_ACCOUNTS.map((acct, idx) => {
+    const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
+    const cur = { f: xhsCurrent('f', acct), n: xhsCurrent('n', acct), z: xhsCurrent('z', acct) };
+    const limitMini = idx === 0 ? (L.count ? `<div class="limit-mini">🚫 ${L.count} 篇限流</div>` : '<div class="limit-mini ok">未限流</div>') : '';
+    return `
+    <div class="xhs-account-block" style="background:${theme.bg};border:1px solid ${theme.soft}33">
+      <div class="xhs-account-title" style="color:${theme.soft}"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)}</div>
+      <div class="xhs-stat xhs-stat-compact">
+        <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f', acct))}</div>
+        <div class="xhs-cell xhs-cell-limit ${L.count ? 'has-limit' : ''}" data-action="xhs-open-limit" title="点击管理限流笔记">
+          <div class="big">${cur.n.toLocaleString()}</div>
+          <div class="lbl">笔记数量</div>
+          ${deltaHTML(xhsDelta('n', acct))}
+          ${limitMini}
+        </div>
+        <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z', acct))}</div>
+      </div>
+    </div>`;
+  }).join('');
 
   // 待返款
   const rebates = S.xhs.rebates || [];
@@ -1629,13 +1687,16 @@ function renderXhs() {
     const isOut = r.dir === 'out';
     const isPgy = r.src === 'pgy';
     const amtColor = isOut ? 'var(--rose-deep)' : 'var(--sage-deep)';
+    const acct = r.account || XHS_ACCOUNTS[0];
+    const abg = XHS_ACCOUNT_BADGE[acct] || '常';
+    const theme = XHS_ACCOUNT_THEME[acct] || { soft: '#C4886E' };
     const typeTag = isPgy
       ? `<span class="t-type pgy">🌼 蒲公英</span>`
       : `<span class="t-type ${isOut ? 'cash' : 'note'}">${isOut ? '我返PR' : 'PR返我'}</span>`;
     return `<div class="xhs-todo ${r.done ? 'done' : ''}">
       <div class="check ${r.done ? 'on' : ''}" data-action="rebrate-toggle" data-id="${r.id}">${r.done ? icCheck() : ''}</div>
       ${typeTag}
-      <span class="tl-text"><b>${esc(r.item || '未命名物品')}</b>
+      <span class="tl-text"><span class="xhs-acct-tag" style="background:${theme.soft}">${abg}</span><b>${esc(r.item || '未命名物品')}</b>
         <span class="date-chip soft">📅 发布 ${esc(r.pub || '—')}</span>
         <span class="date-chip">${isPgy ? '⏰ 交易确认 ' : '⏰ 最晚 '}${esc(r.prom || '—')}</span>
         ${r.done && r.rdate ? `<span class="date-chip ok">✓ ${esc(r.rdate)}${r.channel ? ' · ' + esc(r.channel) : ''}</span>` : ''}
@@ -1644,9 +1705,6 @@ function renderXhs() {
       <button class="icon-btn danger" data-action="rebrate-del" data-id="${r.id}">${icTrash()}</button>
     </div>`;
   }).join('') : '<div class="empty">暂无返款记录，点右上角「+ 添加」</div>';
-
-  // 限流笔记备注（摘要放在「笔记数量」统计格，点击打开弹窗）
-  const L = S.xhs.limit || { count: 0, names: '' };
 
   // 笔记支出（按笔记名称分组，每条含封面图 + 多条明细）
   const now = new Date();
@@ -1659,13 +1717,17 @@ function renderXhs() {
   const noteCards = notes.map(n => {
     const isCart = (n.type || 'note') === 'cart';
     const noteTotal = xhsNoteItemsTotal(n.items);
+    const acct = n.account || XHS_ACCOUNTS[0];
+    const abg = XHS_ACCOUNT_BADGE[acct] || '常';
+    const theme = XHS_ACCOUNT_THEME[acct] || { soft: '#C4886E' };
     return `
     <div class="note-exp-card ${isCart ? 'cart' : ''}">
       <div class="note-cover" data-action="xhs-note-detail" data-id="${n.id}" title="点封面看支出明细">
         <img src="${noteCoverUrl(n)}" alt="封面" />
+        <span class="note-cover-acct" style="background:${theme.soft}">${abg}</span>
       </div>
       <div class="note-info">
-        <div class="note-name"><b>${esc(n.name || '未命名笔记')}</b> <span class="etype-tag ${isCart ? 'cart' : 'note'}">${isCart ? '作业车' : '笔记'}</span></div>
+        <div class="note-name"><span class="xhs-acct-tag" style="background:${theme.soft}">${abg}</span><b>${esc(n.name || '未命名笔记')}</b> <span class="etype-tag ${isCart ? 'cart' : 'note'}">${isCart ? '作业车' : '笔记'}</span></div>
         <div class="note-sub">${(n.items || []).length} 项明细${n.date ? ' · ' + esc(n.date) : ''}</div>
         <div class="note-total">总花费 <b>${money(noteTotal)}</b></div>
       </div>
@@ -1688,16 +1750,7 @@ function renderXhs() {
     </div>`;
 
   $('#view-xhs').innerHTML = `
-    <div class="xhs-stat" style="margin-bottom:18px">
-      <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f'))}</div>
-      <div class="xhs-cell xhs-cell-limit ${L.count ? 'has-limit' : ''}" data-action="xhs-open-limit" title="点击管理限流笔记">
-        <div class="big">${cur.n.toLocaleString()}</div>
-        <div class="lbl">笔记数量</div>
-        ${deltaHTML(xhsDelta('n'))}
-        ${L.count ? `<div class="limit-mini">🚫 ${L.count} 篇限流</div>` : '<div class="limit-mini ok">未限流</div>'}
-      </div>
-      <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z'))}</div>
-    </div>
+    <div class="xhs-accounts" style="margin-bottom:18px">${accountBlocks}</div>
     <button class="btn btn-primary" style="margin-bottom:16px" data-action="xhs-add">+ 记录当前数据（粉丝 / 笔记 / 赞藏 当前总数）</button>
     ${recHistory}
 
@@ -1749,9 +1802,9 @@ function renderXhs() {
 /* ===================== 小红书：数据增长统计（按日期） ===================== */
 /* 按日期聚合累计快照：每格数值 = 截至该日的最新累计（向上沿用），
    增量 = 当日累计 − 前一日累计（首日为 − 起始基线）。同日多次填写取最新。 */
-function xhsHistoryRows() {
-  const recs = (S.xhs.records || []).slice().sort((a, b) => (a.ts || '').localeCompare(b.ts || ''));
-  const baseSnap = { f: xhsBaseVal('f'), n: xhsBaseVal('n'), z: xhsBaseVal('z') };
+function xhsHistoryRows(account) {
+  const recs = (xhsAccountData(account).records || []).slice().sort((a, b) => (a.ts || '').localeCompare(b.ts || ''));
+  const baseSnap = { f: xhsBaseVal('f', account), n: xhsBaseVal('n', account), z: xhsBaseVal('z', account) };
   const groups = {}; const order = [];
   recs.forEach(r => { if (!groups[r.date]) { groups[r.date] = []; order.push(r.date); } groups[r.date].push(r); });
   order.sort();
@@ -1777,11 +1830,16 @@ function histMetricCell(val, delta) {
   </div>`;
 }
 function openXhsHistoryModal() {
-  const rows = xhsHistoryRows();
-  let body;
-  if (!rows.length) {
-    body = '<div class="empty">还没有记录，先点「记录当前数据」添加吧 🌱</div>';
-  } else {
+  let body = '';
+  XHS_ACCOUNTS.forEach((acct, idx) => {
+    const rows = xhsHistoryRows(acct);
+    const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
+    body += `<div class="xhs-hist-account" style="${idx > 0 ? 'margin-top:18px' : ''}">
+      <div class="xhs-hist-title" style="background:${theme.bg};color:${theme.soft}"><span class="acct-badge">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)} · 数据增长统计</div>`;
+    if (!rows.length) {
+      body += '<div class="empty">还没有记录，先点「记录当前数据」添加吧 🌱</div></div>';
+      return;
+    }
     const head = `
       <div class="xhs-hist-hc h-date">日期</div>
       <div class="xhs-hist-hc">粉丝量</div>
@@ -1797,24 +1855,33 @@ function openXhsHistoryModal() {
         ${histMetricCell(r.f, r.df)}
         ${histMetricCell(r.n, r.dn)}
         ${histMetricCell(r.z, r.dz)}
-        <div class="xhs-hist-act"><button class="icon-btn danger" data-action="xhs-hist-del" data-ids="${r.recIds.join(',')}" title="删除该日记录">${icTrash()}</button></div>`;
+        <div class="xhs-hist-act"><button class="icon-btn danger" data-action="xhs-hist-del" data-ids="${r.recIds.join(',')}" data-account="${esc(acct)}" title="删除该日记录">${icTrash()}</button></div>`;
     }).join('');
-    body = `<div class="xhs-hist"><div class="xhs-hist-table">${head}${cells}</div></div>
-      <p class="modal-tip" style="margin-top:12px">每格下方小字为「较前一天」的增量：<b style="color:#D6453D">红色加粗 = 涨</b>，绿色 = 跌，持平则灰色。删除某一天会移除该日全部记录。</p>`;
-  }
+    body += `<div class="xhs-hist"><div class="xhs-hist-table">${head}${cells}</div></div></div>`;
+  });
+  body += `<p class="modal-tip" style="margin-top:12px">每格下方小字为「较前一天」的增量：<b style="color:#D6453D">红色加粗 = 涨</b>，绿色 = 跌，持平则灰色。删除某一天会移除该日全部记录。</p>`;
   openModal(`<h3>📊 数据增长统计</h3>${body}`, 'modal-wide');
 }
 
 /* 小红书：设置起始基准（起始数字，顶部显示 = 基准 + 后续记录变动） */
 function openXhsBaseModal() {
-  const b = S.xhs.base || { followers: 0, notes: 0, zanCang: 0 };
+  migrateXhsAccounts();
+  const rows = XHS_ACCOUNTS.map(acct => {
+    const b = S.xhs.accounts[acct].base || { followers: 0, notes: 0, zanCang: 0 };
+    const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
+    return `
+      <div class="xhs-base-row" style="background:${theme.bg};border:1px solid ${theme.soft}33;border-radius:12px;padding:12px;margin-bottom:12px">
+        <div style="font-weight:800;color:${theme.soft};margin-bottom:8px"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)}</div>
+        <div class="field"><label>起始粉丝量</label><input class="input b-followers" data-account="${acct}" type="number" min="0" value="${b.followers || 0}" /></div>
+        <div class="field"><label>起始笔记数量</label><input class="input b-notes" data-account="${acct}" type="number" min="0" value="${b.notes || 0}" /></div>
+        <div class="field"><label>起始赞藏数量</label><input class="input b-zan" data-account="${acct}" type="number" min="0" value="${b.zanCang || 0}" /></div>
+      </div>`;
+  }).join('');
   openModal(`
     <h3>⚙️ 设置起始基准</h3>
     <p class="modal-tip">这是你「开始记录之前」的起始数字。顶部显示的粉丝/笔记/赞藏 = 起始基准 + 你后来记录的变动。<br>
     如果看到不对的旧数字（如遗留的 15），在这里改成正确的起始值即可；想从零开始就把三项都填 0。</p>
-    <div class="field"><label>起始粉丝量</label><input class="input" id="bFollowers" type="number" min="0" value="${b.followers || 0}" /></div>
-    <div class="field"><label>起始笔记数量</label><input class="input" id="bNotes" type="number" min="0" value="${b.notes || 0}" /></div>
-    <div class="field"><label>起始赞藏数量</label><input class="input" id="bZan" type="number" min="0" value="${b.zanCang || 0}" /></div>
+    ${rows}
     <div class="modal-actions">
       <button class="btn btn-ghost" data-action="close-modal">取消</button>
       <button class="btn btn-primary" data-action="xhs-save-base">保存基准</button>
@@ -1850,7 +1917,9 @@ document.addEventListener('click', e => {
       const time = ($('#bpTime').value || '').trim() || '00:00';
       const type = ($('#bpType').value || BABY_TYPES[0]).trim();
       const note = ($('#bpNote').value || '').trim();
-      S.baby.poops.push({ id: uid(), date: ds, time, type, note });
+      const med = $('#bpMed') ? $('#bpMed').checked : false;
+      const medMg = med ? (parseFloat($('#bpMedMg').value || '0') || 0) : 0;
+      S.baby.poops.push({ id: uid(), date: ds, time, type, note, med, medMg });
       save(); openBabyDayModal(ds); toast('已记录芽芽拉屎 💩'); break;
     }
     case 'baby-del': {
@@ -1951,15 +2020,31 @@ document.addEventListener('click', e => {
     case 'xhs-open-history': openXhsHistoryModal(); break;
     case 'xhs-open-base': openXhsBaseModal(); break;
     case 'xhs-save-base': {
-      S.xhs.base = {
-        followers: Math.max(0, parseInt($('#bFollowers').value || '0', 10) || 0),
-        notes: Math.max(0, parseInt($('#bNotes').value || '0', 10) || 0),
-        zanCang: Math.max(0, parseInt($('#bZan').value || '0', 10) || 0)
-      };
+      migrateXhsAccounts();
+      $$('.b-followers').forEach(inp => {
+        const acct = inp.dataset.account;
+        S.xhs.accounts[acct].base = S.xhs.accounts[acct].base || {};
+        S.xhs.accounts[acct].base.followers = Math.max(0, parseInt(inp.value || '0', 10) || 0);
+      });
+      $$('.b-notes').forEach(inp => {
+        const acct = inp.dataset.account;
+        S.xhs.accounts[acct].base = S.xhs.accounts[acct].base || {};
+        S.xhs.accounts[acct].base.notes = Math.max(0, parseInt(inp.value || '0', 10) || 0);
+      });
+      $$('.b-zan').forEach(inp => {
+        const acct = inp.dataset.account;
+        S.xhs.accounts[acct].base = S.xhs.accounts[acct].base || {};
+        S.xhs.accounts[acct].base.zanCang = Math.max(0, parseInt(inp.value || '0', 10) || 0);
+      });
+      S.xhs.base = S.xhs.accounts[XHS_ACCOUNTS[0]].base;
       save(); closeModal(); renderXhs(); toast('已更新起始基准'); break;
     }
     case 'xhs-reset': {
-      if (window.confirm('确定要重置小红书统计吗？\n\n会清空当前的「基准数」和所有已记录的数据（粉丝/笔记/赞藏），之后你需要重新用「记录当前数据」填入真实数字。\n\n此操作无法撤销。')) {
+      if (window.confirm('确定要重置小红书统计吗？\n\n会清空两个账号的「基准数」和所有已记录的数据（粉丝/笔记/赞藏），之后你需要重新用「记录当前数据」填入真实数字。\n\n此操作无法撤销。')) {
+        migrateXhsAccounts();
+        XHS_ACCOUNTS.forEach(acct => {
+          S.xhs.accounts[acct] = { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
+        });
         S.xhs.base = { followers: 0, notes: 0, zanCang: 0 };
         S.xhs.records = [];
         save(); closeModal(); renderXhs(); toast('已重置，请重新记录真实数据');
@@ -1968,21 +2053,25 @@ document.addEventListener('click', e => {
     }
     case 'xhs-hist-del': {
       const ids = (el.dataset.ids || '').split(',').filter(Boolean);
-      if (ids.length) { S.xhs.records = (S.xhs.records || []).filter(r => !ids.includes(r.id)); save(); }
+      const acct = el.dataset.account || XHS_ACCOUNTS[0];
+      migrateXhsAccounts();
+      if (ids.length && S.xhs.accounts[acct]) { S.xhs.accounts[acct].records = (S.xhs.accounts[acct].records || []).filter(r => !ids.includes(r.id)); save(); }
       openXhsHistoryModal(); toast('已删除该日记录'); break;
     }
     case 'xhs-save-day': {
+      const account = ($('#xAccount').value || XHS_ACCOUNTS[0]).trim();
       const date = ($('#xDate').value || todayStr()).trim();
       const fv = ($('#xFollowers').value || '').trim();
       const nv = ($('#xNotes').value || '').trim();
       const zv = ($('#xZan').value || '').trim();
-      const rec = { id: uid(), date, ts: new Date().toISOString() };
+      const rec = { id: uid(), date, account, ts: new Date().toISOString() };
       if (fv !== '') rec.f = Math.max(0, parseInt(fv, 10) || 0);
       if (nv !== '') rec.n = Math.max(0, parseInt(nv, 10) || 0);
       if (zv !== '') rec.z = Math.max(0, parseInt(zv, 10) || 0);
       if (rec.f == null && rec.n == null && rec.z == null) { toast('至少填一项', 'warn'); return; }
-      S.xhs.records = S.xhs.records || [];
-      S.xhs.records.push(rec);
+      migrateXhsAccounts();
+      S.xhs.accounts[account].records = S.xhs.accounts[account].records || [];
+      S.xhs.accounts[account].records.push(rec);
       save(); closeModal(); renderXhs(); toast('已记录（最新一条即为当前数）'); break;
     }
     case 'xhs-edit-limit':
@@ -2013,6 +2102,7 @@ document.addEventListener('click', e => {
       const editId = id || '';
       const name = ($('#neName').value || '').trim();
       const date = ($('#neDate').value || '').trim();
+      const account = ($('#neAccount').value || XHS_ACCOUNTS[0]).trim();
       const type = (window.__neType ? window.__neType() : 'note');
       const cover = (window.__neCover ? window.__neCover() : '');
       const items = [];
@@ -2028,9 +2118,9 @@ document.addEventListener('click', e => {
       S.xhs.noteExpenses = S.xhs.noteExpenses || [];
       if (editId) {
         const n = S.xhs.noteExpenses.find(x => x.id === editId);
-        if (n) { n.name = name; n.date = date; n.type = type; n.cover = cover; n.items = items; }
+        if (n) { n.name = name; n.date = date; n.account = account; n.type = type; n.cover = cover; n.items = items; }
       } else {
-        S.xhs.noteExpenses.push({ id: uid(), name, date, type, cover, items });
+        S.xhs.noteExpenses.push({ id: uid(), name, date, account, type, cover, items });
       }
       save(); closeModal(); renderXhs(); toast(editId ? '已更新笔记支出' : '已记一笔笔记支出'); break;
     }
@@ -2041,7 +2131,13 @@ document.addEventListener('click', e => {
       }
       break;
     }
-    case 'xhs-rec-del': S.xhs.records = (S.xhs.records || []).filter(r => r.id !== id); save(); renderXhs(); toast('已删除该条记录'); break;
+    case 'xhs-rec-del': {
+      migrateXhsAccounts();
+      XHS_ACCOUNTS.forEach(acct => {
+        if (S.xhs.accounts[acct]) S.xhs.accounts[acct].records = (S.xhs.accounts[acct].records || []).filter(r => r.id !== id);
+      });
+      save(); renderXhs(); toast('已删除该条记录'); break;
+    }
     case 'rebrate-add': openRebrateModal(); break;
     case 'rebrate-add-pgy': openRebrateModal('pgy'); break;
     case 'rebrate-save': {
@@ -2049,9 +2145,10 @@ document.addEventListener('click', e => {
       const item = ($('#rbItem').value || '').trim();
       const pub = ($('#rbPub').value || '').trim();
       const prom = ($('#rbProm').value || todayStr()).trim();
+      const account = ($('#rbAccount').value || XHS_ACCOUNTS[0]).trim();
       if (!amount || !item) { toast('请输入金额和物品名称', 'warn'); return; }
       S.xhs.rebates = S.xhs.rebates || [];
-      S.xhs.rebates.push({ id: uid(), dir: window.__rbDir ? window.__rbDir() : 'out', src: window.__rbSrc ? window.__rbSrc() : 'rebate', amount, item, pub, prom, done: false });
+      S.xhs.rebates.push({ id: uid(), dir: window.__rbDir ? window.__rbDir() : 'out', src: window.__rbSrc ? window.__rbSrc() : 'rebate', account, amount, item, pub, prom, done: false });
       save(); closeModal(); renderXhs(); toast('已添加待返款'); break;
     }
     case 'rebrate-toggle': {
@@ -2394,7 +2491,6 @@ function mergeImport(raw) {
   const src = Object.assign(def, raw);
   S.baby.poops = mergeArr(S.baby.poops, src.baby.poops);
   S.xhs.noteExpenses = mergeArr(S.xhs.noteExpenses, src.xhs.noteExpenses);
-  S.xhs.records = mergeArr(S.xhs.records, src.xhs.records);
   S.xhs.rebates = mergeArr(S.xhs.rebates, src.xhs.rebates);
   S.ledger = mergeArr(S.ledger, src.ledger);
   S.todos = mergeArr(S.todos, src.todos);
@@ -2402,14 +2498,32 @@ function mergeImport(raw) {
   if (Array.isArray(src.home && src.home.rest)) S.home.rest = mergeArr(S.home.rest, src.home.rest);
   /* 红薯日历笔记：仅当当前为空才用备份（当前已有则保留，不回退到备份的 0） */
   if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
-  /* 粉丝/笔记/赞藏汇总：若当前为空且备份 records 有数据，自动取最新一条补全 */
-  const b = S.xhs.base || {};
-  if (!b.followers && !b.notes && !b.zanCang && (S.xhs.records || []).length) {
-    const latest = S.xhs.records.slice().sort((a, c) => (c.date || '').localeCompare(a.date || ''))[0];
-    if (latest) S.xhs.base = { followers: latest.f || 0, notes: latest.n || 0, zanCang: latest.z || 0 };
-  } else if ((src.xhs.base && (src.xhs.base.followers || src.xhs.base.notes || src.xhs.base.zanCang)) && !b.followers && !b.notes && !b.zanCang) {
-    S.xhs.base = src.xhs.base;
+  /* 小红书粉丝/笔记/赞藏：按账号分别合并 */
+  migrateXhsAccounts();
+  if (!src.xhs.accounts) {
+    src.xhs.accounts = {};
+    XHS_ACCOUNTS.forEach((acct, i) => {
+      if (i === 0) src.xhs.accounts[acct] = { base: src.xhs.base || { followers: 0, notes: 0, zanCang: 0 }, records: src.xhs.records || [] };
+      else src.xhs.accounts[acct] = { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
+    });
   }
+  XHS_ACCOUNTS.forEach(acct => {
+    const cur = S.xhs.accounts[acct] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
+    const inc = src.xhs.accounts[acct] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
+    cur.records = mergeArr(cur.records || [], inc.records || []);
+    /* 基准：当前为空则继承备份 */
+    if (!(cur.base && (cur.base.followers || cur.base.notes || cur.base.zanCang)) && (inc.base && (inc.base.followers || inc.base.notes || inc.base.zanCang))) {
+      cur.base = { ...inc.base };
+    }
+    /* 基准仍为空但有记录，则取最新一条 */
+    if (!(cur.base && (cur.base.followers || cur.base.notes || cur.base.zanCang)) && (cur.records || []).length) {
+      const latest = cur.records.slice().sort((a, c) => (c.date || '').localeCompare(a.date || ''))[0];
+      if (latest) cur.base = { followers: latest.f || 0, notes: latest.n || 0, zanCang: latest.z || 0 };
+    }
+    S.xhs.accounts[acct] = cur;
+  });
+  S.xhs.base = S.xhs.accounts[XHS_ACCOUNTS[0]].base;
+  S.xhs.records = S.xhs.accounts[XHS_ACCOUNTS[0]].records;
 }
 function openImportPicker() {
   const inp = document.createElement('input');
