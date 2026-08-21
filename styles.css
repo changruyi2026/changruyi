@@ -787,3 +787,10 @@ input,textarea,select{font-family:inherit;color:inherit}
 .w7-desc{font-size:13px;color:var(--ink-soft);font-weight:600}
 .w7-temp{text-align:right;font-size:14px;font-weight:800;color:var(--ink)}
 
+/* ============ 首页：待出稿事项 ============ */
+.home-draft-card{margin-top:18px;border-left:4px solid var(--rose-deep)}
+.home-draft-list{margin-top:10px}
+.home-draft-note{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.home-draft-note:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.home-draft-date{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink-faint);white-space:nowrap}
+
