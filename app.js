@@ -1659,7 +1659,13 @@ function migrateXhsAccounts() {
 function xhsAccountData(account) { migrateXhsAccounts(); return S.xhs.accounts[account] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] }; }
 function xhsBaseVal(m, account) { const b = xhsAccountData(account).base || {}; return m === 'f' ? (b.followers || 0) : m === 'n' ? (b.notes || 0) : (b.zanCang || 0); }
 function xhsRecsWith(m, account) {
-  return (xhsAccountData(account).records || []).filter(r => r[m] != null).slice().sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+  /* 关键修复：必须按「数据实际日期(date)」降序排序，而不是创建时间(ts)。
+     否则先记 21 号、后补 14 号初始数据时，14 号会因 ts 较新被当成「当前数」并错误对比 21 号。 */
+  return (xhsAccountData(account).records || []).filter(r => r[m] != null).slice().sort((a, b) => {
+    const byDate = (b.date || '').localeCompare(a.date || '');
+    if (byDate !== 0) return byDate;
+    return (b.ts || '').localeCompare(a.ts || '');
+  });
 }
 function xhsCurrent(m, account) { const L = xhsRecsWith(m, account); return L.length ? L[0][m] : xhsBaseVal(m, account); }
 function xhsDelta(m, account) {
@@ -1854,10 +1860,12 @@ function xhsHistoryRows(account) {
   let rf = baseSnap.f, rn = baseSnap.n, rz = baseSnap.z;
   let prev = { f: baseSnap.f, n: baseSnap.n, z: baseSnap.z };
   const rows = [];
-  order.forEach(ds => {
+  order.forEach((ds, idx) => {
     const dayRecs = groups[ds].slice().sort((a, b) => (a.ts || '').localeCompare(b.ts || ''));
     dayRecs.forEach(r => { if (r.f != null) rf = r.f; if (r.n != null) rn = r.n; if (r.z != null) rz = r.z; });
-    rows.push({ date: ds, f: rf, n: rn, z: rz, df: rf - prev.f, dn: rn - prev.n, dz: rz - prev.z, recIds: dayRecs.map(r => r.id) });
+    /* 最早一条（初始数据）不显示涨幅：它与「起始基准」的差不是「增长」，只是建档起点 */
+    const isInitial = idx === 0;
+    rows.push({ date: ds, f: rf, n: rn, z: rz, df: isInitial ? null : rf - prev.f, dn: isInitial ? null : rn - prev.n, dz: isInitial ? null : rz - prev.z, isInitial, recIds: dayRecs.map(r => r.id) });
     prev = { f: rf, n: rn, z: rz };
   });
   return rows;
@@ -1870,6 +1878,13 @@ function histMetricCell(val, delta) {
   return `<div class="xhs-hist-metric">
     <div class="xhs-hist-val">${v}</div>
     <div class="xhs-hist-delta ${cls}">${d}</div>
+  </div>`;
+}
+function initialMetricCell(val) {
+  const v = (val == null ? '—' : val.toLocaleString());
+  return `<div class="xhs-hist-metric">
+    <div class="xhs-hist-val">${v}</div>
+    <div class="xhs-hist-delta flat">初始数据</div>
   </div>`;
 }
 function openXhsHistoryModal() {
@@ -1893,11 +1908,14 @@ function openXhsHistoryModal() {
       const dt = new Date(r.date + 'T00:00:00');
       const md = `${dt.getMonth() + 1}月${dt.getDate()}日`;
       const wk = ['日', '一', '二', '三', '四', '五', '六'][dt.getDay()];
+      const fCell = r.isInitial ? initialMetricCell(r.f) : histMetricCell(r.f, r.df);
+      const nCell = r.isInitial ? initialMetricCell(r.n) : histMetricCell(r.n, r.dn);
+      const zCell = r.isInitial ? initialMetricCell(r.z) : histMetricCell(r.z, r.dz);
       return `
         <div class="xhs-hist-date"><span class="d">${md}</span><span class="w">周${wk}</span></div>
-        ${histMetricCell(r.f, r.df)}
-        ${histMetricCell(r.n, r.dn)}
-        ${histMetricCell(r.z, r.dz)}
+        ${fCell}
+        ${zCell}
+        ${nCell}
         <div class="xhs-hist-act"><button class="icon-btn danger" data-action="xhs-hist-del" data-ids="${r.recIds.join(',')}" data-account="${esc(acct)}" title="删除该日记录">${icTrash()}</button></div>`;
     }).join('');
     body += `<div class="xhs-hist"><div class="xhs-hist-table">${head}${cells}</div></div></div>`;
