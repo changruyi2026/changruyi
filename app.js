@@ -275,7 +275,7 @@ function renderHome() {
             const acctLabel = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="hs-acct-tag">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
             const dateLabel = n.deadline ? `截止 ${n.deadline}` : (n.date ? `出稿 ${n.date}` : '');
             return `<div class="hs-note home-draft-note" data-action="hs-draft-goto" data-date="${esc(n.date || '')}">
-              <button class="home-draft-check" data-action="hs-draft-check" data-id="${esc(n.id || '')}" title="标记为已出稿" type="button">✓</button>
+              <button class="home-draft-check" data-action="hs-draft-check" data-id="${esc(n.id || '')}" title="标记状态" type="button">✓</button>
               <div class="home-draft-body">
                 <div class="hs-note-top">
                   <span class="hs-status ${st ? st.cls : ''}"><span class="hs-ico">${st ? st.icon : ''}</span>${esc(st ? st.label : n.status)}</span>
@@ -1892,13 +1892,28 @@ document.addEventListener('click', e => {
     }
     case 'hs-draft-check': {
       const id = el.dataset.id;
-      const noteEl = el.closest('.home-draft-note');
-      if (noteEl) noteEl.classList.add('done');
-      setTimeout(() => {
-        const note = (S.publish.notes || []).find(n => n.id === id);
-        if (note) { note.status = '已出稿'; save(); toast('已标记为已出稿', 'ok'); }
-        renderHome();
-      }, 280);
+      const note = (S.publish.notes || []).find(n => n.id === id);
+      if (!note) break;
+      openModal(`
+        <h3>📝 标记出稿状态</h3>
+        <p style="margin:-8px 0 14px;color:var(--ink-soft)">选择后将从今日待出稿列表移除</p>
+        <div class="hs-draft-status-options">
+          <button class="btn btn-status-review" data-action="hs-draft-set-status" data-id="${esc(id)}" data-status="审核中">审核中</button>
+          <button class="btn btn-status-published" data-action="hs-draft-set-status" data-id="${esc(id)}" data-status="已出稿">已出稿</button>
+        </div>`, 'modal-narrow');
+      break;
+    }
+    case 'hs-draft-set-status': {
+      const id = el.dataset.id;
+      const status = el.dataset.status;
+      const note = (S.publish.notes || []).find(n => n.id === id);
+      if (note && status) {
+        note.status = status;
+        save();
+        toast(`已标记为${status}`, 'ok');
+      }
+      closeModal();
+      renderHome();
       break;
     }
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
