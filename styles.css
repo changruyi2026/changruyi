@@ -790,7 +790,13 @@ input,textarea,select{font-family:inherit;color:inherit}
 /* ============ 首页：待出稿事项 ============ */
 .home-draft-card{margin-top:18px;border-left:4px solid var(--rose-deep)}
 .home-draft-list{margin-top:10px}
-.home-draft-note{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.home-draft-note{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,opacity .25s ease}
 .home-draft-note:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.home-draft-check{flex-shrink:0;width:22px;height:22px;border:2px solid var(--rose-deep);border-radius:6px;background:transparent;color:transparent;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;cursor:pointer;transition:all .15s ease;margin-top:2px;padding:0}
+.home-draft-check:hover{background:var(--rose-soft);color:var(--rose-deep)}
+.home-draft-check:active{transform:scale(.92)}
+.home-draft-body{flex:1;min-width:0}
+.home-draft-note.done .home-draft-check{color:var(--rose-deep);background:var(--rose-soft)}
+.home-draft-note.done .hs-note-content{text-decoration:line-through;color:var(--ink-faint)}
 .home-draft-date{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink-faint);white-space:nowrap}
 
