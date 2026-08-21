@@ -240,6 +240,18 @@ function homeDayItems(ds) {
   return items;
 }
 
+/* 首页：红薯日历中所有待出稿笔记（按截止日期近→远，无截止日期排最后） */
+function homeDraftNotes() {
+  const list = (S.publish.notes || []).filter(n => normStatus(n.status) === '待出稿');
+  list.sort((a, b) => {
+    const da = a.deadline || '9999-99-99';
+    const db = b.deadline || '9999-99-99';
+    if (da !== db) return da.localeCompare(db);
+    return (a.date || '').localeCompare(b.date || '');
+  });
+  return list;
+}
+
 function renderHome() {
   const now = new Date();
   const quote = QUOTES[dayOfYear() % QUOTES.length];
@@ -249,6 +261,31 @@ function renderHome() {
     ? `<div class="hs-alert-banner">
         <span class="hs-alert-ico">🔔</span>
         <div class="hs-alert-txt">请注意，您有${pending}条笔记今日需出稿！</div>
+      </div>`
+    : '';
+
+  const draftNotes = homeDraftNotes();
+  const draftCard = draftNotes.length
+    ? `<div class="card home-draft-card">
+        <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>📝 今日待出稿事项
+          <span class="cal-hint" style="margin-left:auto">${draftNotes.length} 条待处理</span>
+        </div>
+        <div class="hs-list home-draft-list">
+          ${draftNotes.map(n => {
+            const st = PUB_STATUS_MAP[normStatus(n.status)];
+            const acctLabel = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="hs-acct-tag">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
+            const dateLabel = n.deadline ? `截止 ${n.deadline}` : (n.date ? `出稿 ${n.date}` : '');
+            return `<div class="hs-note home-draft-note" data-action="hs-draft-goto" data-date="${esc(n.date || '')}">
+              <div class="hs-note-top">
+                <span class="hs-status ${st ? st.cls : ''}"><span class="hs-ico">${st ? st.icon : ''}</span>${esc(st ? st.label : n.status)}</span>
+                <span class="hs-type-tag">${esc(n.type)}</span>
+                ${acctLabel}
+                <span class="home-draft-date">${esc(dateLabel)}</span>
+              </div>
+              <div class="hs-note-content">${esc(n.item || '未命名')}</div>
+            </div>`;
+          }).join('')}
+        </div>
       </div>`
     : '';
 
@@ -268,8 +305,8 @@ function renderHome() {
         <div class="weather-body" id="weatherBody"><div class="weather-loading">天气加载中…</div></div>
       </div>
     </div>
-
-    `;
+    ${draftCard}
+  `;
   tickClock();
   fetchWeather();
   updateHomeBadge();
@@ -1846,6 +1883,11 @@ document.addEventListener('click', e => {
     case 'hs-cal-next': hongshuCal.m++; if (hongshuCal.m > 11) { hongshuCal.m = 0; hongshuCal.y++; } renderView('hongshu'); break;
     case 'hs-cal-today': hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() }; renderView('hongshu'); break;
     case 'hs-quick-add': openHongshuDayModal(todayStr()); break;
+    case 'hs-draft-goto': {
+      const dsg = el.dataset.date;
+      if (dsg) { hongshuCal = { y: parseInt(dsg.slice(0, 4)), m: parseInt(dsg.slice(5, 7)) - 1, sel: dsg }; renderView('hongshu'); }
+      break;
+    }
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
     case 'hs-note-save': {
       const ds = el.dataset.date;
