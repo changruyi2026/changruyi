@@ -282,6 +282,9 @@ function renderHongshu() {
         <span class="cal-hint" style="margin-left:auto">点日期记录当天出稿笔记</span>
       </div>
       ${renderHongshuCalendar()}
+      <div class="hs-actions">
+        <button class="btn btn-primary" data-action="hs-quick-add">＋ 记一笔出稿（含笔记名称 / 商单类型）</button>
+      </div>
       <div class="hs-legend">
         <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待出稿</span>
         <span class="hs-legend-item"><i class="hs-lg st-review"></i>审核中</span>
@@ -1842,6 +1845,7 @@ document.addEventListener('click', e => {
     case 'hs-cal-prev': hongshuCal.m--; if (hongshuCal.m < 0) { hongshuCal.m = 11; hongshuCal.y--; } renderView('hongshu'); break;
     case 'hs-cal-next': hongshuCal.m++; if (hongshuCal.m > 11) { hongshuCal.m = 0; hongshuCal.y++; } renderView('hongshu'); break;
     case 'hs-cal-today': hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() }; renderView('hongshu'); break;
+    case 'hs-quick-add': openHongshuDayModal(todayStr()); break;
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
     case 'hs-note-save': {
       const ds = el.dataset.date;
