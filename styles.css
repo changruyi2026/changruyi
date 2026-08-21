@@ -157,6 +157,12 @@ input,textarea,select{font-family:inherit;color:inherit}
 .btn-rose:hover{background:var(--rose-deep)}
 .btn-ghost{background:transparent;box-shadow:none;border:1px solid var(--line)}
 .btn-ghost:hover{background:rgba(255,255,255,.6)}
+.hs-draft-status-options{display:flex;gap:12px;margin-top:10px}
+.hs-draft-status-options .btn{flex:1;padding:12px;border-radius:14px;font-weight:600}
+.btn-status-review{background:#F6E6A6;color:#6B5210;border:1px solid #E8D48A}
+.btn-status-review:hover{background:#F2DD92}
+.btn-status-published{background:#C8EBD7;color:#14764A;border:1px solid #A8D9BB}
+.btn-status-published:hover{background:#B4E3C8}
 .btn-sm{padding:7px 13px;font-size:12.5px;border-radius:12px}
 .icon-btn{
   width:36px;height:36px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;
