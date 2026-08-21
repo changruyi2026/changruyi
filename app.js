@@ -147,138 +147,6 @@ function openModal(html, cls) {
 }
 function closeModal() { $('#modalRoot').classList.remove('show'); $('#modalRoot').innerHTML = ''; }
 
-/* ---------- APP 图标切换（预设 + 自定义上传） ---------- */
-const ICON_PRESETS = [
-  { key: '1', name: '芽芽粉' },
-  { key: '2', name: '常如意' },
-  { key: '3', name: '如如意' }
-];
-
-/* 说明：iPhone 在「添加到主屏幕」时只认服务器 index.html 里写死的 apple-touch-icon 真实文件，
-   不会读取本机 JS / Service Worker 提供的图标。因此"让主屏换图标"必须由助理在服务器端
-   提交图标文件并改写 index.html（不经过浏览器、不暴露任何令牌）。本机这里只负责记录选择，
-   并提示用户在聊天里把选择/图片发给我，由我完成服务器侧的提交。 */
-
-function getIconCfg() {
-  try { return JSON.parse(localStorage.getItem('app_icon') || '{"type":"default"}'); }
-  catch (e) { return { type: 'default' }; }
-}
-function applyAppIcon() {
-  const cfg = getIconCfg();
-  let touch, m192, m512;
-  if (cfg.type === 'preset' && cfg.key) {
-    touch = `preset-${cfg.key}-apple.png`;
-    m192 = `preset-${cfg.key}-192.png`;
-    m512 = `preset-${cfg.key}-512.png`;
-  } else if (cfg.type === 'custom') {
-    touch = 'app-custom-icon.png';
-    m192 = 'app-custom-icon.png';
-    m512 = 'app-custom-icon.png';
-  } else {
-    touch = 'apple-touch-icon.png';
-    m192 = 'icon-192.png';
-    m512 = 'icon-512.png';
-  }
-  let link = document.querySelector('link[rel="apple-touch-icon"]');
-  if (!link) { link = document.createElement('link'); link.rel = 'apple-touch-icon'; document.head.appendChild(link); }
-  link.href = touch;
-  /* 安卓用 manifest 图标：动态生成（仅替换图标，其余沿用默认） */
-  const manifest = {
-    name: '常如意的工作台', short_name: '常如意', description: '常如意个人工作台',
-    start_url: './', scope: './', display: 'standalone',
-    background_color: '#faf6f1', theme_color: '#e0a98a',
-    icons: [
-      { src: m192, sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: m512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-    ]
-  };
-  try {
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-    const url = URL.createObjectURL(blob);
-    const mlink = document.querySelector('link[rel="manifest"]');
-    if (mlink) mlink.href = url;
-  } catch (e) {}
-}
-function idbOpen() {
-  return new Promise((res, rej) => {
-    const r = indexedDB.open('changruyi', 1);
-    r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
-}
-async function idbSet(k, v) {
-  const db = await idbOpen();
-  return new Promise((res, rej) => {
-    const tx = db.transaction('kv', 'readwrite');
-    tx.objectStore('kv').put(v, k);
-    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
-  });
-}
-function openIconModal() {
-  const cfg = getIconCfg();
-  const grid = ICON_PRESETS.map(p => `
-    <button class="icon-opt ${cfg.type === 'preset' && cfg.key === p.key ? 'on' : ''}" data-action="icon-preset" data-key="${p.key}">
-      <img src="preset-${p.key}-apple.png" alt="${p.name}" />
-      <span>${p.name}</span>
-    </button>`).join('');
-  const html = `
-    <h3>🎨 更换 APP 图标</h3>
-    <p class="modal-tip">iPhone 限制：已添加到主屏的图标不会自动变，且只认服务器上的真实图标文件。<br>所以步骤是：<b>① 在这里选好图标（本机先记住）→ ② 在聊天里把选择/图片发给我，我帮你提交到服务器（约 1 分钟发布）→ ③ 你删掉主屏旧图标，重新「添加到主屏幕」一次</b>就会显示新图标（这是苹果规矩，任何 APP 都一样）。</p>
-    <div class="icon-grid">${grid}</div>
-    <div class="icon-upload">
-      <label class="btn btn-ghost" style="display:inline-block">上传我的图片
-        <input type="file" id="iconFile" accept="image/*" hidden />
-      </label>
-      <span style="font-size:12px;color:var(--ink-faint);margin-left:8px">建议正方形图片</span>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" data-action="icon-reset">恢复默认</button>
-      <button class="btn btn-primary" data-action="close-modal">完成</button>
-    </div>`;
-  openModal(html, 'icon');
-  const file = $('#iconFile');
-  if (file) file.addEventListener('change', e => {
-    if (e.target.files && e.target.files[0]) handleIconUpload(e.target.files[0]);
-  });
-}
-function handleIconUpload(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    const img = new Image();
-    img.onload = () => {
-      const size = 512;
-      const c = document.createElement('canvas'); c.width = size; c.height = size;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
-      const scale = Math.max(size / img.width, size / img.height);
-      const w = img.width * scale, h = img.height * scale;
-      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-      const dataUrl = c.toDataURL('image/png');
-      idbSet('appIconCustom', { dataUrl }).then(() => {
-        localStorage.setItem('app_icon', JSON.stringify({ type: 'custom' }));
-        applyAppIcon();
-        openIconModal();
-        toast('图片已在本机保存。要让 iPhone 主屏换成此图，请在聊天里把这张图发给我，我帮你提交到服务器', 'warn');
-      });
-    };
-    img.src = reader.result;
-  };
-  reader.readAsDataURL(file);
-}
-function selectPreset(key) {
-  localStorage.setItem('app_icon', JSON.stringify({ type: 'preset', key }));
-  applyAppIcon();
-  openIconModal();
-  toast('本机已记录。要让 iPhone 主屏也换这个图标，请在聊天里发我「换成' + ICON_PRESETS.find(p => p.key === key).name + '」，我帮你提交到服务器', 'warn');
-}
-function resetIcon() {
-  localStorage.setItem('app_icon', JSON.stringify({ type: 'default' }));
-  applyAppIcon();
-  openIconModal();
-  toast('本机已恢复默认。要让 iPhone 主屏也恢复，请在聊天里发我「恢复默认图标」', 'warn');
-}
-
 /* ---------- 图片压缩 ---------- */
 function compressImage(file, cb) {
   const fr = new FileReader();
@@ -302,8 +170,8 @@ function compressImage(file, cb) {
 const TITLES = {
   home: ['首页', '今天也要闪闪发光呀'],
   ledger: ['记账', '每一笔，都是生活的痕迹'],
-  xhs: ['小红书', '发芽芽的日常 · 常如意i'],
-  baby: ['芽芽', '发芽芽的日常 · 拉屎打卡 💩']
+  xhs: ['红薯概况', '发芽芽的日常 · 常如意i'],
+  baby: ['女鹅记录', '女鹅的成长日记 · 拉屎打卡 💩']
 };
 let currentView = 'home';
 
@@ -322,6 +190,7 @@ function renderView(v) {
   else if (v === 'ledger') renderLedger();
   else if (v === 'xhs') renderXhs();
   else if (v === 'baby') renderBaby();
+  else if (v === 'hongshu') renderHongshu();
 }
 
 /* ===================== 0. 首页 ===================== */
@@ -329,7 +198,7 @@ const QUOTES = [
   '慢慢来，比较快。', '你种下的每颗小芽，都会开花。', '今天的努力，是明天的礼物。',
   '带娃很累，但爱很甜。', '把日子过成喜欢的样子。', '认真生活的人，会被生活偏爱。',
   '一点点变好，就是最好。', '温柔而坚定，是妈妈的力量。', '今天也要给自己一个拥抱。',
-  '发芽芽的日常，平凡也闪亮。', '先照顾好自己，才能照顾好芽芽。', '热爱可抵岁月漫长。'
+  '发芽芽的日常，平凡也闪亮。', '先照顾好自己，才能照顾好女鹅。', '热爱可抵岁月漫长。'
 ];
 
 /* 解析纪念日对应的公历日期（农历按当年/次年换算，每年自动跟着走） */
@@ -400,29 +269,25 @@ function renderHome() {
       </div>
     </div>
 
-      <div class="card" style="margin-top:20px">
-        <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🍠 红薯日历 · 出稿笔记
-          <span class="cal-hint" style="margin-left:auto">点日期记录当天出稿笔记</span>
-        </div>
-        ${renderHongshuCalendar()}
-        <div class="hs-legend">
-          <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待出稿</span>
-          <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
-          <span class="hs-legend-item"><i class="hs-lg st-review"></i>审核中</span>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:20px">
-        <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🎨 个性化
-          <button class="btn btn-sm btn-primary" style="margin-left:auto" data-action="open-icon-modal">更换图标</button>
-        </div>
-        <div style="font-size:12.5px;color:var(--ink-soft)">换 APP 图标：内置几套预设，也能上传自己的图片。iPhone 换完需删掉主屏旧图标、重新添加到主屏幕一次才生效。</div>
-      </div>
-
     `;
   tickClock();
   fetchWeather();
   updateHomeBadge();
+}
+
+function renderHongshu() {
+  $('#view-hongshu').innerHTML = `
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🍠 红薯日历
+        <span class="cal-hint" style="margin-left:auto">点日期记录当天出稿笔记</span>
+      </div>
+      ${renderHongshuCalendar()}
+      <div class="hs-legend">
+        <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待出稿</span>
+        <span class="hs-legend-item"><i class="hs-lg st-review"></i>审核中</span>
+        <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
+      </div>
+    </div>`;
 }
 
 /* 首页：小红书运营概览模块（首页下方第二个模块） */
@@ -558,7 +423,7 @@ function renderBaby() {
 
   $('#view-baby').innerHTML = `
     <div class="card">
-      <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 芽芽记录
+      <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 女鹅记录
         <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
           <span class="cal-hint">点日期记录当天拉屎 / 用药</span>
           <button class="icon-btn btn-sm" data-action="baby-cal-prev">${icPrev()}</button>
@@ -699,7 +564,7 @@ function renderHongshuCalendar() {
     </div>`;
   }
   const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
-  return `<div class="cal-head">${y}年 ${m + 1}月 · 红薯日历</div>
+  return `<div class="cal-head">${y}年 ${m + 1}月</div>
     <div class="cal-nav">
       <button class="icon-btn btn-sm" data-action="hs-cal-prev-year" title="上一年">«</button>
       <button class="icon-btn btn-sm" data-action="hs-cal-prev" title="上个月">${icPrev()}</button>
@@ -1595,10 +1460,9 @@ function renderXhs() {
     <div class="card">
       <div class="card-title"><span class="dot" style="background:var(--clay)"></span>数据记录历史
         <button class="btn btn-sm btn-ghost" data-action="xhs-open-history">📊 查看统计</button>
-        <button class="btn btn-sm btn-ghost" data-action="xhs-open-base">⚙️ 设置起始基准</button>
         <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="xhs-reset" title="清掉所有记录与基准数，从头开始">🧹 重置统计</button>
       </div>
-      <div style="color:var(--ink-soft);font-size:13px">点「查看统计」可按日期查看每条数据的累计值，以及<span style="color:#D6453D;font-weight:700">每日增长</span>（涨红跌绿）。顶部数字 = <b>起始基准</b> + 你后来记录的变动。若看到不对的旧数字（如遗留的 15），点「设置起始基准」改成正确值，或「重置统计」从零开始。</div>
+      <div style="color:var(--ink-soft);font-size:13px">点「查看统计」可按日期查看每条数据的累计值，以及<span style="color:#D6453D;font-weight:700">每日增长</span>（涨红跌绿）。顶部数字会随你记录的变动自动更新。</div>
     </div>`;
 
   $('#view-xhs').innerHTML = `
@@ -1727,31 +1591,6 @@ function openXhsHistoryModal() {
   openModal(`<h3>📊 数据增长统计</h3>${body}`, 'modal-wide');
 }
 
-/* 小红书：设置起始基准（起始数字，顶部显示 = 基准 + 后续记录变动） */
-function openXhsBaseModal() {
-  migrateXhsAccounts();
-  const rows = XHS_ACCOUNTS.map(acct => {
-    const b = S.xhs.accounts[acct].base || { followers: 0, notes: 0, zanCang: 0 };
-    const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
-    return `
-      <div class="xhs-base-row" style="background:${theme.bg};border:1px solid ${theme.soft}33;border-radius:12px;padding:12px;margin-bottom:12px">
-        <div style="font-weight:800;color:${theme.soft};margin-bottom:8px"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)}</div>
-        <div class="field"><label>起始粉丝量</label><input class="input b-followers" data-account="${acct}" type="number" min="0" value="${b.followers || 0}" /></div>
-        <div class="field"><label>起始笔记数量</label><input class="input b-notes" data-account="${acct}" type="number" min="0" value="${b.notes || 0}" /></div>
-        <div class="field"><label>起始赞藏数量</label><input class="input b-zan" data-account="${acct}" type="number" min="0" value="${b.zanCang || 0}" /></div>
-      </div>`;
-  }).join('');
-  openModal(`
-    <h3>⚙️ 设置起始基准</h3>
-    <p class="modal-tip">这是你「开始记录之前」的起始数字。顶部显示的粉丝/笔记/赞藏 = 起始基准 + 你后来记录的变动。<br>
-    如果看到不对的旧数字（如遗留的 15），在这里改成正确的起始值即可；想从零开始就把三项都填 0。</p>
-    ${rows}
-    <div class="modal-actions">
-      <button class="btn btn-ghost" data-action="close-modal">取消</button>
-      <button class="btn btn-primary" data-action="xhs-save-base">保存基准</button>
-    </div>`);
-}
-
 /* ===================== 事件委托 ===================== */
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action]');
@@ -1760,11 +1599,6 @@ document.addEventListener('click', e => {
 
   switch (a) {
     case 'close-modal': closeModal(); renderView(currentView); break;
-
-    /* APP 图标切换 */
-    case 'open-icon-modal': openIconModal(); break;
-    case 'icon-preset': selectPreset(el.dataset.key); break;
-    case 'icon-reset': resetIcon(); break;
 
     /* 导航 */
     case 'nav': break;
@@ -1782,7 +1616,7 @@ document.addEventListener('click', e => {
       const type = ($('#bpType').value || BABY_TYPES[0]).trim();
       const note = ($('#bpNote').value || '').trim();
       S.baby.poops.push({ id: uid(), date: ds, time, type, note });
-      save(); openBabyDayModal(ds); toast('已记录芽芽拉屎 💩'); break;
+      save(); openBabyDayModal(ds); toast('已记录女鹅拉屎 💩'); break;
     }
     case 'baby-med-save': {
       const ds = el.dataset.date;
@@ -1790,7 +1624,7 @@ document.addEventListener('click', e => {
       const medMg = parseFloat($('#bpMedMg').value || '0') || 0;
       const note = ($('#bpMedNote').value || '').trim();
       S.baby.meds.push({ id: uid(), date: ds, time, medMg, note });
-      save(); openBabyDayModal(ds); toast('已记录芽芽用药 💊'); break;
+      save(); openBabyDayModal(ds); toast('已记录女鹅用药 💊'); break;
     }
     case 'baby-del-poop': {
       const rec = (S.baby.poops || []).find(p => p.id === id);
@@ -1848,27 +1682,6 @@ document.addEventListener('click', e => {
     case 'goto-xhs': showView('xhs'); break;
     case 'xhs-add': openXhsAddModal(); break;
     case 'xhs-open-history': openXhsHistoryModal(); break;
-    case 'xhs-open-base': openXhsBaseModal(); break;
-    case 'xhs-save-base': {
-      migrateXhsAccounts();
-      $$('.b-followers').forEach(inp => {
-        const acct = inp.dataset.account;
-        S.xhs.accounts[acct].base = S.xhs.accounts[acct].base || {};
-        S.xhs.accounts[acct].base.followers = Math.max(0, parseInt(inp.value || '0', 10) || 0);
-      });
-      $$('.b-notes').forEach(inp => {
-        const acct = inp.dataset.account;
-        S.xhs.accounts[acct].base = S.xhs.accounts[acct].base || {};
-        S.xhs.accounts[acct].base.notes = Math.max(0, parseInt(inp.value || '0', 10) || 0);
-      });
-      $$('.b-zan').forEach(inp => {
-        const acct = inp.dataset.account;
-        S.xhs.accounts[acct].base = S.xhs.accounts[acct].base || {};
-        S.xhs.accounts[acct].base.zanCang = Math.max(0, parseInt(inp.value || '0', 10) || 0);
-      });
-      S.xhs.base = S.xhs.accounts[XHS_ACCOUNTS[0]].base;
-      save(); closeModal(); renderXhs(); toast('已更新起始基准'); break;
-    }
     case 'xhs-reset': {
       if (window.confirm('确定要重置小红书统计吗？\n\n会清空两个账号的「基准数」和所有已记录的数据（粉丝/笔记/赞藏），之后你需要重新用「记录当前数据」填入真实数字。\n\n此操作无法撤销。')) {
         migrateXhsAccounts();
@@ -2024,11 +1837,11 @@ document.addEventListener('click', e => {
     }
 
     /* 红薯日历（出稿笔记 · 万年历含农历） */
-    case 'hs-cal-prev-year': hongshuCal.y--; renderHome(); break;
-    case 'hs-cal-next-year': hongshuCal.y++; renderHome(); break;
-    case 'hs-cal-prev': hongshuCal.m--; if (hongshuCal.m < 0) { hongshuCal.m = 11; hongshuCal.y--; } renderHome(); break;
-    case 'hs-cal-next': hongshuCal.m++; if (hongshuCal.m > 11) { hongshuCal.m = 0; hongshuCal.y++; } renderHome(); break;
-    case 'hs-cal-today': hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() }; renderHome(); break;
+    case 'hs-cal-prev-year': hongshuCal.y--; renderView('hongshu'); break;
+    case 'hs-cal-next-year': hongshuCal.y++; renderView('hongshu'); break;
+    case 'hs-cal-prev': hongshuCal.m--; if (hongshuCal.m < 0) { hongshuCal.m = 11; hongshuCal.y--; } renderView('hongshu'); break;
+    case 'hs-cal-next': hongshuCal.m++; if (hongshuCal.m > 11) { hongshuCal.m = 0; hongshuCal.y++; } renderView('hongshu'); break;
+    case 'hs-cal-today': hongshuCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() }; renderView('hongshu'); break;
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
     case 'hs-note-save': {
       const ds = el.dataset.date;
@@ -2059,7 +1872,7 @@ document.addEventListener('click', e => {
         S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount });
         toast('已保存出稿笔记 🍠');
       }
-      save(); closeModal(); renderHome(); break;
+      save(); closeModal(); renderView('hongshu'); break;
     }
     case 'hs-note-edit': {
       const n = (S.publish.notes || []).find(x => x.id === id);
@@ -2098,7 +1911,7 @@ document.addEventListener('click', e => {
     case 'hs-note-del': {
       const n = (S.publish.notes || []).find(x => x.id === id);
       S.publish.notes = (S.publish.notes || []).filter(x => x.id !== id);
-      save(); renderHome(); if (n) openHongshuDayModal(n.date); toast('已删除'); break;
+      save(); renderView('hongshu'); if (n) openHongshuDayModal(n.date); toast('已删除'); break;
     }
   }
 });
@@ -2437,6 +2250,5 @@ $('#topDate').textContent = fmtDateCN(todayStr());
 /* 点击顶部同步状态可手动重试（提前绑定，避免首页渲染异常时丢失点击能力） */
 $('#syncPill').addEventListener('click', () => { retrySync(); });
 try { showView('home'); } catch (e) { console.error('首页渲染异常：', e); }
-applyAppIcon();
 initSync();
 registerSW();
