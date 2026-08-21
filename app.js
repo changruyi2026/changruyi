@@ -54,7 +54,7 @@ function defaultState() {
       noteExpenses: [],
       rebates: []
     },
-    baby: { poops: [] },
+    baby: { poops: [], meds: [] },
     publish: { notes: [] },
     backups: []
   };
@@ -446,6 +446,25 @@ const BABY_TYPES = ['正常（金黄软糊）', '偏稀（水样）', '偏干（
 function babyDayPoops(ds) {
   return (S.baby.poops || []).filter(p => p.date === ds).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 }
+function babyDayMeds(ds) {
+  return (S.baby.meds || []).filter(p => p.date === ds).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+}
+/* 旧版：用药信息挂在拉屎记录上（med / medMg 字段）。
+   新版拆成独立的 meds 数组，这里把旧数据拆开迁移，保证历史不丢、且幂等（只跑一次）。 */
+function migrateBabyState() {
+  if (!S.baby) S.baby = { poops: [], meds: [] };
+  if (!S.baby.meds) S.baby.meds = [];
+  const poops = S.baby.poops || [];
+  const old = poops.filter(p => p && 'med' in p);
+  if (!old.length) return;
+  old.forEach(p => {
+    if (p.med && (parseFloat(p.medMg) || 0) > 0) {
+      S.baby.meds.push({ id: uid(), date: p.date, time: p.time || '00:00', medMg: parseFloat(p.medMg) || 0, note: p.note || '' });
+    }
+    delete p.med; delete p.medMg;
+  });
+  save();
+}
 
 function renderBabyCalendar() {
   const { y, m } = babyCal;
@@ -456,12 +475,12 @@ function renderBabyCalendar() {
   for (let i = 0; i < startDow; i++) cal += '<div class="cal-day out"></div>';
   for (let d = 1; d <= daysIn; d++) {
     const ds = `${y}-${pad(m + 1)}-${pad(d)}`;
-    const recs = (S.baby.poops || []).filter(p => p.date === ds);
-    const cnt = recs.length;
-    const hasMed = recs.some(r => r.med);
-    const medMg = hasMed ? recs.filter(r => r.med).reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0) : 0;
+    const ps = (S.baby.poops || []).filter(p => p.date === ds);
+    const ms = (S.baby.meds || []).filter(p => p.date === ds);
+    const cnt = ps.length;
+    const medMg = ms.reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0);
     const mark = cnt ? `<span class="poop-badge">💩${cnt > 1 ? cnt : ''}</span>` : '';
-    const medMark = hasMed ? `<span class="med-badge">💊${medMg > 0 ? medMg + 'mg' : ''}</span>` : '';
+    const medMark = ms.length ? `<span class="med-badge">💊${medMg > 0 ? medMg + 'mg' : ''}</span>` : '';
     cal += `<div class="cal-day ${cnt ? 'poop' : ''} ${ds === todayStr() ? 'today' : ''}" data-action="baby-pick" data-date="${ds}">
       <div class="d">${d}</div>${mark}${medMark}</div>`;
   }
@@ -470,68 +489,92 @@ function renderBabyCalendar() {
 }
 
 function openBabyDayModal(ds) {
-  const recs = babyDayPoops(ds);
+  const poops = babyDayPoops(ds);
+  const meds = babyDayMeds(ds);
   const dt = new Date(ds + 'T00:00:00');
   const ld = lunarStr(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
   const now = new Date();
   const curTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const typeOpts = BABY_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
-  const medInfo = r => (r.med ? `💊 ${r.medMg || 0}mg` : '');
-  const list = recs.length ? `<div class="bp-list">` + recs.map(r => `
+  const poopList = poops.length ? `<div class="bp-list">` + poops.map(r => `
     <div class="bp-item">
       <span class="bp-time">${esc(r.time || '')}</span>
       <span class="bp-type">${esc(r.type || '')}</span>
-      <span class="bp-med">${medInfo(r)}</span>
       <span class="bp-note">${esc(r.note || '')}</span>
-      <button class="icon-btn danger" data-action="baby-del" data-id="${r.id}" title="删除这条">${icTrash()}</button>
-    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录，记一笔吧 💩</div>';
+      <button class="icon-btn danger" data-action="baby-del-poop" data-id="${r.id}" title="删除这条">${icTrash()}</button>
+    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录</div>';
+  const medList = meds.length ? `<div class="bp-list">` + meds.map(r => `
+    <div class="bp-item">
+      <span class="bp-time">${esc(r.time || '')}</span>
+      <span class="bp-med">💊 ${r.medMg || 0}mg</span>
+      <span class="bp-note">${esc(r.note || '')}</span>
+      <button class="icon-btn danger" data-action="baby-del-med" data-id="${r.id}" title="删除这条">${icTrash()}</button>
+    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有用药记录</div>';
   const html = `
-    <h3>👶 ${fmtDateCN(ds)} · ${ld} · 拉屎 ${recs.length} 次</h3>
-    <div class="bp-add">
-      <input class="input" type="time" id="bpTime" value="${curTime}" style="width:108px" />
-      <select class="input" id="bpType" style="flex:1;min-width:120px">${typeOpts}</select>
-      <input class="input" id="bpNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
+    <h3>👶 ${fmtDateCN(ds)} · ${ld}</h3>
+
+    <div class="bp-group">
+      <div class="bp-group-title">💩 拉屎记录</div>
+      <div class="bp-add">
+        <input class="input" type="time" id="bpTime" value="${curTime}" style="width:108px" />
+        <select class="input" id="bpType" style="flex:1;min-width:120px">${typeOpts}</select>
+        <input class="input" id="bpNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin:4px 0 10px" data-action="baby-poop-save" data-date="${ds}">记一笔拉屎</button>
+      ${poopList}
     </div>
-    <div class="bp-med-row">
-      <label class="bp-med-check"><input type="checkbox" id="bpMed" /> 是否用药</label>
-      <input class="input" id="bpMedMg" type="number" min="0" step="0.1" placeholder="用药克数/mg" style="flex:1;min-width:100px" />
-    </div>
-    <button class="btn btn-primary" style="width:100%;margin:4px 0 14px" data-action="baby-save" data-date="${ds}">记一笔</button>
-    ${list}`;
+
+    <div class="bp-group">
+      <div class="bp-group-title">💊 用药记录</div>
+      <div class="bp-med-row">
+        <input class="input" type="time" id="bpMedTime" value="${curTime}" style="width:108px" />
+        <input class="input" id="bpMedMg" type="number" min="0" step="0.1" placeholder="用药克数/mg" style="flex:1;min-width:100px" />
+        <input class="input" id="bpMedNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
+      </div>
+      <button class="btn" style="width:100%;background:#7A6BFF;color:#fff" data-action="baby-med-save" data-date="${ds}">记一笔用药</button>
+      ${medList}
+    </div>`;
   openModal(html, 'baby');
 }
 
 function renderBaby() {
-  const all = S.baby.poops || [];
+  const poops = S.baby.poops || [];
+  const meds = S.baby.meds || [];
   const monthKey = `${babyCal.y}-${pad(babyCal.m + 1)}`;
-  const curM = all.filter(p => (p.date || '').slice(0, 7) === monthKey).length;
-  const last = all.length ? all.slice().sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')))[0] : null;
+  const curM = poops.filter(p => (p.date || '').slice(0, 7) === monthKey).length;
+  const medM = meds.filter(p => (p.date || '').slice(0, 7) === monthKey).length;
+  const medMgM = meds.filter(p => (p.date || '').slice(0, 7) === monthKey).reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0);
+  const last = poops.length ? poops.slice().sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')))[0] : null;
   const summary = `<div class="rb-summary" style="margin:6px 0 2px">
     <span class="rb-sum">本月拉屎 <b>${curM}</b> 次</span>
-    <span class="rb-sum">累计 <b>${all.length}</b> 次</span>
+    <span class="rb-sum">本月用药 <b>${medM}</b> 次 · <b>${medMgM}</b>mg</span>
+    <span class="rb-sum">累计拉屎 <b>${poops.length}</b> 次</span>
     <span class="rb-sum">${last ? ('最近 ' + fmtDateCN(last.date) + ' ' + esc(last.time || '')) : '还没有记录'}</span>
   </div>`;
 
-  /* 数据历史：按天倒序，直观看哪天拉屎 */
+  /* 数据历史：按天倒序，拉屎与用药分开展示 */
   const byDay = {};
-  all.forEach(p => { (byDay[p.date] = byDay[p.date] || []).push(p); });
+  poops.forEach(p => { const o = byDay[p.date] = byDay[p.date] || { poops: [], meds: [] }; o.poops.push(p); });
+  meds.forEach(p => { const o = byDay[p.date] = byDay[p.date] || { poops: [], meds: [] }; o.meds.push(p); });
   const days = Object.keys(byDay).sort((a, b) => b.localeCompare(a));
   const hist = days.length ? days.map(ds => {
-    const recs = byDay[ds].slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    const o = byDay[ds];
+    const recs = o.poops.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    const medRecs = o.meds.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''));
     const d = new Date(ds + 'T00:00:00');
     const wk = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
-    const medTotal = recs.filter(r => r.med).reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0);
+    const medTotal = medRecs.reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0);
     return `<div class="hist-day">
-      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span> <span class="hist-cnt">${recs.length} 次</span>${medTotal > 0 ? ` <span class="hist-med">💊 ${medTotal}mg</span>` : ''}</div>
-      <div class="hist-items">${recs.map(r => `<span class="hist-tag">${esc(r.time || '')} · ${esc(r.type || '')}${r.med ? ` · 💊${r.medMg || 0}mg` : ''}</span>`).join('')}</div>
+      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span>${recs.length ? ` <span class="hist-cnt">💩 ${recs.length} 次</span>` : ''}${medTotal > 0 ? ` <span class="hist-med">💊 ${medTotal}mg</span>` : ''}</div>
+      <div class="hist-items">${recs.map(r => `<span class="hist-tag">${esc(r.time || '')} · ${esc(r.type || '')}</span>`).join('')}${medRecs.map(r => `<span class="hist-tag med">💊 ${esc(r.time || '')} · ${r.medMg || 0}mg</span>`).join('')}</div>
     </div>`;
-  }).join('') : '<div class="empty">还没有拉屎记录，点日历上的日期记一笔吧 💩</div>';
+  }).join('') : '<div class="empty">还没有记录，点日历上的日期记一笔吧 💩 / 💊</div>';
 
   $('#view-baby').innerHTML = `
     <div class="card">
-      <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 芽芽拉屎记录
+      <div class="card-title"><span class="dot" style="background:var(--rose)"></span>👶 芽芽记录
         <span style="margin-left:auto;display:flex;align-items:center;gap:10px">
-          <span class="cal-hint">点日期记录当天拉屎</span>
+          <span class="cal-hint">点日期记录当天拉屎 / 用药</span>
           <button class="icon-btn btn-sm" data-action="baby-cal-prev">${icPrev()}</button>
           <button class="icon-btn btn-sm" data-action="baby-cal-next">${icNext()}</button>
         </span>
@@ -539,7 +582,7 @@ function renderBaby() {
       ${summary}
       ${renderBabyCalendar()}
       <div class="hist-block">
-        <div class="hist-head">📅 拉屎记录历史</div>
+        <div class="hist-head">📅 记录历史</div>
         <div class="hist-scroll">${hist}</div>
       </div>
     </div>`;
@@ -1912,20 +1955,31 @@ document.addEventListener('click', e => {
     case 'baby-cal-prev': babyCal.m--; if (babyCal.m < 0) { babyCal.m = 11; babyCal.y--; } renderView('baby'); break;
     case 'baby-cal-next': babyCal.m++; if (babyCal.m > 11) { babyCal.m = 0; babyCal.y++; } renderView('baby'); break;
     case 'baby-pick': openBabyDayModal(el.dataset.date); break;
-    case 'baby-save': {
+    case 'baby-poop-save': {
       const ds = el.dataset.date;
       const time = ($('#bpTime').value || '').trim() || '00:00';
       const type = ($('#bpType').value || BABY_TYPES[0]).trim();
       const note = ($('#bpNote').value || '').trim();
-      const med = $('#bpMed') ? $('#bpMed').checked : false;
-      const medMg = med ? (parseFloat($('#bpMedMg').value || '0') || 0) : 0;
-      S.baby.poops.push({ id: uid(), date: ds, time, type, note, med, medMg });
+      S.baby.poops.push({ id: uid(), date: ds, time, type, note });
       save(); openBabyDayModal(ds); toast('已记录芽芽拉屎 💩'); break;
     }
-    case 'baby-del': {
+    case 'baby-med-save': {
+      const ds = el.dataset.date;
+      const time = ($('#bpMedTime').value || '').trim() || '00:00';
+      const medMg = parseFloat($('#bpMedMg').value || '0') || 0;
+      const note = ($('#bpMedNote').value || '').trim();
+      S.baby.meds.push({ id: uid(), date: ds, time, medMg, note });
+      save(); openBabyDayModal(ds); toast('已记录芽芽用药 💊'); break;
+    }
+    case 'baby-del-poop': {
       const rec = (S.baby.poops || []).find(p => p.id === id);
       S.baby.poops = S.baby.poops.filter(p => p.id !== id);
-      save(); if (rec) openBabyDayModal(rec.date); toast('已删除'); break;
+      save(); if (rec) openBabyDayModal(rec.date); toast('已删除拉屎记录'); break;
+    }
+    case 'baby-del-med': {
+      const rec = (S.baby.meds || []).find(p => p.id === id);
+      S.baby.meds = S.baby.meds.filter(p => p.id !== id);
+      save(); if (rec) openBabyDayModal(rec.date); toast('已删除用药记录'); break;
     }
     case 'toggle-rest': {
       const ds = el.dataset.date; const set = S.home.rest || (S.home.rest = []);
@@ -2421,6 +2475,7 @@ function isFreshDefault(s) {
     && (s.ledger || []).length === 0
     && Object.keys(s.diet.days || {}).length === 0
     && (s.baby && s.baby.poops || []).length === 0
+    && (s.baby && s.baby.meds || []).length === 0
     && (s.publish && s.publish.notes || []).length === 0
     && (s.home && s.home.rest || []).length === 0
     && (x.records || []).length === 0
@@ -2490,6 +2545,8 @@ function mergeImport(raw) {
   const def = defaultState();
   const src = Object.assign(def, raw);
   S.baby.poops = mergeArr(S.baby.poops, src.baby.poops);
+  if (src.baby && src.baby.meds) S.baby.meds = mergeArr(S.baby.meds || [], src.baby.meds);
+  migrateBabyState();
   S.xhs.noteExpenses = mergeArr(S.xhs.noteExpenses, src.xhs.noteExpenses);
   S.xhs.rebates = mergeArr(S.xhs.rebates, src.xhs.rebates);
   S.ledger = mergeArr(S.ledger, src.ledger);
@@ -2587,6 +2644,9 @@ function registerSW() {
     save();
   }
 })();
+
+/* 迁移：旧版拉屎记录里带用药（med/medMg 字段）→ 拆成独立的用药记录 */
+migrateBabyState();
 
 $('#topDate').textContent = fmtDateCN(todayStr());
 showView('home');
