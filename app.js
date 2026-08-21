@@ -50,7 +50,7 @@ function defaultState() {
     xhs: {
       base: { followers: 0, notes: 0, zanCang: 0 },
       records: [],
-      limit: { count: 0, names: '' },
+      limit: { '常如意i': { count: 0, names: '' }, '芽芽Mochi': { count: 0, names: '' } },
       noteExpenses: [],
       rebates: []
     },
@@ -1501,15 +1501,16 @@ function openXhsAddModal() {
     </div>`);
 }
 /* 小红书：限流笔记备注 */
-function openXhsLimitModal() {
-  const L = S.xhs.limit || { count: 0, names: '' };
+function openXhsLimitModal(account) {
+  const acct = account || XHS_ACCOUNTS[0];
+  const L = xhsLimit(acct);
   openModal(`
-    <h3>🚫 限流笔记备注</h3>
+    <h3>🚫 ${esc(acct)} · 限流笔记备注</h3>
     <div class="field"><label>限流笔记数量（篇）</label><input class="input" id="xLimitCount" type="number" min="0" value="${L.count || 0}" /></div>
     <div class="field"><label>限流笔记名称（用顿号/逗号分隔）</label><textarea class="textarea" id="xLimitNames" placeholder="如：周末去哪儿 Vol.3、芽芽辅食记">${esc(L.names || '')}</textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" data-action="close-modal">取消</button>
-      <button class="btn btn-primary" data-action="xhs-save-limit">保存</button>
+      <button class="btn btn-primary" data-action="xhs-save-limit" data-account="${esc(acct)}">保存</button>
     </div>`);
 }
 /* 小红书：待返款 / 蒲公英商单 */
@@ -1654,15 +1655,22 @@ function migrateXhsAccounts() {
   if (!S.xhs) S.xhs = defaultState().xhs;
   if (S.xhs.accounts) return;
   S.xhs.accounts = {};
+  /* 旧 limit 是全局 {count, names}，迁移给第一个账号 */
+  const oldLimit = (S.xhs.limit && typeof S.xhs.limit === 'object' && !Array.isArray(S.xhs.limit) && (S.xhs.limit.count != null || S.xhs.limit.names != null))
+    ? S.xhs.limit : { count: 0, names: '' };
+  S.xhs.limit = {};
   XHS_ACCOUNTS.forEach((acct, i) => {
     if (i === 0) {
       S.xhs.accounts[acct] = { base: S.xhs.base || { followers: 0, notes: 0, zanCang: 0 }, records: S.xhs.records || [] };
+      S.xhs.limit[acct] = oldLimit;
     } else {
       S.xhs.accounts[acct] = { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
+      S.xhs.limit[acct] = { count: 0, names: '' };
     }
   });
 }
 function xhsAccountData(account) { migrateXhsAccounts(); return S.xhs.accounts[account] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] }; }
+function xhsLimit(account) { migrateXhsAccounts(); return (S.xhs.limit && S.xhs.limit[account]) || { count: 0, names: '' }; }
 function xhsBaseVal(m, account) { const b = xhsAccountData(account).base || {}; return m === 'f' ? (b.followers || 0) : m === 'n' ? (b.notes || 0) : (b.zanCang || 0); }
 function xhsRecsWith(m, account) {
   /* 关键修复：必须按「数据实际日期(date)」降序排序，而不是创建时间(ts)。
@@ -1711,17 +1719,17 @@ function renderXhs() {
   migrateXhsAccounts();
 
   // 账号统计卡片（双账号：常如意i / 芽芽Mochi）
-  const L = S.xhs.limit || { count: 0, names: '' };
-  const accountBlocks = XHS_ACCOUNTS.map((acct, idx) => {
+  const accountBlocks = XHS_ACCOUNTS.map((acct) => {
     const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
     const cur = { f: xhsCurrent('f', acct), n: xhsCurrent('n', acct), z: xhsCurrent('z', acct) };
-    const limitMini = idx === 0 ? (L.count ? `<div class="limit-mini">🚫 ${L.count} 篇限流</div>` : '<div class="limit-mini ok">未限流</div>') : '';
+    const L = xhsLimit(acct);
+    const limitMini = L.count ? `<div class="limit-mini">🚫 ${L.count} 篇限流</div>` : '<div class="limit-mini ok">未限流</div>';
     return `
     <div class="xhs-account-block" style="background:${theme.bg};border:1px solid ${theme.soft}33">
       <div class="xhs-account-title" style="color:${theme.soft}"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)}</div>
       <div class="xhs-stat xhs-stat-compact">
         <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f', acct))}</div>
-        <div class="xhs-cell xhs-cell-limit ${L.count ? 'has-limit' : ''}" data-action="xhs-open-limit" title="点击管理限流笔记">
+        <div class="xhs-cell xhs-cell-limit ${L.count ? 'has-limit' : ''}" data-action="xhs-open-limit" data-account="${esc(acct)}" title="点击管理限流笔记">
           <div class="big">${cur.n.toLocaleString()}</div>
           <div class="lbl">笔记数量</div>
           ${deltaHTML(xhsDelta('n', acct))}
@@ -2153,15 +2161,17 @@ document.addEventListener('click', e => {
       save(); closeModal(); renderXhs(); toast('已记录（最新一条即为当前数）'); break;
     }
     case 'xhs-edit-limit':
-    case 'xhs-open-limit': openXhsLimitModal(); break;
+    case 'xhs-open-limit': openXhsLimitModal(el.dataset.account || XHS_ACCOUNTS[0]); break;
     case 'xhs-export-backup': exportBackup(); break;
     case 'xhs-import-backup': openImportPicker(); break;
     case 'xhs-cloud-backup': openCloudBackup(); break;
     case 'xhs-save-limit': {
+      const account = el.dataset.account || XHS_ACCOUNTS[0];
       const count = Math.max(0, parseInt($('#xLimitCount').value || '0', 10) || 0);
       const names = ($('#xLimitNames').value || '').trim();
-      S.xhs.limit = { count, names };
-      save(); closeModal(); renderXhs(); toast('已保存限流笔记备注'); break;
+      if (!S.xhs.limit) S.xhs.limit = {};
+      S.xhs.limit[account] = { count, names };
+      save(); closeModal(); renderXhs(); toast(`已保存 ${esc(account)} 的限流笔记备注`); break;
     }
     case 'xhs-exp-add': openXhsNoteExpModal(); break;
     case 'xhs-note-edit': openXhsNoteExpModal(id); break;
@@ -2555,7 +2565,7 @@ function isFreshDefault(s) {
     && (x.records || []).length === 0
     && (x.noteExpenses || []).length === 0
     && (x.rebates || []).length === 0
-    && (x.limit ? x.limit.count === 0 : true)
+    && (x.limit ? Object.values(x.limit).every(l => (l.count || 0) === 0 && !(l.names || '').trim()) : true)
     && (x.base ? (x.base.followers || 0) === 0 && (x.base.notes || 0) === 0 && (x.base.zanCang || 0) === 0 : true);
 }
 function pushSync() {
@@ -2636,8 +2646,29 @@ function mergeImport(raw) {
   if (Array.isArray(src.home && src.home.rest)) S.home.rest = mergeArr(S.home.rest, src.home.rest);
   /* 红薯日历笔记：仅当当前为空才用备份（当前已有则保留，不回退到备份的 0） */
   if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
-  /* 小红书粉丝/笔记/赞藏：按账号分别合并 */
+  /* 小红书限流笔记：按账号合并 */
   migrateXhsAccounts();
+  if (src.xhs.limit) {
+    const oldFmt = (src.xhs.limit.count != null || src.xhs.limit.names != null);
+    if (oldFmt) {
+      /* 旧备份是全局 limit，仅当当前第一个账号无数据时才继承 */
+      const first = XHS_ACCOUNTS[0];
+      const curL = S.xhs.limit[first];
+      if (!(curL.count || 0) && !(curL.names || '').trim()) {
+        S.xhs.limit[first] = { count: src.xhs.limit.count || 0, names: (src.xhs.limit.names || '').trim() };
+      }
+    } else {
+      XHS_ACCOUNTS.forEach(acct => {
+        const incL = src.xhs.limit[acct];
+        if (!incL) return;
+        const curL = S.xhs.limit[acct] || { count: 0, names: '' };
+        if (!(curL.count || 0) && !(curL.names || '').trim()) {
+          S.xhs.limit[acct] = { count: incL.count || 0, names: (incL.names || '').trim() };
+        }
+      });
+    }
+  }
+  /* 小红书粉丝/笔记/赞藏：按账号分别合并 */
   if (!src.xhs.accounts) {
     src.xhs.accounts = {};
     XHS_ACCOUNTS.forEach((acct, i) => {
