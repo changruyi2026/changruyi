@@ -646,7 +646,11 @@ input,textarea,select{font-family:inherit;color:inherit}
 .detail-total{display:flex;justify-content:flex-end;align-items:baseline;gap:10px;font-size:15px;color:var(--ink-soft);padding:12px 14px;border-radius:12px;background:rgba(224,169,138,.12);border:1px solid var(--line)}
 .detail-total b{font-family:"Nunito";font-size:24px;color:var(--rose-deep);font-weight:800}
 
-/* ============ 芽芽拉屎记录 ============ */
+/* ============ 芽芽拉屎 / 用药记录 ============ */
+.bp-group{margin:6px 0 4px;padding:10px;border-radius:12px;background:rgba(182,173,161,.08)}
+.bp-group-title{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:8px}
+.bp-group .bp-add{margin:0 0 8px}
+.bp-group .bp-med-row{margin:0 0 8px;background:rgba(122,107,255,.10)}
 .cal-day.poop{background:rgba(217,142,94,.16);box-shadow:inset 0 0 0 1px rgba(217,142,94,.32)}
 .cal-day.poop .d{color:var(--rose-deep)}
 .poop-badge{display:block;font-size:13px;line-height:1;margin-top:2px}
