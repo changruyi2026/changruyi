@@ -631,7 +631,9 @@ function homeDayDetail(ds) {
 }
 
 /* ===================== 红薯日历（出稿笔记 · 万年历含农历） ===================== */
-const PUB_TYPES = ['水下置换', '水下直发', '水下探店', '拍单置换', '蒲公英商单', '众测招募'];
+const PUB_TYPES = ['水下置换', '水下探店', '水下直发', '拍单置换', '蒲公英商单', '众测招募', '探店招募'];
+/* 需填写「订单金额」的类型（水下探店可填可不填，其余为必显） */
+const PUB_ORD_TYPES = ['水下直发', '水下探店', '探店招募', '众测招募'];
 const PUB_ACCOUNTS = ['芽芽Mochi', '常如意i'];
 const PUB_ACCOUNT_BADGE = { '芽芽Mochi': '芽', '常如意i': '常' };
 const PUB_STATUSES = [
@@ -697,7 +699,7 @@ function renderHongshuCalendar() {
     const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
     let coverAmt = '';
     if (top && top.type === '蒲公英商单' && top.net != null && top.net !== 0) coverAmt = money(top.net);
-    else if (top && top.type === '众测招募' && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
+    else if (top && PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
     const itemText = top && top.item ? esc(top.item) : '未命名';
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
     const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
@@ -739,7 +741,7 @@ function openHongshuDayModal(ds) {
         <span>返点${rp} ${money(n.rebate || 0)}</span>
         <span class="hs-net">到手 ${money(n.net || 0)}</span>
       </div>`;
-    } else if (n.type === '众测招募' && (n.orderAmount != null && n.orderAmount !== 0)) {
+    } else if (PUB_ORD_TYPES.includes(n.type) && (n.orderAmount != null && n.orderAmount !== 0)) {
       moneyBlock = `<div class="hs-money">
         <span class="hs-net">订单金额 ${money(n.orderAmount || 0)}</span>
       </div>`;
@@ -799,10 +801,10 @@ function openHongshuDayModal(ds) {
   const amounts = $('#hsAmounts');
   const toggleAmounts = () => {
     const t = typeSel.value;
-    amounts.style.display = (t === '蒲公英商单' || t === '众测招募') ? 'block' : 'none';
+    amounts.style.display = (t === '蒲公英商单' || PUB_ORD_TYPES.includes(t)) ? 'block' : 'none';
     const pg = $('#hsPgArea'), ord = $('#hsOrderArea');
     if (pg) pg.style.display = (t === '蒲公英商单') ? 'block' : 'none';
-    if (ord) ord.style.display = (t === '众测招募') ? 'block' : 'none';
+    if (ord) ord.style.display = (PUB_ORD_TYPES.includes(t)) ? 'block' : 'none';
   };
   typeSel.addEventListener('change', toggleAmounts);
   toggleAmounts();
@@ -2290,7 +2292,7 @@ document.addEventListener('click', e => {
         fee = Math.round(quote * 0.1 * 100) / 100;
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
-      } else if (type === '众测招募') {
+      } else {
         orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
       }
       if (editId) {
