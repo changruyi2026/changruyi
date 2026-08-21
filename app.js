@@ -700,11 +700,13 @@ function renderHongshuCalendar() {
     else if (top && top.type === '众测招募' && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
     const itemText = top && top.item ? esc(top.item) : '未命名';
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
-    const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span>${coverAmt ? `<span class="hs-cover-amt">${coverAmt}</span>` : ''}</div>` : '';
+    const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
+    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}</div>
       <div class="hs-lunar">${ld}</div>
       ${cover}
+      ${amtRow}
       ${badge}
     </div>`;
   }
