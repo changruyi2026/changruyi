@@ -244,13 +244,10 @@ function homeDayItems(ds) {
 
 /* 首页：红薯日历中所有待出稿笔记（按截止日期近→远，无截止日期排最后） */
 function homeDraftNotes() {
-  const list = (S.publish.notes || []).filter(n => normStatus(n.status) === '待出稿');
-  list.sort((a, b) => {
-    const da = a.deadline || '9999-99-99';
-    const db = b.deadline || '9999-99-99';
-    if (da !== db) return da.localeCompare(db);
-    return (a.date || '').localeCompare(b.date || '');
-  });
+  /* 首页「今日待出稿」只显示截止日期为今天且仍是待出稿的笔记 */
+  const ds = todayStr();
+  const list = (S.publish.notes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿');
+  list.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
   return list;
 }
 
@@ -278,13 +275,16 @@ function renderHome() {
             const acctLabel = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="hs-acct-tag">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
             const dateLabel = n.deadline ? `截止 ${n.deadline}` : (n.date ? `出稿 ${n.date}` : '');
             return `<div class="hs-note home-draft-note" data-action="hs-draft-goto" data-date="${esc(n.date || '')}">
-              <div class="hs-note-top">
-                <span class="hs-status ${st ? st.cls : ''}"><span class="hs-ico">${st ? st.icon : ''}</span>${esc(st ? st.label : n.status)}</span>
-                <span class="hs-type-tag">${esc(n.type)}</span>
-                ${acctLabel}
-                <span class="home-draft-date">${esc(dateLabel)}</span>
+              <button class="home-draft-check" data-action="hs-draft-check" data-id="${esc(n.id || '')}" title="标记为已出稿" type="button">✓</button>
+              <div class="home-draft-body">
+                <div class="hs-note-top">
+                  <span class="hs-status ${st ? st.cls : ''}"><span class="hs-ico">${st ? st.icon : ''}</span>${esc(st ? st.label : n.status)}</span>
+                  <span class="hs-type-tag">${esc(n.type)}</span>
+                  ${acctLabel}
+                  <span class="home-draft-date">${esc(dateLabel)}</span>
+                </div>
+                <div class="hs-note-content">${esc(n.item || '未命名')}</div>
               </div>
-              <div class="hs-note-content">${esc(n.item || '未命名')}</div>
             </div>`;
           }).join('')}
         </div>
@@ -1888,6 +1888,17 @@ document.addEventListener('click', e => {
     case 'hs-draft-goto': {
       const dsg = el.dataset.date;
       if (dsg) { hongshuCal = { y: parseInt(dsg.slice(0, 4)), m: parseInt(dsg.slice(5, 7)) - 1, sel: dsg }; renderView('hongshu'); }
+      break;
+    }
+    case 'hs-draft-check': {
+      const id = el.dataset.id;
+      const noteEl = el.closest('.home-draft-note');
+      if (noteEl) noteEl.classList.add('done');
+      setTimeout(() => {
+        const note = (S.publish.notes || []).find(n => n.id === id);
+        if (note) { note.status = '已出稿'; save(); toast('已标记为已出稿', 'ok'); }
+        renderHome();
+      }, 280);
       break;
     }
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
