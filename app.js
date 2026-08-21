@@ -171,15 +171,17 @@ const TITLES = {
   home: ['首页', '今天也要闪闪发光呀'],
   ledger: ['记账', '每一笔，都是生活的痕迹'],
   xhs: ['红薯概况', '发芽芽的日常 · 常如意i'],
-  baby: ['女鹅记录', '女鹅的成长日记 · 拉屎打卡 💩']
+  baby: ['女鹅记录', '女鹅的成长日记 · 拉屎打卡 💩'],
+  hongshu: ['红薯日历', '每天记录你的出稿笔记 🍠']
 };
 let currentView = 'home';
 
 function showView(v) {
   currentView = v;
+  const tt = TITLES[v] || ['', ''];
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-  $('#viewTitle').textContent = TITLES[v][0];
-  $('#viewSub').textContent = TITLES[v][1];
+  $('#viewTitle').textContent = tt[0];
+  $('#viewSub').textContent = tt[1];
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   renderView(v);
   $('.views').scrollTop = 0;
