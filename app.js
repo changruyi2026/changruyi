@@ -578,6 +578,14 @@ function renderHongshuCalendar() {
   const first = new Date(y, m, 1);
   const startDow = (first.getDay() + 6) % 7; /* 周一为每周第一天 */
   const daysIn = new Date(y, m + 1, 0).getDate();
+  /* 月度合计：到手金额 + 订单金额，所有状态都计入 */
+  const monthPrefix = `${y}-${pad(m + 1)}`;
+  const monthTotal = (S.publish.notes || []).reduce((sum, n) => {
+    if (!n.date || !n.date.startsWith(monthPrefix)) return sum;
+    if (n.type === '蒲公英商单') return sum + (n.net || 0);
+    if (PUB_ORD_TYPES.includes(n.type)) return sum + (n.orderAmount || 0);
+    return sum;
+  }, 0);
   let cal = '';
   for (let i = 0; i < startDow; i++) cal += '<div class="cal-day out"></div>';
   for (let d = 1; d <= daysIn; d++) {
@@ -618,7 +626,10 @@ function renderHongshuCalendar() {
     </div>`;
   }
   const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
-  return `<div class="cal-head">${y}年 ${m + 1}月</div>
+  return `<div class="cal-head">
+      <span>${y}年 ${m + 1}月</span>
+      <span class="cal-month-total" title="到手金额 + 订单金额合计（所有状态）">${money(monthTotal)}</span>
+    </div>
     <div class="cal-nav">
       <button class="icon-btn btn-sm" data-action="hs-cal-prev-year" title="上一年">«</button>
       <button class="icon-btn btn-sm" data-action="hs-cal-prev" title="上个月">${icPrev()}</button>
