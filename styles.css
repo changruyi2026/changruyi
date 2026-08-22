@@ -563,11 +563,13 @@ input,textarea,select{font-family:inherit;color:inherit}
   .hs-day::before{height:3px}
   .hs-day .d{font-size:9px}
   .hs-day .hs-day-amt{font-size:8px;padding:1px 2px;border-radius:3px}
-  .hs-day .hs-chips{display:none}
-  .hs-day .hs-mobile-chips{display:flex;flex-direction:column;align-items:flex-start;margin-top:1px;padding:0}
-  .hs-day .hs-mobile-chips .hs-mchip{gap:1px}
-  .hs-day .hs-mobile-chips .hs-mchip-dot{width:1.5px;height:1.5px}
-  .hs-day .hs-mobile-chips .hs-mchip-text{font-size:6.5px;letter-spacing:-.3px}
+  .hs-day .hs-chips{display:none !important}
+  .mchip-line{display:flex;align-items:center;gap:2px;margin-top:2px;padding:0 1px;width:100%;font-size:0}
+  .mchip-dot{width:3px;height:3px;border-radius:50%;flex-shrink:0}
+  .mchip-dot.st-draft{background:#CF4F48}
+  .mchip-dot.st-published{background:#3F9E73}
+  .mchip-dot.st-review{background:#C29E33}
+  .mchip-txt{font-size:7px;font-weight:700;color:var(--ink);letter-spacing:-.3px;line-height:1;white-space:nowrap;overflow:visible;text-overflow:clip}
   .hs-day .hs-cover,.hs-day .hs-amt-row{display:none}
   .hs-day .hs-badge{display:none}
   .hist-scroll{max-height:220px}
