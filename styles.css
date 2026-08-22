@@ -541,12 +541,28 @@ input,textarea,select{font-family:inherit;color:inherit}
   .nav-ico{width:22px;height:22px}
   .main{padding-bottom:0}
   .topbar{position:sticky; top:0; z-index:40; background:var(--bg); padding:16px 16px 10px}
-  .views{padding:6px 14px 96px}
+  .views{padding:6px 14px 130px}
   .grid.cols-2,.grid.cols-3{grid-template-columns:1fr}
   .hero{grid-column:auto !important}
   .card{padding:16px}
   .topbar-right{gap:8px}
   .today-pill{font-size:12px;padding:6px 10px}
+  .cal{gap:3px}
+  .cal-dow{font-size:10px;padding:2px 0}
+  .cal-day{border-radius:8px;padding:2px}
+  .cal-day .d{font-size:11px}
+  .hs-day{padding:2px 1px}
+  .hs-day .hs-lunar{display:none}
+  .hs-day .hs-cover{min-height:30px;padding:4px 2px 2px;margin-top:1px;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(174,48,41,.18)}
+  .hs-day .hs-cover .hs-cover-acct{position:static;display:inline-flex;width:13px;height:13px;font-size:9px;margin-bottom:1px}
+  .hs-day .hs-cover .hs-cover-text{font-size:10px;line-height:1.25}
+  .hs-day .hs-cover.len-1 .hs-cover-text,.hs-day .hs-cover.len-2 .hs-cover-text{font-size:12px}
+  .hs-day .hs-cover.len-3 .hs-cover-text{font-size:11px}
+  .hs-day .hs-cover.len-4 .hs-cover-text{font-size:10px}
+  .hs-day .hs-cover.len-5 .hs-cover-text,.hs-day .hs-cover.len-6 .hs-cover-text{font-size:9px}
+  .hs-day .hs-amt-row{margin-top:1px}
+  .hs-day .hs-amt{font-size:9px;padding:1px 4px;border-radius:4px}
+  .hs-day .hs-badge{display:none}
 }
 
 /* ===================== 云端同步状态标识 ===================== */
