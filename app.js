@@ -1549,16 +1549,17 @@ function renderXhs() {
       <div class="total-line">总支出金额 <b>${money(totalAll)}</b><span class="total-sub">共 ${expCount} 笔（含笔记支出与作业车）</span></div>
     </div>
 
-    <div class="card" style="margin-top:20px">
-      <div class="card-title"><span class="dot" style="background:var(--blue)"></span>数据备份
-        <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-sm btn-ghost" data-action="xhs-export-backup">⬇️ 导出备份</button>
-          <button class="btn btn-sm btn-ghost" data-action="xhs-import-backup">⬆️ 导入备份</button>
-          <button class="btn btn-sm btn-ghost" data-action="xhs-cloud-backup">🛡 恢复云端备份</button>
-        </span>
-      </div>
-      <div style="color:var(--ink-soft);font-size:13px">建议定期点「导出备份」把数据下载到电脑。换浏览器、清缓存或同步异常时，可用「导入备份」恢复。</div>
-    </div>`;
+      <div class="card" style="margin-top:20px">
+        <div class="card-title"><span class="dot" style="background:var(--blue)"></span>数据备份
+          <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-ghost" data-action="xhs-export-backup">⬇️ 导出备份</button>
+            <button class="btn btn-sm btn-ghost" data-action="xhs-import-backup">⬆️ 导入备份</button>
+            <button class="btn btn-sm btn-ghost" data-action="xhs-cloud-backup">🛡 本地快照</button>
+          </span>
+        </div>
+        <div style="color:var(--ink-soft);font-size:13px">建议定期点「导出备份」把数据下载到电脑。换浏览器、清缓存或同步异常时，可用「导入备份」恢复。</div>
+        <button class="btn btn-primary" style="width:100%;margin-top:12px" data-action="xhs-restore-cloud">🔄 从云端恢复数据（把服务器上的最新数据拉回本机）</button>
+      </div>`;
 }
 
 /* ===================== 小红书：数据增长统计（按日期） ===================== */
@@ -1768,6 +1769,13 @@ document.addEventListener('click', e => {
     case 'xhs-export-backup': exportBackup(); break;
     case 'xhs-import-backup': openImportPicker(); break;
     case 'xhs-cloud-backup': openCloudBackup(); break;
+    case 'xhs-restore-cloud': {
+      if (!sbClient) { initSync(); }
+      pendingForceRestore = true;
+      if (sbClient) { pendingForceRestore = false; pullSync(true); }
+      else { toast('正在连接云端…', 'ok'); }
+      break;
+    }
     case 'xhs-save-limit': {
       const account = el.dataset.account || XHS_ACCOUNTS[0];
       const count = Math.max(0, parseInt($('#xLimitCount').value || '0', 10) || 0);
@@ -2028,6 +2036,7 @@ function sproutSVG(sz) {
    4) Supabase 客户端优先使用本地缓存文件，避免 jsDelivr 在国内偶发被墙导致「未连接」。 */
 let sbClient = null, lastSaveTime = 0, syncTimer = null, pullAttempts = 0;
 let cloudHasData = null, cloudReady = false, cloudRecordCount = 0, pendingPush = false, lastSyncErr = '';
+let pendingForceRestore = false;
 const SUPABASE_CDNS = [
   'supabase.min.js',                               // 本地缓存（PWA 优先）
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
@@ -2076,6 +2085,7 @@ function connectSupabase() {
   setSync('syncing');
   pullAttempts = 0;
   pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取，避免弹窗打扰 */
+  if (pendingForceRestore) { pendingForceRestore = false; pullSync(true); } /* 手动「从云端恢复」强制拉取 */
 }
 function retrySync() {
   if (!sbClient) { initSync(); return; }
@@ -2083,7 +2093,7 @@ function retrySync() {
   pullAttempts = 0;
   pullSync();
 }
-async function pullSync() {
+async function pullSync(force) {
   if (!sbClient) return;
   try {
     pullAttempts++;
@@ -2096,11 +2106,14 @@ async function pullSync() {
       cloudRecordCount = totalRecords(remote);
       const localIsBlank = isFreshDefault(S);
       /* 关键防护：云端有真实数据且本地为空 → 静默采用云端恢复（换设备/清缓存后找回）；
-         本地有数据则本地优先，绝不反向覆盖（避免清掉录入）。 */
-      if (localIsBlank && !isFreshDefault(remote)) {
+         本地有数据则本地优先，绝不反向覆盖（避免清掉录入）。force=true 为手动「从云端恢复」。 */
+      if ((force || localIsBlank) && !isFreshDefault(remote)) {
         S = Object.assign(defaultState(), remote);
+        /* ★ 关键修复：把云端恢复的数据立刻写回手机本地存储，否则只是内存里、下次打开又空 */
+        try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { console.warn('restore persist failed', e); }
         renderView(currentView);
         setSync('online');
+        if (force) toast('已从云端恢复全部数据 🎉', 'ok');
       }
     } else if (data === null) {
       cloudHasData = false;
@@ -2115,7 +2128,7 @@ async function pullSync() {
     if (pullAttempts < 3) {
       const wait = pullAttempts * 2000;
       setSync('syncing', `重试(${pullAttempts})`);
-      setTimeout(pullSync, wait);
+      setTimeout(() => pullSync(force), wait);
       return;
     }
     cloudReady = true;
