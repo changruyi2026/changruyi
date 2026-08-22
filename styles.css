@@ -524,6 +524,10 @@ input,textarea,select{font-family:inherit;color:inherit}
   .views{padding:8px 18px 36px}
 }
 
+/* 默认（桌面端）隐藏手机端专属元素；手机端 @media 会覆盖 */
+.mchip-line{display:none}
+.hs-day .hs-day-amt{display:none}
+
 /* 手机：底部标签栏 + 全宽卡片（app 形态） */
 @media(max-width:600px){
   .app{display:block}
@@ -744,8 +748,6 @@ input,textarea,select{font-family:inherit;color:inherit}
 .hs-day.st-published .hs-day-amt{color:#14764A;background:rgba(255,255,255,.7)}
 .hs-day.st-review .hs-day-amt{color:#6B5210;background:rgba(255,255,255,.7)}
 .hs-day .hs-chips{display:none}
-.mchip-line{display:none}
-.hs-day .hs-day-amt{display:none}
 /* 桌面端大封面：账号徽标 + 物品名称 + 金额 */
 .hs-day .hs-cover{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:58px;background:#F7B2AB;border-radius:10px;padding:14px 3px 14px;margin-top:2px;text-align:center;box-shadow:inset 0 0 0 1.5px rgba(174,48,41,.25);overflow:hidden}
 .hs-day .hs-cover.no-item{font-size:13px;font-weight:600;color:#8A5A55;background:transparent;box-shadow:inset 0 0 0 1.5px rgba(174,48,41,.3);font-style:italic}
