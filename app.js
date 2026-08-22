@@ -602,7 +602,7 @@ function renderHongshuCalendar() {
       if (top.type === '蒲公英商单' && top.net != null && top.net !== 0) dayAmt = money(top.net);
       else if (PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) dayAmt = money(top.orderAmount);
     }
-    const mobileChip = top ? `<div class="hs-mobile-chips"><div class="hs-chip hs-mobile-chip"><i class="hs-chip-dot ${topSt ? topSt.cls : ''}"></i><span class="hs-chip-text">${esc((top.item || '未命名').slice(0, 2))}</span></div></div>` : '';
+    const mobileChip = top ? `<div class="hs-mobile-chips"><div class="hs-mchip"><i class="hs-mchip-dot ${topSt ? topSt.cls : ''}"></i><span class="hs-mchip-text">${esc((top.item || '未命名').slice(0, 2))}</span></div></div>` : '';
     const amtHtml = dayAmt ? `<span class="hs-day-amt" title="${esc(top.type === '蒲公英商单' ? '到手金额' : '订单金额')}">${esc(dayAmt)}</span>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}${amtHtml}</div>
