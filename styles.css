@@ -741,7 +741,7 @@ input,textarea,select{font-family:inherit;color:inherit}
 .hs-day.st-published .hs-day-amt{color:#14764A;background:rgba(255,255,255,.7)}
 .hs-day.st-review .hs-day-amt{color:#6B5210;background:rgba(255,255,255,.7)}
 .hs-day .hs-chips{display:flex;flex-direction:column;gap:3px;margin-top:2px;width:100%;padding:0 2px}
-.hs-day .hs-mobile-chips{display:none}
+.mchip-line{display:none}
 .hs-chip{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;line-height:1.25;color:var(--ink);background:rgba(255,255,255,.55);border-radius:6px;padding:3px 5px;overflow:hidden}
 .hs-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .hs-chip-dot.st-draft{background:#CF4F48}
@@ -749,13 +749,6 @@ input,textarea,select{font-family:inherit;color:inherit}
 .hs-chip-dot.st-review{background:#C29E33}
 .hs-chip-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
 .hs-chip-more{justify-content:center;color:var(--ink-faint);background:transparent;font-size:10px;padding:1px 5px}
-/* 手机端独立小条：避免被桌面端 hs-chip-text 的省略号覆盖 */
-.hs-mchip{display:flex;align-items:center;gap:2px;width:100%}
-.hs-mchip-dot{width:1.5px;height:1.5px;border-radius:50%;flex-shrink:0}
-.hs-mchip-dot.st-draft{background:#CF4F48}
-.hs-mchip-dot.st-published{background:#3F9E73}
-.hs-mchip-dot.st-review{background:#C29E33}
-.hs-mchip-text{font-size:6.5px;font-weight:700;color:var(--ink);letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:visible !important;text-overflow:clip !important}
 /* 旧封面样式保留兼容（弹窗/统计仍可能用到），但日历格子里已不用 */
 .hs-day .hs-cover,.hs-day .hs-amt-row{display:none}
 .hs-day .hs-badge{display:none}
