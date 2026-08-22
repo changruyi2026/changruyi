@@ -586,7 +586,7 @@ function renderHongshuCalendar() {
     const isToday = ds === todayStr();
     const stCls = notes.length ? primaryStatusCls(notes) : '';
     const ld = lunarDayShort(y, m + 1, d);
-    /* 日程条：最多显示 2 条笔记，每条 = 状态色点 + 名称；超出显示 +N */
+    /* 桌面端日程条：最多 2 条 */
     const dayNotes = notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9));
     const chips = dayNotes.slice(0, 2).map(n => {
       const st = PUB_STATUS_MAP[normStatus(n.status)];
@@ -594,10 +594,21 @@ function renderHongshuCalendar() {
     }).join('');
     const more = dayNotes.length > 2 ? `<div class="hs-chip hs-chip-more">+${dayNotes.length - 2}</div>` : '';
     const chipsHtml = notes.length ? `<div class="hs-chips">${chips}${more}</div>` : '';
+    /* 手机端简化：只显示一条，取物品前 2 个字；金额放在日期右上角 */
+    const top = dayNotes[0];
+    const topSt = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
+    let dayAmt = '';
+    if (top) {
+      if (top.type === '蒲公英商单' && top.net != null && top.net !== 0) dayAmt = money(top.net);
+      else if (PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) dayAmt = money(top.orderAmount);
+    }
+    const mobileChip = top ? `<div class="hs-mobile-chips"><div class="hs-chip hs-mobile-chip"><i class="hs-chip-dot ${topSt ? topSt.cls : ''}"></i><span class="hs-chip-text">${esc((top.item || '未命名').slice(0, 2))}</span></div></div>` : '';
+    const amtHtml = dayAmt ? `<span class="hs-day-amt" title="${esc(top.type === '蒲公英商单' ? '到手金额' : '订单金额')}">${esc(dayAmt)}</span>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
-      <div class="d">${d}</div>
+      <div class="d">${d}${amtHtml}</div>
       <div class="hs-lunar">${ld}</div>
       ${chipsHtml}
+      ${mobileChip}
     </div>`;
   }
   const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
