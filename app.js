@@ -602,7 +602,7 @@ function renderHongshuCalendar() {
       if (top.type === '蒲公英商单' && top.net != null && top.net !== 0) dayAmt = money(top.net);
       else if (PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) dayAmt = money(top.orderAmount);
     }
-    const mobileChip = top ? `<div class="hs-mobile-chips"><div class="hs-mchip"><i class="hs-mchip-dot ${topSt ? topSt.cls : ''}"></i><span class="hs-mchip-text">${esc((top.item || '未命名').slice(0, 2))}</span></div></div>` : '';
+    const mobileChip = top ? `<div class="mchip-line"><i class="mchip-dot ${topSt ? topSt.cls : ''}"></i><span class="mchip-txt">${esc((top.item || '未命名').slice(0, 2))}</span></div>` : '';
     const amtHtml = dayAmt ? `<span class="hs-day-amt" title="${esc(top.type === '蒲公英商单' ? '到手金额' : '订单金额')}">${esc(dayAmt)}</span>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}${amtHtml}</div>
@@ -2360,10 +2360,10 @@ function registerSW() {
 /* 迁移：旧版拉屎记录里带用药（med/medMg 字段）→ 拆成独立的用药记录 */
 migrateBabyState();
 
-/* 兜底：防止旧 CSS 缓存导致移动端红薯日历省略号不更新 */
+/* 兜底：防止旧 CSS 缓存导致移动端红薯日历仍显示桌面端省略号日程条 */
 (function injectMobileFix() {
   const style = document.createElement('style');
-  style.textContent = '.hs-mchip-text{white-space:nowrap !important;overflow:visible !important;text-overflow:clip !important;display:inline !important;}';
+  style.textContent = '@media(max-width:600px){.hs-day .hs-chips{display:none !important}.mchip-line{display:flex !important;align-items:center !important;gap:2px !important;font-size:0 !important}.mchip-dot{width:3px !important;height:3px !important;border-radius:50% !important;flex-shrink:0 !important}.mchip-txt{font-size:7px !important;font-weight:700 !important;color:#4A3F35 !important;letter-spacing:-.3px !important;line-height:1 !important;white-space:nowrap !important;overflow:visible !important;text-overflow:clip !important}}';
   document.head.appendChild(style);
 })();
 
