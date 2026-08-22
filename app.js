@@ -586,23 +586,18 @@ function renderHongshuCalendar() {
     const isToday = ds === todayStr();
     const stCls = notes.length ? primaryStatusCls(notes) : '';
     const ld = lunarDayShort(y, m + 1, d);
-    const top = notes.length ? notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9))[0] : null;
-    const st = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
-    const badge = st ? `<span class="hs-badge ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>` : '';
-    const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
-    let coverAmt = '';
-    if (top && top.type === '蒲公英商单' && top.net != null && top.net !== 0) coverAmt = money(top.net);
-    else if (top && PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
-    const itemText = top && top.item ? esc(top.item) : '未命名';
-    const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
-    const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
-    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
+    /* 日程条：最多显示 2 条笔记，每条 = 状态色点 + 名称；超出显示 +N */
+    const dayNotes = notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9));
+    const chips = dayNotes.slice(0, 2).map(n => {
+      const st = PUB_STATUS_MAP[normStatus(n.status)];
+      return `<div class="hs-chip" title="${esc(n.item || '未命名')}"><i class="hs-chip-dot ${st ? st.cls : ''}"></i><span class="hs-chip-text">${esc(n.item || '未命名')}</span></div>`;
+    }).join('');
+    const more = dayNotes.length > 2 ? `<div class="hs-chip hs-chip-more">+${dayNotes.length - 2}</div>` : '';
+    const chipsHtml = notes.length ? `<div class="hs-chips">${chips}${more}</div>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}</div>
       <div class="hs-lunar">${ld}</div>
-      ${cover}
-      ${amtRow}
-      ${badge}
+      ${chipsHtml}
     </div>`;
   }
   const dows = ['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="cal-dow">${w}</div>`).join('');
