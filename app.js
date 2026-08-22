@@ -2105,8 +2105,10 @@ async function pullSync(force) {
       cloudHasData = true;
       cloudRecordCount = totalRecords(remote);
       const localIsBlank = isFreshDefault(S);
-      /* 关键防护：云端有真实数据且本地为空 → 静默采用云端恢复（换设备/清缓存后找回）；
-         本地有数据则本地优先，绝不反向覆盖（避免清掉录入）。force=true 为手动「从云端恢复」。 */
+      /* 关键防护：
+         1) 本地完全空白 → 整份采用云端恢复（换设备/清缓存后找回）。
+         2) 本地有部分数据但某个模块缺失（如红薯日历 notes 被 iPhone 清掉）→ 智能合并，只补缺失模块，绝不覆盖本地已有内容。
+         3) force=true 为手动「从云端恢复」：整份替换。 */
       if ((force || localIsBlank) && !isFreshDefault(remote)) {
         S = Object.assign(defaultState(), remote);
         /* ★ 关键修复：把云端恢复的数据立刻写回手机本地存储，否则只是内存里、下次打开又空 */
@@ -2114,6 +2116,15 @@ async function pullSync(force) {
         renderView(currentView);
         setSync('online');
         if (force) toast('已从云端恢复全部数据 🎉', 'ok');
+      } else if (!isFreshDefault(remote)) {
+        const before = totalRecords(S);
+        mergeImport(remote); /* 智能合并：只补当前缺失的记录 */
+        if (totalRecords(S) > before) {
+          save(); /* 落盘并回写云端（此时本地数已≥云端，不会覆盖） */
+          renderView(currentView);
+          setSync('online');
+          toast('已自动补回缺失的云端数据 🎉', 'ok');
+        }
       }
     } else if (data === null) {
       cloudHasData = false;
