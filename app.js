@@ -2366,10 +2366,10 @@ function registerSW() {
 /* 迁移：旧版拉屎记录里带用药（med/medMg 字段）→ 拆成独立的用药记录 */
 migrateBabyState();
 
-/* 兜底：防止旧 CSS 缓存导致移动端红薯日历仍显示桌面端省略号日程条 */
+/* 兜底：防止旧 CSS 缓存导致移动端红薯日历仍显示桌面端大封面块 */
 (function injectMobileFix() {
   const style = document.createElement('style');
-  style.textContent = '@media(max-width:600px){.hs-day .hs-chips{display:none !important}.mchip-line{display:flex !important;align-items:center !important;gap:2px !important;font-size:0 !important}.mchip-dot{width:3px !important;height:3px !important;border-radius:50% !important;flex-shrink:0 !important}.mchip-txt{font-size:7px !important;font-weight:700 !important;color:#4A3F35 !important;letter-spacing:-.3px !important;line-height:1 !important;white-space:nowrap !important;overflow:visible !important;text-overflow:clip !important}}';
+  style.textContent = '@media(max-width:600px){.hs-day .hs-cover,.hs-day .hs-amt-row,.hs-day .hs-badge,.hs-day .hs-chips{display:none !important}.hs-day .hs-day-amt{display:inline-block !important}.mchip-line{display:flex !important;align-items:center !important;gap:2px !important;font-size:0 !important;width:100% !important}.mchip-dot{width:3px !important;height:3px !important;border-radius:50% !important;flex-shrink:0 !important}.mchip-txt{font-size:7px !important;font-weight:700 !important;color:#4A3F35 !important;letter-spacing:-.3px !important;line-height:1 !important;white-space:nowrap !important;overflow:visible !important;text-overflow:clip !important}}';
   document.head.appendChild(style);
 })();
 
