@@ -586,16 +586,20 @@ function renderHongshuCalendar() {
     const isToday = ds === todayStr();
     const stCls = notes.length ? primaryStatusCls(notes) : '';
     const ld = lunarDayShort(y, m + 1, d);
-    /* 桌面端日程条：最多 2 条 */
+    /* 桌面端：恢复大封面块（账号徽标 + 物品名称 + 金额） */
     const dayNotes = notes.slice().sort((a, b) => (PUB_STATUS_ORDER[a.status] ?? 9) - (PUB_STATUS_ORDER[b.status] ?? 9));
-    const chips = dayNotes.slice(0, 2).map(n => {
-      const st = PUB_STATUS_MAP[normStatus(n.status)];
-      return `<div class="hs-chip" title="${esc(n.item || '未命名')}"><i class="hs-chip-dot ${st ? st.cls : ''}"></i><span class="hs-chip-text">${esc(n.item || '未命名')}</span></div>`;
-    }).join('');
-    const more = dayNotes.length > 2 ? `<div class="hs-chip hs-chip-more">+${dayNotes.length - 2}</div>` : '';
-    const chipsHtml = notes.length ? `<div class="hs-chips">${chips}${more}</div>` : '';
-    /* 手机端简化：只显示一条，取物品前 2 个字；金额放在日期右上角 */
     const top = dayNotes[0];
+    const st = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
+    const badge = st ? `<span class="hs-badge ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>` : '';
+    const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
+    let coverAmt = '';
+    if (top && top.type === '蒲公英商单' && top.net != null && top.net !== 0) coverAmt = money(top.net);
+    else if (top && PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
+    const itemText = top && top.item ? esc(top.item) : '未命名';
+    const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
+    const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
+    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
+    /* 手机端简化：只显示一条，取物品前 2 个字；金额放在日期右上角 */
     const topSt = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
     let dayAmt = '';
     if (top) {
@@ -607,7 +611,9 @@ function renderHongshuCalendar() {
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}${amtHtml}</div>
       <div class="hs-lunar">${ld}</div>
-      ${chipsHtml}
+      ${cover}
+      ${amtRow}
+      ${badge}
       ${mobileChip}
     </div>`;
   }
