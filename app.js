@@ -2360,6 +2360,13 @@ function registerSW() {
 /* 迁移：旧版拉屎记录里带用药（med/medMg 字段）→ 拆成独立的用药记录 */
 migrateBabyState();
 
+/* 兜底：防止旧 CSS 缓存导致移动端红薯日历省略号不更新 */
+(function injectMobileFix() {
+  const style = document.createElement('style');
+  style.textContent = '.hs-mchip-text{white-space:nowrap !important;overflow:visible !important;text-overflow:clip !important;display:inline !important;}';
+  document.head.appendChild(style);
+})();
+
 $('#topDate').textContent = fmtDateCN(todayStr());
 /* 点击顶部同步状态可手动重试（提前绑定，避免首页渲染异常时丢失点击能力） */
 $('#syncPill').addEventListener('click', () => { retrySync(); });
