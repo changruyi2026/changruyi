@@ -1,5 +1,5 @@
 /* 常如意工作台 · Service Worker（离线缓存壳，保证稳定打开） */
-const CACHE = 'changruyi-workbench-v14';
+const CACHE = 'changruyi-workbench-v15';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './supabase.min.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
