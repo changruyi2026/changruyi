@@ -561,10 +561,13 @@ input,textarea,select{font-family:inherit;color:inherit}
   .hs-day{padding:3px 2px 2px;gap:1px;justify-content:flex-start;min-height:46px}
   .hs-day .hs-lunar{display:none}
   .hs-day::before{height:3px}
-  .hs-day .hs-chips{gap:2px;margin-top:3px;padding:0}
-  .hs-chip{font-size:9px;padding:2px 4px;border-radius:4px;gap:3px;background:rgba(255,255,255,.6)}
-  .hs-chip-dot{width:4px;height:4px}
-  .hs-chip-more{font-size:8px;padding:0}
+  .hs-day .d{font-size:9px}
+  .hs-day .hs-day-amt{font-size:8px;padding:1px 2px;border-radius:3px}
+  .hs-day .hs-chips{display:none}
+  .hs-day .hs-mobile-chips{display:flex;flex-direction:column;margin-top:1px;padding:0 1px}
+  .hs-day .hs-mobile-chips .hs-chip{font-size:8px;padding:1px 3px;border-radius:3px;gap:2px;background:transparent}
+  .hs-day .hs-mobile-chips .hs-chip-dot{width:3px;height:3px}
+  .hs-day .hs-mobile-chips .hs-chip-text{white-space:nowrap;overflow:hidden}
   .hs-day .hs-cover,.hs-day .hs-amt-row{display:none}
   .hs-day .hs-badge{display:none}
   .hist-scroll{max-height:220px}
@@ -730,7 +733,13 @@ input,textarea,select{font-family:inherit;color:inherit}
 .hs-day.st-draft::before{background:#CF4F48}
 .hs-day.st-published::before{background:#3F9E73}
 .hs-day.st-review::before{background:#C29E33}
+.hs-day .d{display:flex;align-items:center;justify-content:space-between;gap:2px;position:relative;z-index:2}
+.hs-day .hs-day-amt{font-size:9px;font-weight:800;font-family:"Nunito";color:var(--ink);line-height:1;padding:1px 3px;border-radius:4px;background:rgba(255,255,255,.55);white-space:nowrap}
+.hs-day.st-draft .hs-day-amt{color:#8A2823;background:rgba(255,255,255,.7)}
+.hs-day.st-published .hs-day-amt{color:#14764A;background:rgba(255,255,255,.7)}
+.hs-day.st-review .hs-day-amt{color:#6B5210;background:rgba(255,255,255,.7)}
 .hs-day .hs-chips{display:flex;flex-direction:column;gap:3px;margin-top:2px;width:100%;padding:0 2px}
+.hs-day .hs-mobile-chips{display:none}
 .hs-chip{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;line-height:1.25;color:var(--ink);background:rgba(255,255,255,.55);border-radius:6px;padding:3px 5px;overflow:hidden}
 .hs-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .hs-chip-dot.st-draft{background:#CF4F48}
