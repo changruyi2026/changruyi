@@ -667,6 +667,10 @@ function openHongshuDayModal(ds) {
         <select class="input" id="hsAccount">${accountOpts}</select>
       </div>
       <div class="hs-deadline-row">
+        <label>归属日期</label>
+        <input class="input" id="hsDate" type="date" value="${ds}" />
+      </div>
+      <div class="hs-deadline-row">
         <label>发布日期（最晚）</label>
         <input class="input" id="hsDeadline" type="date" />
       </div>
@@ -1919,6 +1923,7 @@ document.addEventListener('click', e => {
     case 'hs-pick': openHongshuDayModal(el.dataset.date); break;
     case 'hs-note-save': {
       const ds = el.dataset.date;
+      const newDate = ($('#hsDate').value || ds).trim();
       const editId = ($('#hsEditId').value || '').trim();
       const item = ($('#hsItem').value || '').trim();
       const type = ($('#hsType').value || PUB_TYPES[0]).trim();
@@ -1926,6 +1931,7 @@ document.addEventListener('click', e => {
       const account = ($('#hsAccount').value || PUB_ACCOUNTS[0]).trim();
       const deadline = ($('#hsDeadline').value || '').trim();
       if (!item) { toast('请填写物品名称', 'warn'); return; }
+      if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0;
       if (type === '蒲公英商单') {
         quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
@@ -1939,14 +1945,16 @@ document.addEventListener('click', e => {
       if (editId) {
         const idx = (S.publish.notes || []).findIndex(x => x.id === editId);
         if (idx > -1) {
-          S.publish.notes[idx] = { ...S.publish.notes[idx], date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount };
+          S.publish.notes[idx] = { ...S.publish.notes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount };
           toast('已修改出稿笔记 🍠');
         }
       } else {
-        S.publish.notes.push({ id: uid(), date: ds, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount });
+        S.publish.notes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount });
         toast('已保存出稿笔记 🍠');
       }
-      save(); closeModal(); renderView('hongshu'); break;
+      save(); closeModal();
+      hongshuCal = { y: parseInt(newDate.slice(0, 4)), m: parseInt(newDate.slice(5, 7)) - 1, sel: newDate };
+      renderView('hongshu'); break;
     }
     case 'hs-note-edit': {
       const n = (S.publish.notes || []).find(x => x.id === id);
@@ -1956,6 +1964,7 @@ document.addEventListener('click', e => {
       $('#hsType').value = n.type || PUB_TYPES[0];
       $('#hsStatus').value = normStatus(n.status) || '待出稿';
       $('#hsAccount').value = n.account || PUB_ACCOUNTS[0];
+      $('#hsDate').value = n.date || ds;
       $('#hsDeadline').value = n.deadline || '';
       $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
       $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
@@ -1972,6 +1981,7 @@ document.addEventListener('click', e => {
       $('#hsType').value = PUB_TYPES.includes('蒲公英商单') ? '蒲公英商单' : PUB_TYPES[0];
       $('#hsStatus').value = '待出稿';
       $('#hsAccount').value = PUB_ACCOUNTS[0];
+      $('#hsDate').value = ds;
       $('#hsDeadline').value = '';
       $('#hsQuote').value = '';
       $('#hsRebatePct').value = '';
