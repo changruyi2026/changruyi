@@ -1,6 +1,6 @@
 /* 常如意工作台 · Service Worker（离线缓存壳，保证稳定打开） */
-const CACHE = 'changruyi-workbench-v30';
-const ASSETS = ['./', './index.html', './styles.css?v=30', './app.js?v=30', './supabase.min.js', './manifest.webmanifest',
+const CACHE = 'changruyi-workbench-v31';
+const ASSETS = ['./', './index.html', './styles.css?v=31', './app.js?v=31', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -47,7 +47,7 @@ function serveCustomIcon(reqUrl) {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
-  // 跨域（如 Supabase）走网络，不缓存
+  // 跨域（如 api.github.com）走网络，不缓存
   if (u.origin !== location.origin) return;
   // 自定义图标：从 IndexedDB 返回
   if (u.pathname.indexOf('/app-custom-icon') !== -1) {
