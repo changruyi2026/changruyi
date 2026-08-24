@@ -2113,12 +2113,17 @@ function retrySync() { syncNow(); }
 async function syncNow() {
   setSync('syncing');
   pullAttempts = 0;
+  let pushedOk = false;
   try {
     await pushSync(true); /* 先尝试把本地修改推上去 */
+    pushedOk = true;
   } catch (e) {
     console.warn('push failed', e);
   }
   await pullSync(); /* 再拉取云端最新状态 */
+  /* 关键修复：只要本地数据已成功推送到云端，即使后续「拉取/解析」因 360 等浏览器注入脚本干扰而报错，
+     也应视为「已同步」，避免把状态错误地覆盖成「未连接」。数据已安全上云，显示须与事实一致。 */
+  if (pushedOk && lastSyncErr) setSync('online');
 }
 async function pullSync(force) {
   try {
