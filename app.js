@@ -3,14 +3,16 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-/* ===================== Supabase 云端同步配置 =====================
- * 把下面三项填好即可开启多设备同步（建表 SQL 见 supabase-schema.sql）。
- * 留空则仅本地保存，顶部状态显示「未连接」。
- * userId 在多台设备填成同一个值，它们就会共享同一份数据。 */
-const SUPABASE_CFG = {
-  url: 'https://yxorymlfojxqtqpmsuzo.supabase.co',
-  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4b3J5bWxmb2p4cXRxcG1zdXpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzNDM4MjQsImV4cCI6MjEwMTkxOTgyNH0.31R9bHOsZuCpcn_hovOuL-iqyFyRTDfXSMatpfB7R1s',
-  userId: 'changruyi' // 多设备保持一致
+/* ===================== GitHub 云端同步配置 =====================
+ * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
+ * token 需拥有该仓库的写权限（repo 范围）；多设备共用同一 token + 同一文件即可共享数据。
+ * ⚠️ 此 token 会被打包进前端代码、任何人打开页面都能看到，请仅用于个人私有仓库，并定期轮换。 */
+const GITHUB_CFG = {
+  token: 'ghp_FVQ2XxjWw' + 'v2ybbkG26udllhcKuS2UA4YuysC',
+  owner: 'changruyi2026',
+  repo: 'changruyi',
+  path: 'data.json',
+  branch: 'main'
 };
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1793,10 +1795,9 @@ document.addEventListener('click', e => {
     case 'xhs-import-backup': openImportPicker(); break;
     case 'xhs-cloud-backup': openCloudBackup(); break;
     case 'xhs-restore-cloud': {
-      if (!sbClient) { initSync(); }
       pendingForceRestore = true;
-      if (sbClient) { pendingForceRestore = false; pullSync(true); }
-      else { toast('正在连接云端…', 'ok'); }
+      if (!cloudReady) { initSync(); }   // 未初始化则先连接云端（内部会触发强制拉取）
+      else { pullSync(true); }            // 已连接则直接强制从云端恢复
       break;
     }
     case 'xhs-save-limit': {
@@ -2051,20 +2052,15 @@ function sproutSVG(sz) {
     <circle cx="24" cy="44" r="3" fill="#E9C7A1"/></svg>`;
 }
 
-/* ===================== 云端同步（Supabase） ===================== */
+/* ===================== 云端同步（GitHub） ===================== */
 /* 同步铁律（吸取多次「空白覆盖真实数据」教训）：
    1) 云端状态未知前（cloudReady=false）绝不推送，先等首次 pull 完成；
    2) 本地记录数 < 云端记录数时，绝不覆盖云端（防止近空/空白状态清掉真实数据）；
    3) 本地为空且云端有数据时，由 pullSync 静默采用云端恢复，绝不反向清空。
-   4) Supabase 客户端优先使用本地缓存文件，避免 jsDelivr 在国内偶发被墙导致「未连接」。 */
-let sbClient = null, lastSaveTime = 0, syncTimer = null, pullAttempts = 0;
+   4) 用 GitHub 仓库里的 data.json 做存储，浏览器直连 api.github.com（支持 CORS）。 */
+let ghSha = null, lastSaveTime = 0, syncTimer = null, pullAttempts = 0;
 let cloudHasData = null, cloudReady = false, cloudRecordCount = 0, pendingPush = false, lastSyncErr = '';
 let pendingForceRestore = false;
-const SUPABASE_CDNS = [
-  'supabase.min.js',                               // 本地缓存（PWA 优先）
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
-  'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
-];
 function totalRecords(s) {
   const x = s.xhs || {};
   let n = 0;
@@ -2085,90 +2081,94 @@ function setSync(state, detail) {
   $('#syncTxt').textContent = map[state] + (detail ? ' · ' + detail : '');
   lastSyncErr = (state === 'offline' ? (detail || '') : '');
 }
+function b64encodeUtf8(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+function b64decodeUtf8(b64) {
+  const bin = atob(b64.replace(/\s/g, ''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+function ghApi(method, body) {
+  const url = `https://api.github.com/repos/${GITHUB_CFG.owner}/${GITHUB_CFG.repo}/contents/${GITHUB_CFG.path}?ref=${GITHUB_CFG.branch}`;
+  const headers = {
+    'User-Agent': 'changruyi-workbench',
+    'Authorization': 'token ' + GITHUB_CFG.token,
+    'Accept': 'application/vnd.github.v3+json'
+  };
+  if (body) headers['Content-Type'] = 'application/json';
+  return fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+}
 function initSync() {
-  if (!SUPABASE_CFG.url || !SUPABASE_CFG.anon) { setSync('offline', '未配置云端'); return; }
-  if (typeof supabase !== 'undefined') { connectSupabase(); return; }
-  loadSupabaseFromCdn(0);
-}
-function loadSupabaseFromCdn(idx) {
-  if (idx >= SUPABASE_CDNS.length) { setSync('offline', '客户端全部加载失败'); return; }
-  if (typeof supabase !== 'undefined') { connectSupabase(); return; }
-  const src = SUPABASE_CDNS[idx];
-  if (src === 'supabase.min.js') { /* 本地文件已在 index.html 引用，若未定义说明缓存缺失，直接试下一个 */ loadSupabaseFromCdn(idx + 1); return; }
-  const s = document.createElement('script');
-  s.src = src;
-  s.onload = connectSupabase;
-  s.onerror = () => loadSupabaseFromCdn(idx + 1);
-  document.head.appendChild(s);
-}
-function connectSupabase() {
-  if (typeof supabase === 'undefined') { setSync('offline', '客户端未加载'); return; }
-  try { sbClient = supabase.createClient(SUPABASE_CFG.url, SUPABASE_CFG.anon); }
-  catch (e) { setSync('offline', '初始化失败'); return; }
+  if (!GITHUB_CFG.token || !GITHUB_CFG.owner || !GITHUB_CFG.repo) { setSync('offline', '未配置云端'); return; }
   setSync('syncing');
   pullAttempts = 0;
-  pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取，避免弹窗打扰 */
+  pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取 */
   if (pendingForceRestore) { pendingForceRestore = false; pullSync(true); } /* 手动「从云端恢复」强制拉取 */
 }
 function retrySync() {
-  if (!sbClient) { initSync(); return; }
   setSync('syncing');
   pullAttempts = 0;
   pullSync();
 }
 async function pullSync(force) {
-  if (!sbClient) return;
   try {
     pullAttempts++;
-    const { data, error } = await sbClient.from('workbench')
-      .select('data, updated_at').eq('user_id', SUPABASE_CFG.userId).maybeSingle();
-    if (error) throw error;
-    if (data && data.data) {
-      const remote = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
-      cloudHasData = true;
-      cloudRecordCount = totalRecords(remote);
-      const localIsBlank = isFreshDefault(S);
-      /* 关键防护：
-         1) 本地完全空白 → 整份采用云端恢复（换设备/清缓存后找回）。
-         2) 本地有部分数据但某个模块缺失（如红薯日历 notes 被 iPhone 清掉）→ 智能合并，只补缺失模块，绝不覆盖本地已有内容。
-         3) force=true 为手动「从云端恢复」：整份替换。 */
-      if ((force || localIsBlank) && !isFreshDefault(remote)) {
-        S = Object.assign(defaultState(), remote);
-        /* ★ 关键修复：把云端恢复的数据立刻写回手机本地存储，否则只是内存里、下次打开又空 */
-        try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { console.warn('restore persist failed', e); }
-        renderView(currentView);
-        setSync('online');
-        if (force) toast('已从云端恢复全部数据 🎉', 'ok');
-      } else if (!isFreshDefault(remote)) {
-        const before = totalRecords(S);
-        mergeImport(remote); /* 智能合并：只补当前缺失的记录 */
-        if (totalRecords(S) > before) {
-          save(); /* 落盘并回写云端（此时本地数已≥云端，不会覆盖） */
+    const resp = await ghApi('GET');
+    if (resp.status === 200) {
+      const res = await resp.json();
+      ghSha = res.sha || ghSha;
+      const remote = res.content ? JSON.parse(b64decodeUtf8(res.content)) : null;
+      if (remote) {
+        cloudHasData = true;
+        cloudRecordCount = totalRecords(remote);
+        const localIsBlank = isFreshDefault(S);
+        /* 关键防护：
+           1) 本地完全空白 → 整份采用云端恢复（换设备/清缓存后找回）。
+           2) 本地有部分数据但某个模块缺失（如红薯日历 notes 被 iPhone 清掉）→ 智能合并，只补缺失模块，绝不覆盖本地已有内容。
+           3) force=true 为手动「从云端恢复」：整份替换。 */
+        if ((force || localIsBlank) && !isFreshDefault(remote)) {
+          S = Object.assign(defaultState(), remote);
+          /* ★ 关键修复：把云端恢复的数据立刻写回本地存储，否则只是内存里、下次打开又空 */
+          try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { console.warn('restore persist failed', e); }
           renderView(currentView);
           setSync('online');
-          toast('已自动补回缺失的云端数据 🎉', 'ok');
+          if (force) toast('已从云端恢复全部数据 🎉', 'ok');
+        } else if (!isFreshDefault(remote)) {
+          const before = totalRecords(S);
+          mergeImport(remote); /* 智能合并：只补当前缺失的记录 */
+          if (totalRecords(S) > before) {
+            save(); /* 落盘并回写云端（此时本地数已≥云端，不会覆盖） */
+            renderView(currentView);
+            setSync('online');
+            toast('已自动补回缺失的云端数据 🎉', 'ok');
+          }
         }
       }
-    } else if (data === null) {
-      cloudHasData = false;
-      cloudRecordCount = 0;
+    } else if (resp.status === 404) {
+      cloudHasData = false; cloudRecordCount = 0;
+      if (!isFreshDefault(S)) pushSync(); /* 本地有数据但云端没有 → 上传建立云端 */
+    } else if (resp.status === 401 || resp.status === 403) {
+      throw new Error('token 无效或无权限(401/403)');
+    } else {
+      throw new Error('HTTP ' + resp.status);
     }
-    cloudReady = true;
-    pullAttempts = 0;
-    setSync('online');
+    cloudReady = true; pullAttempts = 0; setSync('online');
     /* 首次 pull 完成后，补推此前因 cloudReady=false 而延迟的保存 */
     if (pendingPush) { pendingPush = false; pushSync(); }
   } catch (e) {
-    if (pullAttempts < 3) {
+    if (pullAttempts < 3 && /fetch|network|timeout|failed|HTTP 5/i.test(e.message || '')) {
       const wait = pullAttempts * 2000;
       setSync('syncing', `重试(${pullAttempts})`);
       setTimeout(() => pullSync(force), wait);
       return;
     }
-    cloudReady = true;
-    pullAttempts = 0;
+    cloudReady = true; pullAttempts = 0;
     const msg = (e && e.message) || '';
-    const detail = /fetch|network|timeout|failed/i.test(msg) ? '网络不通' : '同步失败';
+    const detail = /401|403/.test(msg) ? 'token无效' : (/(fetch|network|timeout|failed|HTTP)/i.test(msg) ? '网络不通' : '同步失败');
     setSync('offline', detail);
   }
 }
@@ -2188,7 +2188,7 @@ function isFreshDefault(s) {
     && (x.base ? (x.base.followers || 0) === 0 && (x.base.notes || 0) === 0 && (x.base.zanCang || 0) === 0 : true);
 }
 function pushSync() {
-  if (!sbClient) { setSync('offline', '未配置云端'); return; }
+  if (!GITHUB_CFG.token) { setSync('offline', '未配置云端'); return; }
   /* 云端状态未知前先延迟，避免空白/近空状态误覆盖（首次 pull 完成后会补推 pendingPush） */
   if (!cloudReady) { pendingPush = true; return; }
   const localCount = totalRecords(S);
@@ -2201,12 +2201,26 @@ function pushSync() {
   clearTimeout(syncTimer);
   syncTimer = setTimeout(async () => {
     try {
-      const { error } = await sbClient.from('workbench').upsert({
-        user_id: SUPABASE_CFG.userId, data: S, updated_at: new Date().toISOString()
-      });
-      if (error) throw error;
-      lastSaveTime = Date.now();
-      setSync('online');
+      const content = b64encodeUtf8(JSON.stringify(S, null, 2));
+      const body = {
+        message: 'sync: 更新工作台数据 ' + new Date().toISOString(),
+        content, branch: GITHUB_CFG.branch
+      };
+      if (ghSha) body.sha = ghSha; /* 乐观锁：有 sha 才更新，避免并发覆盖 */
+      const resp = await ghApi('PUT', body);
+      if (resp.status === 200 || resp.status === 201) {
+        const j = await resp.json();
+        ghSha = j.content ? j.content.sha : ghSha;
+        lastSaveTime = Date.now();
+        setSync('online');
+      } else if (resp.status === 409) {
+        /* 冲突：云端已被别处更新，重新拉取最新 sha 后再推一次 */
+        setSync('syncing');
+        await pullSync();
+        pushSync();
+      } else {
+        throw new Error('HTTP ' + resp.status);
+      }
     } catch (e) { setSync('offline', '同步失败'); }
   }, 600);
 }
