@@ -2109,10 +2109,16 @@ function initSync() {
   pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取 */
   if (pendingForceRestore) { pendingForceRestore = false; pullSync(true); } /* 手动「从云端恢复」强制拉取 */
 }
-function retrySync() {
+function retrySync() { syncNow(); }
+async function syncNow() {
   setSync('syncing');
   pullAttempts = 0;
-  pullSync();
+  try {
+    await pushSync(true); /* 先尝试把本地修改推上去 */
+  } catch (e) {
+    console.warn('push failed', e);
+  }
+  await pullSync(); /* 再拉取云端最新状态 */
 }
 async function pullSync(force) {
   try {
@@ -2168,7 +2174,8 @@ async function pullSync(force) {
     }
     cloudReady = true; pullAttempts = 0;
     const msg = (e && e.message) || '';
-    const detail = /401|403/.test(msg) ? 'token无效' : (/(fetch|network|timeout|failed|HTTP)/i.test(msg) ? '网络不通' : '同步失败');
+    const raw = /401|403/.test(msg) ? 'token无效' : (/(fetch|network|timeout|failed|HTTP)/i.test(msg) ? '网络不通' : msg || '同步失败');
+    const detail = raw.slice(0, 12);
     setSync('offline', detail);
   }
 }
@@ -2187,42 +2194,49 @@ function isFreshDefault(s) {
     && (x.limit ? Object.values(x.limit).every(l => (l.count || 0) === 0 && !(l.names || '').trim()) : true)
     && (x.base ? (x.base.followers || 0) === 0 && (x.base.notes || 0) === 0 && (x.base.zanCang || 0) === 0 : true);
 }
-function pushSync() {
-  if (!GITHUB_CFG.token) { setSync('offline', '未配置云端'); return; }
+function pushSync(force) {
+  if (!GITHUB_CFG.token) { setSync('offline', '未配置云端'); return Promise.resolve(); }
   /* 云端状态未知前先延迟，避免空白/近空状态误覆盖（首次 pull 完成后会补推 pendingPush） */
-  if (!cloudReady) { pendingPush = true; return; }
+  if (!cloudReady && !force) { pendingPush = true; return Promise.resolve(); }
   const localCount = totalRecords(S);
   /* 铁律：本地记录数 < 云端记录数时，绝不覆盖云端（防止近空/空白状态清掉真实数据）。
      仅当本地数据不少于云端时才允许上传。 */
   if (cloudHasData && localCount < cloudRecordCount) {
     setSync('online');
-    return;
+    return Promise.resolve();
   }
   clearTimeout(syncTimer);
-  syncTimer = setTimeout(async () => {
-    try {
-      const content = b64encodeUtf8(JSON.stringify(S, null, 2));
-      const body = {
-        message: 'sync: 更新工作台数据 ' + new Date().toISOString(),
-        content, branch: GITHUB_CFG.branch
-      };
-      if (ghSha) body.sha = ghSha; /* 乐观锁：有 sha 才更新，避免并发覆盖 */
-      const resp = await ghApi('PUT', body);
-      if (resp.status === 200 || resp.status === 201) {
-        const j = await resp.json();
-        ghSha = j.content ? j.content.sha : ghSha;
-        lastSaveTime = Date.now();
-        setSync('online');
-      } else if (resp.status === 409) {
-        /* 冲突：云端已被别处更新，重新拉取最新 sha 后再推一次 */
-        setSync('syncing');
-        await pullSync();
-        pushSync();
-      } else {
-        throw new Error('HTTP ' + resp.status);
+  return new Promise((resolve, reject) => {
+    syncTimer = setTimeout(async () => {
+      try {
+        const content = b64encodeUtf8(JSON.stringify(S, null, 2));
+        const body = {
+          message: 'sync: 更新工作台数据 ' + new Date().toISOString(),
+          content, branch: GITHUB_CFG.branch
+        };
+        if (ghSha) body.sha = ghSha; /* 乐观锁：有 sha 才更新，避免并发覆盖 */
+        const resp = await ghApi('PUT', body);
+        if (resp.status === 200 || resp.status === 201) {
+          const j = await resp.json();
+          ghSha = j.content ? j.content.sha : ghSha;
+          lastSaveTime = Date.now();
+          setSync('online');
+          resolve();
+        } else if (resp.status === 409) {
+          /* 冲突：云端已被别处更新，重新拉取最新 sha 后再推一次 */
+          setSync('syncing');
+          await pullSync();
+          pushSync().then(resolve).catch(reject);
+        } else {
+          throw new Error('HTTP ' + resp.status);
+        }
+      } catch (e) {
+        const detail = (e && e.message ? e.message : '同步失败').slice(0, 12);
+        setSync('offline', detail);
+        reject(e);
       }
-    } catch (e) { setSync('offline', '同步失败'); }
-  }, 600);
+    }, force ? 50 : 600);
+  });
 }
 /* ---------- 手动备份：导出 / 导入 ---------- */
 function exportBackup() {
