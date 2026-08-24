@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1787550194399,
+  "_modifiedAt": 1787540159516,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 0
+    "hsReadCount": 1
   },
   "ledger": [
     {
@@ -146,14 +146,6 @@
             "ts": "2026-08-23T13:27:55.974Z",
             "date": "2026-08-23",
             "account": "常如意i"
-          },
-          {
-            "id": "mt6s79htmsa5t",
-            "date": "2026-08-24",
-            "account": "常如意i",
-            "ts": "2026-08-24T05:14:23.057Z",
-            "f": 6889,
-            "z": 118480
           }
         ]
       },
@@ -189,14 +181,6 @@
             "ts": "2026-08-23T13:39:19.202Z",
             "date": "2026-08-23",
             "account": "芽芽Mochi"
-          },
-          {
-            "id": "mt6s7m1h624xa",
-            "date": "2026-08-24",
-            "account": "芽芽Mochi",
-            "ts": "2026-08-24T05:14:39.317Z",
-            "f": 1833,
-            "z": 9322
           }
         ]
       }
@@ -528,6 +512,21 @@
         "account": "芽芽Mochi",
         "deadline": "",
         "rebatePct": 40,
+        "orderAmount": 0
+      },
+      {
+        "id": "mt2mntixp8kzn",
+        "fee": 0,
+        "net": 0,
+        "date": "2026-08-30",
+        "item": "布布熊",
+        "type": "水下探店",
+        "quote": 0,
+        "rebate": 0,
+        "status": "待出稿",
+        "account": "芽芽Mochi",
+        "deadline": "",
+        "rebatePct": 0,
         "orderAmount": 0
       },
       {
