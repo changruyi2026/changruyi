@@ -585,7 +585,7 @@ function renderHongshuCalendar() {
   const monthTotal = (S.publish.notes || []).reduce((sum, n) => {
     if (!n.date || !n.date.startsWith(monthPrefix)) return sum;
     if (n.type === '蒲公英商单') return sum + (n.net || 0);
-    if (PUB_ORD_TYPES.includes(n.type)) return sum + (n.orderAmount || 0);
+    if (PUB_ORD_TYPES.includes(n.type)) return sum + (n.net != null ? n.net : (n.orderAmount || 0));
     return sum;
   }, 0);
   let cal = '';
@@ -602,22 +602,18 @@ function renderHongshuCalendar() {
     const st = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
     const badge = st ? `<span class="hs-badge ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>` : '';
     const acctBadge = top && top.account && PUB_ACCOUNT_BADGE[top.account] ? `<span class="hs-cover-acct">${esc(PUB_ACCOUNT_BADGE[top.account])}</span>` : '';
-    let coverAmt = '';
-    if (top && top.type === '蒲公英商单' && top.net != null && top.net !== 0) coverAmt = money(top.net);
-    else if (top && PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) coverAmt = money(top.orderAmount);
+    /* 桌面端：优先显示「到手金额」，旧数据（无 net 字段）回退订单金额 */
+    const topMoney = top ? ((top.net != null && top.net !== 0) ? top.net : (top.orderAmount || 0)) : 0;
+    let coverAmt = topMoney ? money(topMoney) : '';
     const itemText = top && top.item ? esc(top.item) : '未命名';
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
     const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
     const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
-    /* 手机端简化：只显示一条，取物品前 2 个字；金额放在日期右上角 */
+    /* 手机端简化：只显示一条，取物品前 2 个字；金额（到手）放在日期右上角 */
     const topSt = top ? PUB_STATUS_MAP[normStatus(top.status)] : null;
-    let dayAmt = '';
-    if (top) {
-      if (top.type === '蒲公英商单' && top.net != null && top.net !== 0) dayAmt = money(top.net);
-      else if (PUB_ORD_TYPES.includes(top.type) && top.orderAmount != null && top.orderAmount !== 0) dayAmt = money(top.orderAmount);
-    }
+    const dayAmt = topMoney ? money(topMoney) : '';
     const mobileChip = top ? `<div class="mchip-line"><i class="mchip-dot ${topSt ? topSt.cls : ''}"></i><span class="mchip-txt">${esc((top.item || '未命名').slice(0, 2))}</span></div>` : '';
-    const amtHtml = dayAmt ? `<span class="hs-day-amt" title="${esc(top.type === '蒲公英商单' ? '到手金额' : '订单金额')}">${esc(dayAmt)}</span>` : '';
+    const amtHtml = dayAmt ? `<span class="hs-day-amt" title="到手金额">${esc(dayAmt)}</span>` : '';
     cal += `<div class="cal-day hs-day ${stCls} ${isToday ? 'today' : ''} ${ds === hongshuCal.sel ? 'sel' : ''}" data-action="hs-pick" data-date="${ds}">
       <div class="d">${d}${amtHtml}</div>
       <div class="hs-lunar">${ld}</div>
@@ -642,6 +638,25 @@ function renderHongshuCalendar() {
     <div class="cal">${dows}${cal}</div>`;
 }
 
+/* 把已有笔记填充到弹窗表单并进入「编辑」状态（关闭今/点 ✏️ 与自动回填复用） */
+function fillHongshuEdit(n) {
+  if (!n) return;
+  $('#hsEditId').value = n.id || '';
+  $('#hsItem').value = n.item || '';
+  $('#hsType').value = n.type || PUB_TYPES[0];
+  $('#hsStatus').value = normStatus(n.status) || '待出稿';
+  $('#hsAccount').value = n.account || PUB_ACCOUNTS[0];
+  $('#hsDate').value = n.date || '';
+  $('#hsDeadline').value = n.deadline || '';
+  $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
+  $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
+  $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
+  $('#hsSaveBtn').textContent = '💾 保存修改';
+  $('#hsCancelEditBtn').style.display = 'block';
+  $('#hsType').dispatchEvent(new Event('change'));
+  if ($('#hsQuote')) $('#hsQuote').dispatchEvent(new Event('input'));
+  if ($('#hsOrderAmount')) $('#hsOrderAmount').dispatchEvent(new Event('input'));
+}
 function openHongshuDayModal(ds) {
   const dt = new Date(ds + 'T00:00:00');
   const ld = lunarStr(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
@@ -661,7 +676,9 @@ function openHongshuDayModal(ds) {
       </div>`;
     } else if (PUB_ORD_TYPES.includes(n.type) && (n.orderAmount != null && n.orderAmount !== 0)) {
       moneyBlock = `<div class="hs-money">
-        <span class="hs-net">订单金额 ${money(n.orderAmount || 0)}</span>
+        <span>订单金额 ${money(n.orderAmount || 0)}</span>
+        <span>手续费 ${money(n.fee || 0)}</span>
+        <span class="hs-net">到手 ${money(n.net || 0)}</span>
       </div>`;
     }
     const st = PUB_STATUS_MAP[normStatus(n.status)];
@@ -711,6 +728,10 @@ function openHongshuDayModal(ds) {
         </div>
         <div id="hsOrderArea" style="display:none">
           <div class="hs-amount-row"><label>订单金额(¥)</label><input class="input" id="hsOrderAmount" type="number" min="0" step="0.01" placeholder="0" /></div>
+          <div class="hs-calc">
+            <span>手续费(10%)：<b id="hsOrderFee">¥0</b></span>
+            <span class="hs-net">到手金额：<b id="hsOrderNet">¥0</b></span>
+          </div>
         </div>
       </div>
       <button class="btn btn-primary" id="hsSaveBtn" style="width:100%;margin-top:10px" data-action="hs-note-save" data-date="${ds}">+ 保存出稿笔记</button>
@@ -731,28 +752,50 @@ function openHongshuDayModal(ds) {
   typeSel.addEventListener('change', toggleAmounts);
   toggleAmounts();
   const recompute = () => {
-    if (typeSel.value !== '蒲公英商单') {
-      const feeEl = $('#hsFee'), rebateEl = $('#hsRebateAmt'), netEl = $('#hsNet');
+    const t = typeSel.value;
+    const feeEl = $('#hsFee'), rebateEl = $('#hsRebateAmt'), netEl = $('#hsNet');
+    const orderFeeEl = $('#hsOrderFee'), orderNetEl = $('#hsOrderNet');
+    if (t === '蒲公英商单') {
+      const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+      const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
+      const fee = Math.round(q * 0.1 * 100) / 100;
+      const rebate = -Math.round(q * pct / 100 * 100) / 100; /* 返点为支出，记为负数 */
+      const net = Math.round((q - fee + rebate) * 100) / 100;
+      if (feeEl) feeEl.textContent = money(fee);
+      if (rebateEl) rebateEl.textContent = money(rebate);
+      if (netEl) netEl.textContent = money(net);
+  if (orderFeeEl) orderFeeEl.textContent = money(0);
+      if (orderNetEl) orderNetEl.textContent = money(0);
+    } else if (PUB_ORD_TYPES.includes(t)) {
+      /* 订单类商单（含众测）：手续费固定为订单金额 10%，到手 = 订单金额 - 手续费 */
+      const o = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
+      const fee = Math.round(o * 0.1 * 100) / 100;
+      const net = Math.round((o - fee) * 100) / 100;
+      if (orderFeeEl) orderFeeEl.textContent = money(fee);
+      if (orderNetEl) orderNetEl.textContent = money(net);
       if (feeEl) feeEl.textContent = money(0);
       if (rebateEl) rebateEl.textContent = money(0);
       if (netEl) netEl.textContent = money(0);
-      return;
+    } else {
+      if (feeEl) feeEl.textContent = money(0);
+      if (rebateEl) rebateEl.textContent = money(0);
+      if (netEl) netEl.textContent = money(0);
+      if (orderFeeEl) orderFeeEl.textContent = money(0);
+      if (orderNetEl) orderNetEl.textContent = money(0);
     }
-    const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
-    const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
-    const fee = Math.round(q * 0.1 * 100) / 100;
-    const rebate = -Math.round(q * pct / 100 * 100) / 100; /* 返点为支出，记为负数 */
-    const net = Math.round((q - fee + rebate) * 100) / 100;
-    const feeEl = $('#hsFee'), rebateEl = $('#hsRebateAmt'), netEl = $('#hsNet');
-    if (feeEl) feeEl.textContent = money(fee);
-    if (rebateEl) rebateEl.textContent = money(rebate);
-    if (netEl) netEl.textContent = money(net);
   };
   $('#hsQuote').addEventListener('input', recompute);
   $('#hsRebatePct').addEventListener('input', recompute);
-  recompute();
-  $('#hsType').value = PUB_TYPES.includes('蒲公英商单') ? '蒲公英商单' : PUB_TYPES[0];
-  $('#hsType').dispatchEvent(new Event('change'));
+  $('#hsOrderAmount').addEventListener('input', recompute);
+  /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
+  if (notes.length > 0) {
+    fillHongshuEdit(notes[0]);
+  } else {
+    toggleAmounts();
+    recompute();
+    $('#hsType').value = PUB_TYPES.includes('蒲公英商单') ? '蒲公英商单' : PUB_TYPES[0];
+    $('#hsType').dispatchEvent(new Event('change'));
+  }
 }
 
 /* ===================== 首页天气（杭州，Open-Meteo 免费接口，无需密钥） ===================== */
@@ -1971,8 +2014,10 @@ document.addEventListener('click', e => {
         fee = Math.round(quote * 0.1 * 100) / 100;
         rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
         net = Math.round((quote - fee + rebate) * 100) / 100;
-      } else {
+      } else if (PUB_ORD_TYPES.includes(type)) {
         orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
+        fee = Math.round(orderAmount * 0.1 * 100) / 100; /* 手续费 = 订单金额 10% */
+        net = Math.round((orderAmount - fee) * 100) / 100; /* 到手 = 订单金额 - 手续费 */
       }
       if (editId) {
         const idx = (S.publish.notes || []).findIndex(x => x.id === editId);
@@ -1991,20 +2036,7 @@ document.addEventListener('click', e => {
     case 'hs-note-edit': {
       const n = (S.publish.notes || []).find(x => x.id === id);
       if (!n) { toast('笔记不存在', 'warn'); break; }
-      $('#hsEditId').value = n.id;
-      $('#hsItem').value = n.item || '';
-      $('#hsType').value = n.type || PUB_TYPES[0];
-      $('#hsStatus').value = normStatus(n.status) || '待出稿';
-      $('#hsAccount').value = n.account || PUB_ACCOUNTS[0];
-      $('#hsDate').value = n.date || ds;
-      $('#hsDeadline').value = n.deadline || '';
-      $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
-      $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
-      $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
-      $('#hsSaveBtn').textContent = '💾 保存修改';
-      $('#hsCancelEditBtn').style.display = 'block';
-      $('#hsType').dispatchEvent(new Event('change'));
-      if ($('#hsQuote')) $('#hsQuote').dispatchEvent(new Event('input'));
+      fillHongshuEdit(n);
       break;
     }
     case 'hs-note-cancel-edit': {
