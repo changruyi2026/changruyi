@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1787736847368,
+  "_modifiedAt": 1787737126437,
   "home": {
     "rest": [
       "2026-08-01",
@@ -690,6 +690,21 @@
         "id": "mt9wczrca4son",
         "date": "2026-08-30",
         "item": "布布熊",
+        "type": "水下探店",
+        "status": "待出稿",
+        "account": "芽芽Mochi",
+        "deadline": "",
+        "quote": 0,
+        "rebatePct": 0,
+        "rebate": 0,
+        "fee": 0,
+        "net": 0,
+        "orderAmount": 0
+      },
+      {
+        "id": "mt9wiz39ttiq8",
+        "date": "2026-09-06",
+        "item": "SolarShow",
         "type": "水下探店",
         "status": "待出稿",
         "account": "芽芽Mochi",
