@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1787710785824,
+  "_modifiedAt": 1787710883080,
   "home": {
     "rest": [
       "2026-08-01",
@@ -656,6 +656,21 @@
         "fee": 30,
         "net": 170,
         "orderAmount": 0
+      },
+      {
+        "id": "mt9gwhl4kqwlk",
+        "date": "2026-09-06",
+        "item": "超启能恩",
+        "type": "众测招募",
+        "status": "待出稿",
+        "account": "芽芽Mochi",
+        "deadline": "",
+        "quote": 0,
+        "rebatePct": 0,
+        "rebate": 0,
+        "fee": 16,
+        "net": 144,
+        "orderAmount": 160
       }
     ]
   },
