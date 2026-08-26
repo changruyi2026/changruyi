@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1787710227156,
+  "_modifiedAt": 1787710705814,
   "home": {
     "rest": [
       "2026-08-01",
@@ -633,6 +633,21 @@
         "account": "芽芽Mochi",
         "deadline": "",
         "rebatePct": 0,
+        "orderAmount": 0
+      },
+      {
+        "id": "mt9gsot2yz0o0",
+        "date": "2026-09-10",
+        "item": "叽里呱啦",
+        "type": "蒲公英商单",
+        "status": "待出稿",
+        "account": "芽芽Mochi",
+        "deadline": "",
+        "quote": 300,
+        "rebatePct": 33.333,
+        "rebate": -100,
+        "fee": 30,
+        "net": 170,
         "orderAmount": 0
       }
     ]
