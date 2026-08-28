@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v38'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v39'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -132,7 +132,10 @@ function snapshotIfNeeded() {
     if (!S.backups) S.backups = [];
     const today = todayStr();
     if (S.backups[0] && S.backups[0].date === today) return;
-    S.backups.unshift({ date: today, ts: Date.now(), data: JSON.parse(JSON.stringify(S)) });
+    /* 保存快照时去掉 backups 自身，避免嵌套导致体积指数膨胀 */
+    const snap = JSON.parse(JSON.stringify(S));
+    delete snap.backups;
+    S.backups.unshift({ date: today, ts: Date.now(), data: snap });
     if (S.backups.length > 7) S.backups = S.backups.slice(0, 7);
   } catch (e) {}
 }
