@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=34" />
+  <link rel="stylesheet" href="styles.css?v=35" />
 </head>
 <body>
   <div class="app">
@@ -94,6 +94,7 @@
           <div class="sync-pill" id="syncPill" title="云端同步状态">
             <span class="sync-dot" id="syncDot"></span><span id="syncTxt">未连接</span>
           </div>
+          <div class="ver-pill" id="verPill" title="当前版本">v?</div>
           <div class="today-pill" id="topDate">—</div>
         </div>
       </header>
@@ -112,7 +113,12 @@
   <div class="modal-root" id="modalRoot"></div>
   <!-- 提示 -->
   <div class="toast-root" id="toastRoot"></div>
+  <!-- 新版本提示条（默认隐藏，检测到更新时显示） -->
+  <div class="update-banner" id="updateBanner" style="display:none">
+    <span>🎉 已发布新版本，点击刷新以加载</span>
+    <button class="update-btn" id="updateBtn">立即刷新</button>
+  </div>
 
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
 </body>
 </html>
