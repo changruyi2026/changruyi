@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v36'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v37'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -2150,17 +2150,23 @@ function retrySync() { syncNow(); }
 async function syncNow() {
   setSync('syncing');
   pullAttempts = 0;
-  let pushedOk = false;
+  let pulledOk = false;
   try {
-    await pushSync(true); /* 先尝试把本地修改推上去 */
-    pushedOk = true;
+    await pullSync(); /* 先拉取云端最新数据，避免手机旧数据覆盖电脑端新数据 */
+    pulledOk = true;
   } catch (e) {
-    console.warn('push failed', e);
+    console.warn('pull failed', e);
   }
-  await pullSync(); /* 再拉取云端最新状态 */
-  /* 关键修复：只要本地数据已成功推送到云端，即使后续「拉取/解析」因 360 等浏览器注入脚本干扰而报错，
-     也应视为「已同步」，避免把状态错误地覆盖成「未连接」。数据已安全上云，显示须与事实一致。 */
-  if (pushedOk && lastSyncErr) setSync('online');
+  if (pulledOk) {
+    try {
+      await pushSync(true); /* 再把合并后的最新数据推回云端 */
+    } catch (e) {
+      console.warn('push failed', e);
+      /* 拉取已成功：电脑端修改已下行到手机，即使上传因 360/公司网络拦截而失败，
+         也应视为「已同步」，避免状态错误变成「未连接」。 */
+      setSync('online');
+    }
+  }
 }
 async function pullSync(force) {
   try {
@@ -2336,6 +2342,7 @@ function mergeArrCloud(cur,  inc) {
   return out;
 }
 function mergeImport(raw, cloudPriority) {
+  const before = JSON.stringify(S); /* 用于最后判断是否有变更 */
   const def = defaultState();
   const src = Object.assign(def, raw);
   const pick = cloudPriority ? mergeArrCloud : mergeArr;
