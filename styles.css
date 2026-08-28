@@ -593,6 +593,12 @@ input,textarea,select{font-family:inherit;color:inherit}
 .sync-syncing .sync-dot{background:#E3C15B;box-shadow:0 0 0 3px rgba(227,193,91,.18);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .goal-note{color:var(--ink-faint);font-size:12px;margin-top:8px;line-height:1.6}
+/* 顶栏版本号小标 */
+.ver-pill{font-size:11px;font-weight:700;padding:5px 8px;border-radius:14px;background:var(--card-2);border:1px solid var(--line);color:var(--ink-faint);white-space:nowrap;user-select:none}
+/* 新版本提示横幅 */
+.update-banner{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;background:linear-gradient(90deg,#E0A98A,#CD8E6B);color:#fff;font-size:13px;font-weight:700;box-shadow:0 -4px 16px rgba(0,0,0,.15)}
+.update-btn{border:none;border-radius:18px;padding:7px 14px;background:#fff;color:#B5673E;font-weight:800;font-size:13px;cursor:pointer}
+.update-btn:active{transform:scale(.96)}
 
 /* ===================== 首页天气卡片 ===================== */
 .weather-loc{margin-left:auto;font-size:12.5px;color:var(--ink-soft);font-weight:700}
