@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v42'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v43'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -1719,7 +1719,7 @@ function openXhsHistoryModal() {
     body += `<div class="xhs-hist">
       <div class="xhs-hist-table">${head}${renderRow(initRow)}`;
     if (hiddenRows.length) {
-      body += `<div class="xhs-hist-more" id="xhs-hist-more-${idx}" data-count="${hiddenRows.length}">
+      body += `<div class="xhs-hist-more" id="xhs-hist-more-${idx}" data-count="${hiddenRows.length}" style="display:none">
         ${hiddenRows.map(renderRow).join('')}
       </div>
       <button class="xhs-hist-toggle" data-action="xhs-hist-toggle" data-idx="${idx}" data-count="${hiddenRows.length}">
@@ -1846,6 +1846,8 @@ document.addEventListener('click', e => {
       const more = document.getElementById('xhs-hist-more-' + el.dataset.idx);
       if (more) {
         const open = more.classList.toggle('open');
+        /* 内联样式兜底：即使旧缓存的 CSS 没加载 .xhs-hist-more{display:none}，JS 也能正确显隐 */
+        more.style.display = open ? 'contents' : 'none';
         const count = el.dataset.count || '';
         el.innerHTML = `<span class="toggle-icon">${open ? '−' : '+'}</span> ${open ? '收起' : `展开 ${count} 天历史`}`;
       }
