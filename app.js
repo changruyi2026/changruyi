@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v37'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v38'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -118,8 +118,14 @@ function load() {
   catch (e) { console.warn('load failed', e); }
   return defaultState();
 }
-function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
-/* 每日自动备份：每天首次保存时，把当前完整状态存一份到 S.backups（保留最近 30 天）。
+function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); trimBackups(S); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
+/* 清理备份：保留最近 7 天，防止 localStorage 和云端 data.json 体积膨胀 */
+function trimBackups(s) {
+  try {
+    if (s && Array.isArray(s.backups) && s.backups.length > 7) s.backups = s.backups.slice(0, 7);
+  } catch (e) {}
+}
+/* 每日自动备份：每天首次保存时，把当前完整状态存一份到 S.backups（保留最近 7 天，控制体积）。
    与云端同步共用同一个云端行，恢复时可选某一天「回退」。 */
 function snapshotIfNeeded() {
   try {
@@ -127,7 +133,7 @@ function snapshotIfNeeded() {
     const today = todayStr();
     if (S.backups[0] && S.backups[0].date === today) return;
     S.backups.unshift({ date: today, ts: Date.now(), data: JSON.parse(JSON.stringify(S)) });
-    if (S.backups.length > 30) S.backups = S.backups.slice(0, 30);
+    if (S.backups.length > 7) S.backups = S.backups.slice(0, 7);
   } catch (e) {}
 }
 
@@ -1840,6 +1846,7 @@ document.addEventListener('click', e => {
     case 'xhs-cloud-backup': openCloudBackup(); break;
     case 'xhs-restore-cloud': {
       pendingForceRestore = true;
+      toast('正在从云端恢复数据，请稍候…', 'warn');
       if (!cloudReady) { initSync(); }   // 未初始化则先连接云端（内部会触发强制拉取）
       else { pullSync(true); }            // 已连接则直接强制从云端恢复
       break;
@@ -2143,8 +2150,8 @@ function initSync() {
   if (!GITHUB_CFG.token || !GITHUB_CFG.owner || !GITHUB_CFG.repo) { setSync('offline', '未配置云端'); return; }
   setSync('syncing');
   pullAttempts = 0;
-  pullSync(); /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取 */
   if (pendingForceRestore) { pendingForceRestore = false; pullSync(true); } /* 手动「从云端恢复」强制拉取 */
+  else { pullSync(); } /* 仅打开时静默同步一次（本地空白才恢复），之后不再自动拉取 */
 }
 function retrySync() { syncNow(); }
 async function syncNow() {
@@ -2186,11 +2193,16 @@ async function pullSync(force) {
            3) force=true 为手动「从云端恢复」：整份替换。 */
         if ((force || localIsBlank) && !isFreshDefault(remote)) {
           S = Object.assign(defaultState(), remote);
+          trimBackups(S); /* 强制恢复时清理云端旧备份，防止体积过大存不进本地 */
           /* ★ 关键修复：把云端恢复的数据立刻写回本地存储，否则只是内存里、下次打开又空 */
-          try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { console.warn('restore persist failed', e); }
+          let persistOk = false;
+          try { localStorage.setItem(KEY, JSON.stringify(S)); persistOk = true; } catch (e) {
+            console.warn('restore persist failed', e);
+            toast('云端数据已拉回，但本地存不下（数据太大），建议导出备份后清理', 'warn');
+          }
           renderView(currentView);
           setSync('online');
-          if (force) toast('已从云端恢复全部数据 🎉', 'ok');
+          if (force) toast('已从云端恢复全部数据 🎉' + (persistOk ? '' : '（本地保存失败）'), persistOk ? 'ok' : 'warn');
         } else if (!isFreshDefault(remote)) {
           const changed = mergeImport(remote, true); /* 云端优先合并：相同 id 以云端为准，确保电脑端修改下行到手机 */
           if (changed) {
@@ -2222,8 +2234,9 @@ async function pullSync(force) {
     cloudReady = true; pullAttempts = 0;
     const msg = (e && e.message) || '';
     const raw = /401|403/.test(msg) ? 'token无效' : (/(fetch|network|timeout|failed|HTTP)/i.test(msg) ? '网络不通' : msg || '同步失败');
-    const detail = raw.slice(0, 12);
+    const detail = raw.slice(0, 24);
     setSync('offline', detail);
+    if (force) toast('恢复失败：' + detail, 'warn');
   }
 }
 /* 判断当前状态是否是「空白默认」（除了种子纪念日外没有任何真实录入）。
@@ -2253,6 +2266,7 @@ function pushSync(force) {
     return Promise.resolve();
   }
   clearTimeout(syncTimer);
+  trimBackups(S); /* 上传前清理旧备份，控制 data.json 体积 */
   return new Promise((resolve, reject) => {
     syncTimer = setTimeout(async () => {
       try {
