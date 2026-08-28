@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v35'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v36'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -2133,7 +2133,11 @@ function ghApi(method, body) {
     'Accept': 'application/vnd.github.v3+json'
   };
   if (body) headers['Content-Type'] = 'application/json';
-  return fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const opt = { method, headers, body: body ? JSON.stringify(body) : undefined };
+  /* 关键修复：GET 拉取云端数据必须 no-store，否则浏览器/GitHub CDN（Cache-Control: max-age=60）会把旧响应缓存住，
+     导致手机/电脑一直看到「不是最新的」数据。 */
+  if (method === 'GET') opt.cache = 'no-store';
+  return fetch(url, opt);
 }
 function initSync() {
   if (!GITHUB_CFG.token || !GITHUB_CFG.owner || !GITHUB_CFG.repo) { setSync('offline', '未配置云端'); return; }
@@ -2182,13 +2186,12 @@ async function pullSync(force) {
           setSync('online');
           if (force) toast('已从云端恢复全部数据 🎉', 'ok');
         } else if (!isFreshDefault(remote)) {
-          const before = totalRecords(S);
-          mergeImport(remote); /* 智能合并：只补当前缺失的记录 */
-          if (totalRecords(S) > before) {
-            save(); /* 落盘并回写云端（此时本地数已≥云端，不会覆盖） */
+          const changed = mergeImport(remote, true); /* 云端优先合并：相同 id 以云端为准，确保电脑端修改下行到手机 */
+          if (changed) {
+            save(); /* 落盘并回写云端（本地修改已先推上云，云端总是最新） */
             renderView(currentView);
             setSync('online');
-            toast('已自动补回缺失的云端数据 🎉', 'ok');
+            toast('已同步云端最新数据 🎉', 'ok');
           }
         }
       }
@@ -2317,18 +2320,38 @@ function mergeArr(cur, inc) {
   return cur;
 }
 /* 智能合并导入：找回备份中当前缺失的历史数据，同时完整保留当前已录入内容 */
-function mergeImport(raw) {
+/* 按 id 合并：相同 id 以传入 inc 为准（云端优先），inc 没有的保留 cur。用于云端拉取时下行更新。 */
+function mergeArrCloud(cur,  inc) {
+  cur = Array.isArray(cur) ? cur.slice() : [];
+  if (!Array.isArray(inc)) return cur;
+  const incMap = new Map();
+  inc.forEach(x => { if (x && x.id) incMap.set(x.id, x); });
+  const out = [];
+  const seen = new Set();
+  cur.forEach(x => {
+    if (x && x.id && incMap.has(x.id)) { out.push(incMap.get(x.id)); seen.add(x.id); }
+    else { out.push(x); }
+  });
+  inc.forEach(x => { if (x && x.id && !seen.has(x.id)) { out.push(x); seen.add(x.id); } });
+  return out;
+}
+function mergeImport(raw, cloudPriority) {
   const def = defaultState();
   const src = Object.assign(def, raw);
-  S.baby.poops = mergeArr(S.baby.poops, src.baby.poops);
-  if (src.baby && src.baby.meds) S.baby.meds = mergeArr(S.baby.meds || [], src.baby.meds);
+  const pick = cloudPriority ? mergeArrCloud : mergeArr;
+  S.baby.poops = pick(S.baby.poops, src.baby.poops);
+  if (src.baby && src.baby.meds) S.baby.meds = pick(S.baby.meds || [], src.baby.meds);
   migrateBabyState();
-  S.xhs.noteExpenses = mergeArr(S.xhs.noteExpenses, src.xhs.noteExpenses);
-  S.xhs.rebates = mergeArr(S.xhs.rebates, src.xhs.rebates);
-  S.ledger = mergeArr(S.ledger, src.ledger);
-  if (Array.isArray(src.home && src.home.rest)) S.home.rest = mergeArr(S.home.rest, src.home.rest);
-  /* 红薯日历笔记：仅当当前为空才用备份（当前已有则保留，不回退到备份的 0） */
-  if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
+  S.xhs.noteExpenses = pick(S.xhs.noteExpenses, src.xhs.noteExpenses);
+  S.xhs.rebates = pick(S.xhs.rebates, src.xhs.rebates);
+  S.ledger = pick(S.ledger, src.ledger);
+  if (Array.isArray(src.home && src.home.rest)) S.home.rest = pick(S.home.rest, src.home.rest);
+  /* 红薯日历笔记：云端优先时用云端最新；备份导入时仅当本地为空才用备份 */
+  if (cloudPriority) {
+    if ((src.publish.notes || []).length) S.publish.notes = src.publish.notes;
+  } else {
+    if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
+  }
   /* 小红书限流笔记：按账号合并 */
   migrateXhsAccounts();
   if (src.xhs.limit) {
@@ -2337,7 +2360,7 @@ function mergeImport(raw) {
       /* 旧备份是全局 limit，仅当当前第一个账号无数据时才继承 */
       const first = XHS_ACCOUNTS[0];
       const curL = S.xhs.limit[first];
-      if (!(curL.count || 0) && !(curL.names || '').trim()) {
+      if (cloudPriority || (!(curL.count || 0) && !(curL.names || '').trim())) {
         S.xhs.limit[first] = { count: src.xhs.limit.count || 0, names: (src.xhs.limit.names || '').trim() };
       }
     } else {
@@ -2345,7 +2368,7 @@ function mergeImport(raw) {
         const incL = src.xhs.limit[acct];
         if (!incL) return;
         const curL = S.xhs.limit[acct] || { count: 0, names: '' };
-        if (!(curL.count || 0) && !(curL.names || '').trim()) {
+        if (cloudPriority || (!(curL.count || 0) && !(curL.names || '').trim())) {
           S.xhs.limit[acct] = { count: incL.count || 0, names: (incL.names || '').trim() };
         }
       });
@@ -2362,10 +2385,10 @@ function mergeImport(raw) {
   XHS_ACCOUNTS.forEach(acct => {
     const cur = S.xhs.accounts[acct] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
     const inc = src.xhs.accounts[acct] || { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
-    cur.records = mergeArr(cur.records || [], inc.records || []);
+    cur.records = pick(cur.records || [], inc.records || []);
     /* 基准：当前为空则继承备份 */
-    if (!(cur.base && (cur.base.followers || cur.base.notes || cur.base.zanCang)) && (inc.base && (inc.base.followers || inc.base.notes || inc.base.zanCang))) {
-      cur.base = { ...inc.base };
+    if (cloudPriority || !(cur.base && (cur.base.followers || cur.base.notes || cur.base.zanCang))) {
+      if (inc.base && (inc.base.followers || inc.base.notes || inc.base.zanCang)) cur.base = { ...inc.base };
     }
     /* 基准仍为空但有记录，则取最新一条 */
     if (!(cur.base && (cur.base.followers || cur.base.notes || cur.base.zanCang)) && (cur.records || []).length) {
@@ -2376,6 +2399,7 @@ function mergeImport(raw) {
   });
   S.xhs.base = S.xhs.accounts[XHS_ACCOUNTS[0]].base;
   S.xhs.records = S.xhs.accounts[XHS_ACCOUNTS[0]].records;
+  return JSON.stringify(S) !== before;
 }
 function openImportPicker() {
   const inp = document.createElement('input');
