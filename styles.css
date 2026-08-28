@@ -641,6 +641,10 @@ input,textarea,select{font-family:inherit;color:inherit}
 .xhs-hist-delta.up{color:#D6453D}    /* 涨：红 加粗 */
 .xhs-hist-delta.down{color:#2E9E6B}  /* 跌：绿 */
 .xhs-hist-delta.flat{color:var(--ink-faint);font-weight:700}
+.xhs-hist-more{display:none}
+.xhs-hist-more.open{display:contents}
+.xhs-hist-toggle{width:100%;margin-top:10px;padding:9px 12px;border:1px dashed var(--line);background:var(--card);border-radius:10px;color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.xhs-hist-toggle .toggle-icon{font-size:16px;line-height:1;font-weight:800}
 
 /* ===================== 小红书：待返款合计 ===================== */
 .rb-summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;font-size:13px;color:var(--ink-soft);margin:2px 0 8px}
