@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v40'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v41'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -1711,8 +1711,12 @@ function openXhsHistoryModal() {
         <div class="xhs-hist-act"><button class="icon-btn danger" data-action="xhs-hist-del" data-ids="${r.recIds.join(',')}" data-account="${esc(acct)}" title="删除该日记录">${icTrash()}</button></div>`;
     };
     const SHOW_RECENT = 3;
-    const visibleRows = rows.slice(-SHOW_RECENT);
-    const hiddenRows = rows.slice(0, -SHOW_RECENT);
+    const initRow = rows.find(r => r.isInitial) || rows[0];
+    const seen = new Set();
+    const visibleRows = [];
+    if (initRow) { visibleRows.push(initRow); seen.add(initRow); }
+    rows.slice(-SHOW_RECENT).forEach(r => { if (!seen.has(r)) { visibleRows.push(r); seen.add(r); } });
+    const hiddenRows = rows.filter(r => !seen.has(r));
     body += `<div class="xhs-hist">
       <div class="xhs-hist-table">${head}${visibleRows.map(renderRow).join('')}`;
     if (hiddenRows.length) {
