@@ -2,6 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
+const APP_VERSION = 'v35'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -2412,7 +2413,29 @@ function openCloudBackup() {
 /* ---------- 同步冲突弹窗（两端都有改动时让用户选择，绝不静默覆盖） ---------- */
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    /* 发现新版本 Service Worker 安装完成：提示用户刷新（加载新的 app.js/index.html）。
+       这能根治「iPhone PWA 一直跑旧缓存版本、不同步」的问题。 */
+    if (reg && reg.addEventListener) {
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (nw) nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdateBanner();
+        });
+      });
+    }
+  }).catch(() => {});
+  /* 新 SW 接管页面控制权时（已在后台安装），提示刷新 */
+  navigator.serviceWorker.addEventListener('controllerchange', () => { showUpdateBanner(); });
+}
+/* 显示「发现新版本」横幅；点击「立即刷新」硬性重载页面（跳过缓存） */
+function showUpdateBanner() {
+  const b = $('#updateBanner');
+  if (!b || b.dataset.shown) return;
+  b.dataset.shown = '1';
+  b.style.display = 'flex';
+  const btn = $('#updateBtn');
+  if (btn) btn.addEventListener('click', () => location.reload(true));
 }
 
 /* ===================== 启动 ===================== */
@@ -2450,6 +2473,15 @@ migrateBabyState();
 })();
 
 $('#topDate').textContent = fmtDateCN(todayStr());
+/* 顶栏显示当前版本号，便于核对手机/电脑是否都运行最新版 */
+const verPill = $('#verPill');
+if (verPill) verPill.textContent = APP_VERSION;
+/* 版本标记：写入 localStorage；若检测到之前跑的是更旧的版本，提示刷新以彻底加载新版 */
+try {
+  const prevVer = localStorage.getItem('cr_app_ver');
+  if (prevVer && prevVer !== APP_VERSION) showUpdateBanner();
+  localStorage.setItem('cr_app_ver', APP_VERSION);
+} catch (e) {}
 /* 点击顶部同步状态可手动重试（提前绑定，避免首页渲染异常时丢失点击能力） */
 $('#syncPill').addEventListener('click', () => { retrySync(); });
 try { showView('home'); } catch (e) { console.error('首页渲染异常：', e); }
