@@ -2,7 +2,7 @@
 'use strict';
 
 const KEY = 'changruyi_workbench_v1';
-const APP_VERSION = 'v41'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v42'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 /* ===================== GitHub 云端同步配置 =====================
  * 用 GitHub 仓库里的 data.json 做多设备同步（浏览器直连 api.github.com，支持 CORS）。
@@ -1711,26 +1711,22 @@ function openXhsHistoryModal() {
         <div class="xhs-hist-act"><button class="icon-btn danger" data-action="xhs-hist-del" data-ids="${r.recIds.join(',')}" data-account="${esc(acct)}" title="删除该日记录">${icTrash()}</button></div>`;
     };
     const SHOW_RECENT = 3;
-    const initRow = rows.find(r => r.isInitial) || rows[0];
-    const seen = new Set();
-    const visibleRows = [];
-    if (initRow) { visibleRows.push(initRow); seen.add(initRow); }
-    rows.slice(-SHOW_RECENT).forEach(r => { if (!seen.has(r)) { visibleRows.push(r); seen.add(r); } });
-    const hiddenRows = rows.filter(r => !seen.has(r));
+    const initIdx = rows.findIndex(r => r.isInitial);
+    const initRow = initIdx >= 0 ? rows[initIdx] : rows[0];
+    const recentRows = rows.slice(-SHOW_RECENT);
+    const hiddenRows = rows.filter((r, i) => i !== initIdx && !recentRows.includes(r));
+    const recentWithoutInit = recentRows.filter(r => r !== initRow);
     body += `<div class="xhs-hist">
-      <div class="xhs-hist-table">${head}${visibleRows.map(renderRow).join('')}`;
+      <div class="xhs-hist-table">${head}${renderRow(initRow)}`;
     if (hiddenRows.length) {
       body += `<div class="xhs-hist-more" id="xhs-hist-more-${idx}" data-count="${hiddenRows.length}">
         ${hiddenRows.map(renderRow).join('')}
-      </div>`;
-    }
-    body += `</div>`;
-    if (hiddenRows.length) {
-      body += `<button class="xhs-hist-toggle" data-action="xhs-hist-toggle" data-idx="${idx}" data-count="${hiddenRows.length}">
+      </div>
+      <button class="xhs-hist-toggle" data-action="xhs-hist-toggle" data-idx="${idx}" data-count="${hiddenRows.length}">
         <span class="toggle-icon">+</span> 展开 ${hiddenRows.length} 天历史
       </button>`;
     }
-    body += `</div></div>`;
+    body += `${recentWithoutInit.map(renderRow).join('')}</div></div></div>`;
   });
   body += `<p class="modal-tip" style="margin-top:12px">每格下方小字为「较前一天」的增量：<b style="color:#D6453D">红色加粗 = 涨</b>，绿色 = 跌，持平则灰色。删除某一天会移除该日全部记录。</p>`;
   openModal(`<h3>📊 数据增长统计</h3>${body}`, 'modal-wide');
