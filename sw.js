@@ -1,6 +1,6 @@
 /* 常如意工作台 · Service Worker（离线缓存壳，保证稳定打开） */
-const CACHE = 'changruyi-workbench-v41';
-const ASSETS = ['./', './index.html', './styles.css?v=41', './app.js?v=41', './manifest.webmanifest',
+const CACHE = 'changruyi-workbench-v42';
+const ASSETS = ['./', './index.html', './styles.css?v=42', './app.js?v=42', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
