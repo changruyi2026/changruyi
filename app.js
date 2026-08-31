@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v49'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v50'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -4810,7 +4810,7 @@ document.addEventListener('click', e => {
 
       S.ruyiNotes = (S.ruyiNotes || []).filter(x => x.id !== id);
 
-      save(); renderView('ruyi'); if (n) openRuyiDayModal(n.date); toast('已删除'); break;
+      save(); pushSync(true).catch(() => {}); renderView('ruyi'); if (n) openRuyiDayModal(n.date); toast('已删除'); break;
 
     }
 
@@ -5018,7 +5018,7 @@ document.addEventListener('click', e => {
 
       S.yayaNotes = (S.yayaNotes || []).filter(x => x.id !== id);
 
-      save(); renderView('yaya'); if (n) openYayaDayModal(n.date); toast('已删除'); break;
+      save(); pushSync(true).catch(() => {}); renderView('yaya'); if (n) openYayaDayModal(n.date); toast('已删除'); break;
 
     }
 
@@ -5676,15 +5676,15 @@ function mergeImport(raw, cloudPriority) {
 
   if (Array.isArray(src.home && src.home.rest)) S.home.rest = pick(S.home.rest, src.home.rest);
 
-  /* 如意/芽芽日历笔记：云端优先时用云端最新；备份导入时仅当本地为空才用备份 */
+  /* 如意/芽芽日历笔记：按 id 合并，避免云端整批覆盖本地；云端优先时同 id 以云端为准 */
 
   if (cloudPriority) {
 
     if (Array.isArray(src.ruyiNotes) || Array.isArray(src.yayaNotes)) {
 
-      if (Array.isArray(src.ruyiNotes)) S.ruyiNotes = src.ruyiNotes;
+      S.ruyiNotes = mergeArrCloud(S.ruyiNotes || [], src.ruyiNotes || []);
 
-      if (Array.isArray(src.yayaNotes)) S.yayaNotes = src.yayaNotes;
+      S.yayaNotes = mergeArrCloud(S.yayaNotes || [], src.yayaNotes || []);
 
     } else if ((src.publish && src.publish.notes || []).length) {
 
