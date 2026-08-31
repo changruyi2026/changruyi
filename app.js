@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v48'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v49'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -5454,13 +5454,35 @@ function pushSync(force) {
 
   trimBackups(S); /* 上传前清理旧备份，控制 data.json 体积 */
 
+  /* 上传前先把对象序列化并校验：防止内存中的 S 损坏后覆盖云端 */
+
+  let jsonStr;
+
+  try { jsonStr = JSON.stringify(S, null, 2); JSON.parse(jsonStr); }
+
+  catch (e) { setSync('offline', '数据损坏'); throw new Error('本地数据 JSON 损坏，拒绝上传：' + e.message); }
+
+  /* 体积过大时清理 backups 再试；仍过大则拒绝上传，避免截断/失败 */
+
+  if (jsonStr.length > 500000) {
+
+    S.backups = [];
+
+    try { jsonStr = JSON.stringify(S, null, 2); JSON.parse(jsonStr); }
+
+    catch (e) { setSync('offline', '数据损坏'); throw new Error('本地数据 JSON 损坏，拒绝上传：' + e.message); }
+
+    if (jsonStr.length > 500000) { setSync('offline', '数据太大'); throw new Error('data.json 超过 500KB，请导出备份后清理数据'); }
+
+  }
+
   return new Promise((resolve, reject) => {
 
     syncTimer = setTimeout(async () => {
 
       try {
 
-        const content = b64encodeUtf8(JSON.stringify(S, null, 2));
+        const content = b64encodeUtf8(jsonStr);
 
         const body = {
 
