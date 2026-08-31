@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v45'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v46'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -230,7 +230,7 @@ function lunarToSolar(y, m, d, leap) {
 
 
 
-/* 把旧版 S.publish.notes 按账号拆到 ruyiNotes / yayaNotes；幂等，不丢数据 */
+/* 旧版 S.publish.notes 全部属于芽芽Mochi，整体并入 yayaNotes；如意日历保持空白；幂等，不丢数据 */
 
 function migrateCalendarSplit() {
 
@@ -244,43 +244,25 @@ function migrateCalendarSplit() {
 
     if (!data || typeof data !== 'object') return;
 
-    /* 已经拆分过就不处理了 */
+    if (!Array.isArray(data.ruyiNotes)) data.ruyiNotes = [];
 
-    if (Array.isArray(data.ruyiNotes) || Array.isArray(data.yayaNotes)) return;
+    if (!Array.isArray(data.yayaNotes)) data.yayaNotes = [];
+
+    /* 任何残留在旧 publish.notes 里的历史笔记，全部归入芽芽日历（用户确认旧红薯日历数据都属于芽芽Mochi） */
 
     const old = Array.isArray(data.publish && data.publish.notes) ? data.publish.notes : [];
 
-    if (!old.length) {
+    if (old.length) {
 
-      data.ruyiNotes = [];
+      for (const n of old) data.yayaNotes.push(n);
 
-      data.yayaNotes = [];
+      if (!data.publish) data.publish = {};
+
+      data.publish.notes = []; /* 清空旧数组，避免重复统计；publish 容器保留做兼容 */
 
       localStorage.setItem(KEY, JSON.stringify(data));
 
-      return;
-
     }
-
-    data.ruyiNotes = [];
-
-    data.yayaNotes = [];
-
-    for (const n of old) {
-
-      if (n && n.account === '芽芽Mochi') data.yayaNotes.push(n);
-
-      else data.ruyiNotes.push(n);
-
-    }
-
-    /* 保留旧字段做备份，但清空 notes 避免重复统计 */
-
-    if (!data.publish) data.publish = {};
-
-    data.publish.notes = [];
-
-    localStorage.setItem(KEY, JSON.stringify(data));
 
   } catch (e) { console.warn('migrateCalendarSplit failed', e); }
 
@@ -5650,17 +5632,13 @@ function mergeImport(raw, cloudPriority) {
 
     } else if ((src.publish && src.publish.notes || []).length) {
 
-      /* 兼容旧版云端：按账号拆分 */
+      /* 兼容旧版云端：仅当本地尚未迁移过才整批归入芽芽，避免覆盖本地已有笔记 */
 
-      S.ruyiNotes = [];
+      if ((S.ruyiNotes || []).length === 0 && (S.yayaNotes || []).length === 0) {
 
-      S.yayaNotes = [];
+        S.ruyiNotes = [];
 
-      for (const n of src.publish.notes) {
-
-        if (n && n.account === '芽芽Mochi') S.yayaNotes.push(n);
-
-        else S.ruyiNotes.push(n);
+        S.yayaNotes = (src.publish.notes || []).slice(); /* 旧红薯日历数据全部属于芽芽Mochi */
 
       }
 
@@ -5682,15 +5660,7 @@ function mergeImport(raw, cloudPriority) {
 
         S.ruyiNotes = [];
 
-        S.yayaNotes = [];
-
-        for (const n of src.publish.notes) {
-
-          if (n && n.account === '芽芽Mochi') S.yayaNotes.push(n);
-
-          else S.ruyiNotes.push(n);
-
-        }
+        S.yayaNotes = (src.publish.notes || []).slice(); /* 旧红薯日历数据全部属于芽芽Mochi */
 
       }
 
