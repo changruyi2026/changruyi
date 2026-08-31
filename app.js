@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v46'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v47'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -415,8 +415,8 @@ const TITLES = {
 
   baby: ['女鹅记录', '女鹅的成长日记 · 拉屎打卡 💩'],
 
-  ruyi: ['如意日历', '大号常如意i · 出稿笔记 📕'],
-  yaya: ['芽芽日历', '小号芽芽Mochi · 出稿笔记 🌱']
+  ruyi: ['🟠常如意i', '大号常如意i · 出稿笔记'],
+  yaya: ['🌱芽芽Mochi', '小号芽芽Mochi · 出稿笔记']
 
 };
 
@@ -729,7 +729,7 @@ function renderRuyi() {
 
     <div class="card">
 
-      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>📕 如意日历
+      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🟠常如意i
 
         <span class="cal-hint" style="margin-left:auto">点日期记录当天出稿笔记</span>
 
@@ -763,7 +763,7 @@ function renderYaya() {
 
     <div class="card">
 
-      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🌱 芽芽日历
+      <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>🌱芽芽Mochi
 
         <span class="cal-hint" style="margin-left:auto">点日期记录当天出稿笔记</span>
 
@@ -1523,7 +1523,7 @@ function openRuyiDayModal(ds) {
 
   const html = `
 
-    <h3>📕 如意日历 · ${fmtDateCN(ds)} · ${ld}</h3>
+    <h3>🟠常如意i · ${fmtDateCN(ds)} · ${ld}</h3>
 
     <div class="hs-add">
 
@@ -2027,7 +2027,7 @@ function openYayaDayModal(ds) {
 
   const html = `
 
-    <h3>🌱 芽芽日历 · ${fmtDateCN(ds)} · ${ld}</h3>
+    <h3>🌱芽芽Mochi · ${fmtDateCN(ds)} · ${ld}</h3>
 
     <div class="hs-add">
 
