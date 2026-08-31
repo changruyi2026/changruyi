@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v47'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v48'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -31,6 +31,9 @@ const GITHUB_CFG = {
   branch: 'main'
 
 };
+
+/* GitHub Pages 静态源（国内通常可直连，作为 api.github.com 被墙时的只读恢复备用源） */
+const PAGES_DATA_URL = `https://${GITHUB_CFG.owner}.github.io/${GITHUB_CFG.repo}/${GITHUB_CFG.path}`;
 
 const $  = (s, r = document) => r.querySelector(s);
 
@@ -5232,6 +5235,19 @@ async function syncNow() {
 
 }
 
+/* 从 GitHub Pages 静态地址只读恢复整份数据（api.github.com 被墙/超时时的兜底）。
+   不依赖 token，国内网络通常可直连；恢复后写回本地存储，保证下次打开不丢。 */
+async function restoreFromPages() {
+  const resp = await fetch(PAGES_DATA_URL, { cache: 'no-store' });
+  if (!resp.ok) throw new Error('Pages HTTP ' + resp.status);
+  const remote = await resp.json();
+  if (!remote || typeof remote !== 'object') throw new Error('Pages 数据为空');
+  S = Object.assign(defaultState(), remote);
+  trimBackups(S);
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { console.warn('Pages 恢复后本地存不下', e); }
+  return true;
+}
+
 async function pullSync(force) {
 
   try {
@@ -5332,21 +5348,39 @@ async function pullSync(force) {
 
   } catch (e) {
 
-    if (pullAttempts < 3 && /fetch|network|timeout|failed|HTTP 5/i.test(e.message || '')) {
+    const msg = (e && e.message) || '';
 
-      const wait = pullAttempts * 2000;
+    /* 网络类错误（api.github.com 被墙/超时）：优先用 GitHub Pages 备用源恢复，不再执着于 api */
+    if (/fetch|network|timeout|failed|HTTP 5/i.test(msg)) {
 
-      setSync('syncing', `重试(${pullAttempts})`);
+      try {
 
-      setTimeout(() => pullSync(force), wait);
+        await restoreFromPages();
 
-      return;
+        toast('已从云端(Pages)恢复全部数据 🎉', 'ok');
+
+        renderView(currentView);
+
+        return;
+
+      } catch (e2) { console.warn('Pages 备用恢复失败', e2); }
+
+      /* Pages 也失败才回退到 api 重试 */
+      if (pullAttempts < 3) {
+
+        pullAttempts++;
+
+        setSync('syncing', `重试(${pullAttempts})`);
+
+        setTimeout(() => pullSync(force), pullAttempts * 2000);
+
+        return;
+
+      }
 
     }
 
     cloudReady = true; pullAttempts = 0;
-
-    const msg = (e && e.message) || '';
 
     const raw = /401|403/.test(msg) ? 'token无效' : (/(fetch|network|timeout|failed|HTTP)/i.test(msg) ? '网络不通' : msg || '同步失败');
 
