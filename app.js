@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v44'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v45'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -114,7 +114,11 @@ function defaultState() {
 
     baby: { poops: [], meds: [] },
 
-    publish: { notes: [] },
+    publish: { notes: [] }, /* 旧版兼容：迁移后数据写入 ruyiNotes / yayaNotes */
+
+    ruyiNotes: [],
+
+    yayaNotes: [],
 
     backups: []
 
@@ -221,6 +225,64 @@ function lunarToSolar(y, m, d, leap) {
   date.setDate(date.getDate() + (d - 1));
 
   return date;
+
+}
+
+
+
+/* 把旧版 S.publish.notes 按账号拆到 ruyiNotes / yayaNotes；幂等，不丢数据 */
+
+function migrateCalendarSplit() {
+
+  try {
+
+    const raw = localStorage.getItem(KEY);
+
+    if (!raw) return;
+
+    const data = JSON.parse(raw);
+
+    if (!data || typeof data !== 'object') return;
+
+    /* 已经拆分过就不处理了 */
+
+    if (Array.isArray(data.ruyiNotes) || Array.isArray(data.yayaNotes)) return;
+
+    const old = Array.isArray(data.publish && data.publish.notes) ? data.publish.notes : [];
+
+    if (!old.length) {
+
+      data.ruyiNotes = [];
+
+      data.yayaNotes = [];
+
+      localStorage.setItem(KEY, JSON.stringify(data));
+
+      return;
+
+    }
+
+    data.ruyiNotes = [];
+
+    data.yayaNotes = [];
+
+    for (const n of old) {
+
+      if (n && n.account === '芽芽Mochi') data.yayaNotes.push(n);
+
+      else data.ruyiNotes.push(n);
+
+    }
+
+    /* 保留旧字段做备份，但清空 notes 避免重复统计 */
+
+    if (!data.publish) data.publish = {};
+
+    data.publish.notes = [];
+
+    localStorage.setItem(KEY, JSON.stringify(data));
+
+  } catch (e) { console.warn('migrateCalendarSplit failed', e); }
 
 }
 
@@ -517,15 +579,35 @@ function homeDayItems(ds) {
 
 function homeDraftNotes() {
 
-  /* 首页「今日待出稿」只显示截止日期为今天且仍是待出稿的笔记 */
+  /* 首页「今日待出稿」合并如意、芽芽两个日历，只显示截止日期为今天且仍是待出稿的笔记 */
 
   const ds = todayStr();
 
-  const list = (S.publish.notes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿');
+  const ruyi = (S.ruyiNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').map(n => ({ ...n, cal: '常如意i' }));
+
+  const yaya = (S.yayaNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').map(n => ({ ...n, cal: '芽芽Mochi' }));
+
+  const list = [...ruyi, ...yaya];
 
   list.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
   return list;
+
+}
+
+
+
+/* 首页 badge：两个日历今日待出稿总数 */
+
+function totalPendingCount() {
+
+  const ds = todayStr();
+
+  const ruyi = (S.ruyiNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').length;
+
+  const yaya = (S.yayaNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').length;
+
+  return ruyi + yaya;
 
 }
 
@@ -1173,7 +1255,11 @@ function ruyiUnreadPending() {
 
 function updateHomeBadge() {
 
-  const unread = ruyiUnreadPending();
+  const cur = totalPendingCount();
+
+  const read = (S.home && S.home.hsReadCount) || 0;
+
+  const unread = Math.max(0, cur - read);
 
   const el = $('#navBadgeHome');
 
@@ -1685,17 +1771,7 @@ function yayaUnreadPending() {
 
 }
 
-function updateHomeBadge() {
-
-  const unread = yayaUnreadPending();
-
-  const el = $('#navBadgeHome');
-
-  if (el) el.style.display = unread > 0 ? 'inline-flex' : 'none';
-
-  return unread;
-
-}
+/* updateHomeBadge 已在上方统一实现（合并两个日历的未读待出稿） */
 
 
 
@@ -5318,6 +5394,10 @@ function isFreshDefault(s) {
 
     && (s.publish && s.publish.notes || []).length === 0
 
+    && (s.ruyiNotes || []).length === 0
+
+    && (s.yayaNotes || []).length === 0
+
     && (s.home && s.home.rest || []).length === 0
 
     && (x.records || []).length === 0
@@ -5558,15 +5638,63 @@ function mergeImport(raw, cloudPriority) {
 
   if (Array.isArray(src.home && src.home.rest)) S.home.rest = pick(S.home.rest, src.home.rest);
 
-  /* 红薯日历笔记：云端优先时用云端最新；备份导入时仅当本地为空才用备份 */
+  /* 如意/芽芽日历笔记：云端优先时用云端最新；备份导入时仅当本地为空才用备份 */
 
   if (cloudPriority) {
 
-    if ((src.publish.notes || []).length) S.publish.notes = src.publish.notes;
+    if (Array.isArray(src.ruyiNotes) || Array.isArray(src.yayaNotes)) {
+
+      if (Array.isArray(src.ruyiNotes)) S.ruyiNotes = src.ruyiNotes;
+
+      if (Array.isArray(src.yayaNotes)) S.yayaNotes = src.yayaNotes;
+
+    } else if ((src.publish && src.publish.notes || []).length) {
+
+      /* 兼容旧版云端：按账号拆分 */
+
+      S.ruyiNotes = [];
+
+      S.yayaNotes = [];
+
+      for (const n of src.publish.notes) {
+
+        if (n && n.account === '芽芽Mochi') S.yayaNotes.push(n);
+
+        else S.ruyiNotes.push(n);
+
+      }
+
+    }
 
   } else {
 
-    if ((S.publish.notes || []).length === 0 && (src.publish.notes || []).length) S.publish.notes = src.publish.notes;
+    const localEmpty = (S.ruyiNotes || []).length === 0 && (S.yayaNotes || []).length === 0;
+
+    if (localEmpty) {
+
+      if (Array.isArray(src.ruyiNotes) || Array.isArray(src.yayaNotes)) {
+
+        if (Array.isArray(src.ruyiNotes)) S.ruyiNotes = src.ruyiNotes;
+
+        if (Array.isArray(src.yayaNotes)) S.yayaNotes = src.yayaNotes;
+
+      } else if ((src.publish && src.publish.notes || []).length) {
+
+        S.ruyiNotes = [];
+
+        S.yayaNotes = [];
+
+        for (const n of src.publish.notes) {
+
+          if (n && n.account === '芽芽Mochi') S.yayaNotes.push(n);
+
+          else S.ruyiNotes.push(n);
+
+        }
+
+      }
+
+    }
 
   }
 
