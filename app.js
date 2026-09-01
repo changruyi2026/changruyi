@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v50'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v51'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -123,7 +123,9 @@ function defaultState() {
 
     yayaNotes: [],
 
-    backups: []
+    backups: [],
+
+    deletedIds: {} /* 删除笔记的墓碑记录，防止删除后被云端/备份又拉回来；{ id: timestamp } */
 
   };
 
@@ -286,7 +288,7 @@ function load() {
 
 }
 
-function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); trimBackups(S); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
+function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); trimBackups(S); trimDeletedIds(S); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
 
 /* 清理备份：保留最近 7 天，防止 localStorage 和云端 data.json 体积膨胀 */
 
@@ -295,6 +297,26 @@ function trimBackups(s) {
   try {
 
     if (s && Array.isArray(s.backups) && s.backups.length > 7) s.backups = s.backups.slice(0, 7);
+
+  } catch (e) {}
+
+}
+
+/* 清理墓碑：删除超过 30 天的已删笔记 id，防止 deletedIds 无限膨胀 */
+
+function trimDeletedIds(s) {
+
+  try {
+
+    if (!s || !s.deletedIds) return;
+
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+    for (const id in s.deletedIds) {
+
+      if (s.deletedIds[id] < cutoff) delete s.deletedIds[id];
+
+    }
 
   } catch (e) {}
 
@@ -4808,6 +4830,8 @@ document.addEventListener('click', e => {
 
       const n = (S.ruyiNotes || []).find(x => x.id === id);
 
+      if (n && n.id) { S.deletedIds = S.deletedIds || {}; S.deletedIds[n.id] = Date.now(); }
+
       S.ruyiNotes = (S.ruyiNotes || []).filter(x => x.id !== id);
 
       save(); pushSync(true).catch(() => {}); renderView('ruyi'); if (n) openRuyiDayModal(n.date); toast('已删除'); break;
@@ -5015,6 +5039,8 @@ document.addEventListener('click', e => {
     case 'yy-note-del': {
 
       const n = (S.yayaNotes || []).find(x => x.id === id);
+
+      if (n && n.id) { S.deletedIds = S.deletedIds || {}; S.deletedIds[n.id] = Date.now(); }
 
       S.yayaNotes = (S.yayaNotes || []).filter(x => x.id !== id);
 
@@ -5440,9 +5466,9 @@ function pushSync(force) {
 
   /* 铁律：本地记录数 < 云端记录数时，绝不覆盖云端（防止近空/空白状态清掉真实数据）。
 
-     仅当本地数据不少于云端时才允许上传。 */
+     仅当本地数据不少于云端时才允许上传。 force=true（删除笔记/手动同步）时绕过此限制。 */
 
-  if (cloudHasData && localCount < cloudRecordCount) {
+  if (!force && cloudHasData && localCount < cloudRecordCount) {
 
     setSync('online');
 
@@ -5452,7 +5478,7 @@ function pushSync(force) {
 
   clearTimeout(syncTimer);
 
-  trimBackups(S); /* 上传前清理旧备份，控制 data.json 体积 */
+  trimBackups(S); trimDeletedIds(S); /* 上传前清理旧备份与过期墓碑，控制 data.json 体积 */
 
   /* 上传前先把对象序列化并校验：防止内存中的 S 损坏后覆盖云端 */
 
@@ -5676,15 +5702,34 @@ function mergeImport(raw, cloudPriority) {
 
   if (Array.isArray(src.home && src.home.rest)) S.home.rest = pick(S.home.rest, src.home.rest);
 
-  /* 如意/芽芽日历笔记：按 id 合并，避免云端整批覆盖本地；云端优先时同 id 以云端为准 */
+  /* 合并墓碑：两端删除记录互通。取较晚的删除时间。 */
+
+  S.deletedIds = S.deletedIds || {};
+
+  if (src.deletedIds && typeof src.deletedIds === 'object') {
+
+    for (const [k, v] of Object.entries(src.deletedIds)) {
+
+      const t = Number(v) || 0;
+
+      if (!S.deletedIds[k] || t > S.deletedIds[k]) S.deletedIds[k] = t;
+
+    }
+
+  }
+
+  const notDeleted = x => x && x.id && !S.deletedIds[x.id];
+
+  /* 如意/芽芽日历笔记：按 id 合并，避免云端整批覆盖本地；云端优先时同 id 以云端为准。
+     已被墓碑标记的笔记不再合并回来。 */
 
   if (cloudPriority) {
 
     if (Array.isArray(src.ruyiNotes) || Array.isArray(src.yayaNotes)) {
 
-      S.ruyiNotes = mergeArrCloud(S.ruyiNotes || [], src.ruyiNotes || []);
+      S.ruyiNotes = mergeArrCloud(S.ruyiNotes || [], (src.ruyiNotes || []).filter(notDeleted));
 
-      S.yayaNotes = mergeArrCloud(S.yayaNotes || [], src.yayaNotes || []);
+      S.yayaNotes = mergeArrCloud(S.yayaNotes || [], (src.yayaNotes || []).filter(notDeleted));
 
     } else if ((src.publish && src.publish.notes || []).length) {
 
@@ -5694,7 +5739,7 @@ function mergeImport(raw, cloudPriority) {
 
         S.ruyiNotes = [];
 
-        S.yayaNotes = (src.publish.notes || []).slice(); /* 旧红薯日历数据全部属于芽芽Mochi */
+        S.yayaNotes = (src.publish.notes || []).filter(notDeleted).slice(); /* 旧红薯日历数据全部属于芽芽Mochi */
 
       }
 
@@ -5708,15 +5753,15 @@ function mergeImport(raw, cloudPriority) {
 
       if (Array.isArray(src.ruyiNotes) || Array.isArray(src.yayaNotes)) {
 
-        if (Array.isArray(src.ruyiNotes)) S.ruyiNotes = src.ruyiNotes;
+        if (Array.isArray(src.ruyiNotes)) S.ruyiNotes = (src.ruyiNotes || []).filter(notDeleted);
 
-        if (Array.isArray(src.yayaNotes)) S.yayaNotes = src.yayaNotes;
+        if (Array.isArray(src.yayaNotes)) S.yayaNotes = (src.yayaNotes || []).filter(notDeleted);
 
       } else if ((src.publish && src.publish.notes || []).length) {
 
         S.ruyiNotes = [];
 
-        S.yayaNotes = (src.publish.notes || []).slice(); /* 旧红薯日历数据全部属于芽芽Mochi */
+        S.yayaNotes = (src.publish.notes || []).filter(notDeleted).slice(); /* 旧红薯日历数据全部属于芽芽Mochi */
 
       }
 
@@ -5817,6 +5862,12 @@ function mergeImport(raw, cloudPriority) {
   S.xhs.base = S.xhs.accounts[XHS_ACCOUNTS[0]].base;
 
   S.xhs.records = S.xhs.accounts[XHS_ACCOUNTS[0]].records;
+
+  /* 墓碑生效：过滤掉本地仍残留的已删除笔记 */
+
+  S.ruyiNotes = (S.ruyiNotes || []).filter(notDeleted);
+
+  S.yayaNotes = (S.yayaNotes || []).filter(notDeleted);
 
   return JSON.stringify(S) !== before;
 
