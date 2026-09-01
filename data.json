@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788265648062,
+  "_modifiedAt": 1788265674761,
   "home": {
     "rest": [
       "2026-08-01",
@@ -42,6 +42,14 @@
       "cat": "餐饮",
       "amount": 2,
       "note": "山姆"
+    },
+    {
+      "id": "mtin7ll5uqbk4",
+      "date": "2026-09-01",
+      "type": "out",
+      "cat": "居家",
+      "amount": 308.13,
+      "note": "电费"
     }
   ],
   "xhs": {
