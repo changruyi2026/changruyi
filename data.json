@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788241474015,
+  "_modifiedAt": 1788265648062,
   "home": {
     "rest": [
       "2026-08-01",
@@ -34,6 +34,14 @@
       "note": "小红书号【初始粉丝6098 赞藏11.4W】",
       "type": "out",
       "amount": 1200
+    },
+    {
+      "id": "mtin70zig1vzy",
+      "date": "2026-09-01",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 2,
+      "note": "山姆"
     }
   ],
   "xhs": {
