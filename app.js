@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v51'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v52'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -50,6 +50,24 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+}
+
+/* 安全计算简单加法表达式：把 "3125+1269" 或 "3125 + 1269" 计算成 4394。
+
+   仅允许数字、空格、加号，避免 eval 任意代码执行。 */
+
+function evalMathExpr(s) {
+
+  const str = String(s == null ? '' : s).replace(/\s/g, '');
+
+  if (!str) return NaN;
+
+  if (/^\d+$/.test(str)) return parseInt(str, 10);
+
+  if (!/^\d+(\+\d+)+$/.test(str)) return NaN;
+
+  return str.split('+').reduce((sum, part) => sum + (parseInt(part, 10) || 0), 0);
 
 }
 
@@ -3180,9 +3198,7 @@ function openXhsAddModal() {
 
     <div class="field"><label>粉丝量（当前总粉丝）</label><input class="input" id="xFollowers" type="number" min="0" placeholder="如 1500" /></div>
 
-    <div class="field"><label>笔记数量（当前总篇数）</label><input class="input" id="xNotes" type="number" min="0" placeholder="如 86" /></div>
-
-    <div class="field"><label>赞藏数量（点赞+收藏 总数）</label><input class="input" id="xZan" type="number" min="0" placeholder="如 7999" /></div>
+    <div class="field"><label>赞藏数量（点赞+收藏 总数，可写 3125+1269）</label><input class="input" id="xZan" type="text" inputmode="numeric" placeholder="如 7999 或 3125+1269" /></div>
 
     <div class="modal-actions">
 
@@ -3636,11 +3652,7 @@ function renderXhs() {
 
     const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
 
-    const cur = { f: xhsCurrent('f', acct), n: xhsCurrent('n', acct), z: xhsCurrent('z', acct) };
-
-    const L = xhsLimit(acct);
-
-    const limitMini = L.count ? `<div class="limit-mini">🚫 ${L.count} 篇限流</div>` : '<div class="limit-mini ok">未限流</div>';
+    const cur = { f: xhsCurrent('f', acct), z: xhsCurrent('z', acct) };
 
     return `
 
@@ -3651,18 +3663,6 @@ function renderXhs() {
       <div class="xhs-stat xhs-stat-compact">
 
         <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f', acct))}</div>
-
-        <div class="xhs-cell xhs-cell-limit ${L.count ? 'has-limit' : ''}" data-action="xhs-open-limit" data-account="${esc(acct)}" title="点击管理限流笔记">
-
-          <div class="big">${cur.n.toLocaleString()}</div>
-
-          <div class="lbl">笔记数量</div>
-
-          ${deltaHTML(xhsDelta('n', acct))}
-
-          ${limitMini}
-
-        </div>
 
         <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z', acct))}</div>
 
@@ -3820,7 +3820,7 @@ function renderXhs() {
 
     <div class="xhs-accounts" style="margin-bottom:18px">${accountBlocks}</div>
 
-    <button class="btn btn-primary" style="margin-bottom:16px" data-action="xhs-add">+ 记录当前数据（粉丝 / 笔记 / 赞藏 当前总数）</button>
+    <button class="btn btn-primary" style="margin-bottom:16px" data-action="xhs-add">+ 记录当前数据（粉丝 / 赞藏 当前总数）</button>
 
     ${recHistory}
 
@@ -4026,8 +4026,6 @@ function openXhsHistoryModal() {
 
       <div class="xhs-hist-hc">赞藏数量</div>
 
-      <div class="xhs-hist-hc">笔记数量</div>
-
       <div class="xhs-hist-hc h-act"></div>`;
 
     const renderRow = r => {
@@ -4040,8 +4038,6 @@ function openXhsHistoryModal() {
 
       const fCell = r.isInitial ? initialMetricCell(r.f) : histMetricCell(r.f, r.df);
 
-      const nCell = r.isInitial ? initialMetricCell(r.n) : histMetricCell(r.n, r.dn);
-
       const zCell = r.isInitial ? initialMetricCell(r.z) : histMetricCell(r.z, r.dz);
 
       return `
@@ -4051,8 +4047,6 @@ function openXhsHistoryModal() {
         ${fCell}
 
         ${zCell}
-
-        ${nCell}
 
         <div class="xhs-hist-act"><button class="icon-btn danger" data-action="xhs-hist-del" data-ids="${r.recIds.join(',')}" data-account="${esc(acct)}" title="删除该日记录">${icTrash()}</button></div>`;
 
@@ -4352,19 +4346,23 @@ document.addEventListener('click', e => {
 
       const fv = ($('#xFollowers').value || '').trim();
 
-      const nv = ($('#xNotes').value || '').trim();
-
       const zv = ($('#xZan').value || '').trim();
 
       const rec = { id: uid(), date, account, ts: new Date().toISOString() };
 
       if (fv !== '') rec.f = Math.max(0, parseInt(fv, 10) || 0);
 
-      if (nv !== '') rec.n = Math.max(0, parseInt(nv, 10) || 0);
+      if (zv !== '') {
 
-      if (zv !== '') rec.z = Math.max(0, parseInt(zv, 10) || 0);
+        const znum = evalMathExpr(zv);
 
-      if (rec.f == null && rec.n == null && rec.z == null) { toast('至少填一项', 'warn'); return; }
+        if (Number.isNaN(znum)) { toast('赞藏数量格式不对，请填写数字或加法算式（如 3125+1269）', 'warn'); return; }
+
+        rec.z = Math.max(0, znum);
+
+      }
+
+      if (rec.f == null && rec.z == null) { toast('至少填一项', 'warn'); return; }
 
       migrateXhsAccounts();
 
