@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788362646075,
+  "_modifiedAt": 1788362660589,
   "home": {
     "rest": [
       "2026-08-01",
@@ -50,6 +50,14 @@
       "cat": "居家",
       "amount": 308.13,
       "note": "电费"
+    },
+    {
+      "id": "mtk8ycbxrfeo5",
+      "date": "2026-09-02",
+      "type": "in",
+      "cat": "红包",
+      "amount": 3000,
+      "note": "梁根"
     }
   ],
   "xhs": {
