@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788313072868,
+  "_modifiedAt": 1788313142107,
   "home": {
     "rest": [
       "2026-08-01",
@@ -457,7 +457,24 @@
         ]
       }
     },
-    "noteExpenses": []
+    "noteExpenses": [
+      {
+        "id": "mtjfgzmjiknxf",
+        "name": "爱婴室",
+        "date": "2026-09-01",
+        "account": "常如意i",
+        "type": "note",
+        "cover": "",
+        "items": [
+          {
+            "id": "mtjfgj9c222z8",
+            "desc": "真人2000+20000",
+            "amount": 30.02,
+            "kind": "real"
+          }
+        ]
+      }
+    ]
   },
   "baby": {
     "meds": [
