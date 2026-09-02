@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788362761493,
+  "_modifiedAt": 1788362791470,
   "home": {
     "rest": [
       "2026-08-01",
@@ -74,6 +74,14 @@
       "cat": "居家",
       "amount": 14.5,
       "note": "水费"
+    },
+    {
+      "id": "mtk915biifiaj",
+      "date": "2026-09-02",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 92.1,
+      "note": "梁根盒马"
     }
   ],
   "xhs": {
