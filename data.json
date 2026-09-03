@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788405979805,
+  "_modifiedAt": 1788406191585,
   "home": {
     "rest": [
       "2026-08-01",
@@ -106,6 +106,14 @@
       "cat": "交通",
       "amount": 100,
       "note": "地铁卡"
+    },
+    {
+      "id": "mtkyvd29ay7hh",
+      "date": "2026-09-03",
+      "type": "out",
+      "cat": "其他",
+      "amount": 300,
+      "note": "梁根"
     }
   ],
   "xhs": {
