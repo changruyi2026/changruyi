@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788421216160,
+  "_modifiedAt": 1788421237385,
   "home": {
     "rest": [
       "2026-08-01",
@@ -68,14 +68,6 @@
       "note": "水费"
     },
     {
-      "id": "mtk915biifiaj",
-      "date": "2026-09-02",
-      "type": "out",
-      "cat": "餐饮",
-      "amount": 92.1,
-      "note": "梁根盒马"
-    },
-    {
       "id": "mtk91qv96m6na",
       "date": "2026-09-02",
       "type": "out",
@@ -114,6 +106,14 @@
       "cat": "买菜",
       "amount": 93.56,
       "note": "盒马"
+    },
+    {
+      "id": "mtl7tuh5914cf",
+      "date": "2026-09-02",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 92.1,
+      "note": "零食"
     }
   ],
   "xhs": {
