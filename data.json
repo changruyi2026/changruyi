@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788421172087,
+  "_modifiedAt": 1788421179255,
   "home": {
     "rest": [
       "2026-08-01",
@@ -114,6 +114,14 @@
       "cat": "其他",
       "amount": 300,
       "note": "梁根"
+    },
+    {
+      "id": "mtl7slmfe3lp6",
+      "date": "2026-09-02",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 80,
+      "note": "游戏点卡"
     }
   ],
   "xhs": {
