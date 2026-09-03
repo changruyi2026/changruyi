@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788398368871,
+  "_modifiedAt": 1788399381755,
   "home": {
     "rest": [
       "2026-08-01",
@@ -90,6 +90,14 @@
       "cat": "娱乐",
       "amount": 20.62,
       "note": "大疆挂绳"
+    },
+    {
+      "id": "mtkutekbmqx5v",
+      "date": "2026-09-03",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 93.56,
+      "note": "盒马买菜"
     }
   ],
   "xhs": {
