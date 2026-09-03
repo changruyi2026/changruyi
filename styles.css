@@ -405,7 +405,7 @@ input,textarea,select{font-family:inherit;color:inherit}
 .modal-x:hover{color:var(--rose-deep);transform:rotate(90deg)}
 
 /* ============ 小红书 ============ */
-.xhs-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.xhs-stat{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 @media(max-width:680px){.xhs-stat{grid-template-columns:1fr}}
 .xhs-cell{padding:20px;border-radius:18px;background:var(--card-2);text-align:center;position:relative;overflow:hidden}
 .xhs-cell .big{font-family:"Nunito";font-weight:800;font-size:34px;color:var(--ink)}
@@ -628,7 +628,7 @@ input,textarea,select{font-family:inherit;color:inherit}
 .modal-wide{width:min(560px,100%)}
 .xhs-hist{overflow-x:auto;margin:0 -2px;padding:0 2px}
 .xhs-hist-title{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;padding:8px 10px;border-radius:10px;margin-bottom:8px}
-.xhs-hist-table{display:grid;grid-template-columns:1.3fr repeat(3,1fr) 36px;min-width:440px;align-items:stretch}
+.xhs-hist-table{display:grid;grid-template-columns:1.3fr repeat(2,1fr) 36px;min-width:360px;align-items:stretch}
 .xhs-hist-table > div{padding:11px 8px;border-bottom:1px solid var(--line);display:flex;align-items:center}
 .xhs-hist-hc{font-size:12.5px;font-weight:800;color:var(--ink-soft);justify-content:center}
 .xhs-hist-hc.h-date{justify-content:flex-start;padding-left:4px}
