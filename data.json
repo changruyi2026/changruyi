@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788421237385,
+  "_modifiedAt": 1788421256614,
   "home": {
     "rest": [
       "2026-08-01",
@@ -68,14 +68,6 @@
       "note": "水费"
     },
     {
-      "id": "mtk91qv96m6na",
-      "date": "2026-09-02",
-      "type": "out",
-      "cat": "娱乐",
-      "amount": 20.62,
-      "note": "大疆挂绳"
-    },
-    {
       "id": "mtkuvqoud5zlt",
       "date": "2026-09-03",
       "type": "out",
@@ -114,6 +106,14 @@
       "cat": "梁根",
       "amount": 92.1,
       "note": "零食"
+    },
+    {
+      "id": "mtl7u9baivh5f",
+      "date": "2026-09-02",
+      "type": "out",
+      "cat": "居家",
+      "amount": 20.62,
+      "note": "大疆挂绳"
     }
   ],
   "xhs": {
