@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v53'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v54'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -2454,11 +2454,11 @@ setInterval(tickClock, 1000);
 
 /* ===================== 3. 记账 ===================== */
 
-const EXP_CATS = ['餐饮', '母婴', '交通', '居家', '娱乐', '医疗', '其他', '小红书'];
+const EXP_CATS = ['餐饮', '买菜', '母婴', '交通', '居家', '梁根', '医疗', '其他', '小红书'];
 
 const INC_CATS = ['工资', '副业', '红包', '返款', '蒲公英', '其他'];
 
-const CAT_COLOR = { '餐饮': '#E0A98A', '母婴': '#E8B98C', '交通': '#D8A06A', '居家': '#E9C7A1', '娱乐': '#D98E5E', '医疗': '#C9A98A', '其他': '#BCA99B', '小红书': '#E08A6A', '工资': '#CD8E6B', '副业': '#D3A878', '红包': '#E0A06A', '返款': '#D8A97E', '蒲公英': '#A8B58C' };
+const CAT_COLOR = { '餐饮': '#E0A98A', '买菜': '#C7B98C', '母婴': '#E8B98C', '交通': '#D8A06A', '居家': '#E9C7A1', '梁根': '#C49A78', '医疗': '#C9A98A', '其他': '#BCA99B', '小红书': '#E08A6A', '工资': '#CD8E6B', '副业': '#D3A878', '红包': '#E0A06A', '返款': '#D8A97E', '蒲公英': '#A8B58C' };
 
 let ledgerMonth = { y: new Date().getFullYear(), m: new Date().getMonth() };
 
