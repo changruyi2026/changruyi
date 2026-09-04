@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788489731593,
+  "_modifiedAt": 1788489759626,
   "home": {
     "rest": [
       "2026-08-01",
@@ -138,6 +138,14 @@
       "cat": "娱乐",
       "amount": 20.62,
       "note": "大疆挂绳"
+    },
+    {
+      "id": "mtmcmikq77glr",
+      "date": "2026-09-03",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 20,
+      "note": "游戏点卡"
     }
   ],
   "xhs": {
