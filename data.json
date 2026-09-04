@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788489657641,
+  "_modifiedAt": 1788489731593,
   "home": {
     "rest": [
       "2026-08-01",
@@ -630,6 +630,22 @@
             "desc": "真人2000+20000",
             "amount": 30,
             "kind": "real"
+          }
+        ]
+      },
+      {
+        "id": "mtmclwy1oiq2w",
+        "name": "吹风机",
+        "date": "2026-09-04",
+        "account": "芽芽Mochi",
+        "type": "note",
+        "cover": "",
+        "items": [
+          {
+            "id": "mtmclgvuvo8qq",
+            "desc": "机刷1000+10000",
+            "amount": 9,
+            "kind": "custom"
           }
         ]
       }
