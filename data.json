@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788585793206,
+  "_modifiedAt": 1788585828506,
   "home": {
     "rest": [
       "2026-08-01",
@@ -186,6 +186,14 @@
       "cat": "居家",
       "amount": 30,
       "note": "洗头发"
+    },
+    {
+      "id": "mtnxtlsqb1mvl",
+      "date": "2026-09-05",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 9,
+      "note": "午餐-盒马鸡腿"
     }
   ],
   "xhs": {
