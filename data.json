@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788585217345,
+  "_modifiedAt": 1788585793206,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1219,6 +1219,21 @@
       "fee": 30,
       "net": 150,
       "orderAmount": 0
+    },
+    {
+      "id": "mtnxsuk6ec8fv",
+      "date": "2026-09-11",
+      "item": "牛肉烧麦",
+      "type": "水下直发",
+      "status": "待出稿",
+      "account": "芽芽Mochi",
+      "deadline": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 0,
+      "net": 25,
+      "orderAmount": 25
     }
   ],
   "backups": [
