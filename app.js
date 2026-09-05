@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v54'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v55'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1226,6 +1226,12 @@ const PUB_TYPES = ['水下置换', '水下探店', '水下直发', '拍单置换
 
 const PUB_ORD_TYPES = ['水下直发', '水下探店', '探店招募', '众测招募'];
 
+/* 走平台的「招募类」商单收订单金额 10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
+
+const PUB_ORD_FEE_TYPES = ['探店招募', '众测招募'];
+
+const hasPubFee = t => PUB_ORD_FEE_TYPES.includes(t);
+
 const PUB_ACCOUNTS = ['芽芽Mochi', '常如意i'];
 
 const PUB_ACCOUNT_BADGE = { '芽芽Mochi': '芽', '常如意i': '常' };
@@ -1630,7 +1636,7 @@ function openRuyiDayModal(ds) {
 
           <div class="hs-calc">
 
-            <span>手续费(10%)：<b id="hsOrderFee">¥0</b></span>
+            <span id="hsOrderFeeLabel">手续费(10%)：<b id="hsOrderFee">¥0</b></span>
 
             <span class="hs-net">到手金额：<b id="hsOrderNet">¥0</b></span>
 
@@ -1706,13 +1712,17 @@ function openRuyiDayModal(ds) {
 
     } else if (PUB_ORD_TYPES.includes(t)) {
 
-      /* 订单类商单（含众测）：手续费固定为订单金额 10%，到手 = 订单金额 - 手续费 */
+      /* 订单类商单：招募类（探店招募/众测招募）走平台收订单金额 10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
 
       const o = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-      const fee = Math.round(o * 0.1 * 100) / 100;
+      const fee = hasPubFee(t) ? Math.round(o * 0.1 * 100) / 100 : 0;
 
       const net = Math.round((o - fee) * 100) / 100;
+
+      const feeLabel = $('#hsOrderFeeLabel');
+
+      if (feeLabel && feeLabel.firstChild) feeLabel.firstChild.textContent = hasPubFee(t) ? '手续费(10%)：' : '手续费(无)：';
 
       if (orderFeeEl) orderFeeEl.textContent = money(fee);
 
@@ -2134,7 +2144,7 @@ function openYayaDayModal(ds) {
 
           <div class="hs-calc">
 
-            <span>手续费(10%)：<b id="hsOrderFee">¥0</b></span>
+            <span id="hsOrderFeeLabel">手续费(10%)：<b id="hsOrderFee">¥0</b></span>
 
             <span class="hs-net">到手金额：<b id="hsOrderNet">¥0</b></span>
 
@@ -2210,13 +2220,17 @@ function openYayaDayModal(ds) {
 
     } else if (PUB_ORD_TYPES.includes(t)) {
 
-      /* 订单类商单（含众测）：手续费固定为订单金额 10%，到手 = 订单金额 - 手续费 */
+      /* 订单类商单：招募类（探店招募/众测招募）走平台收订单金额 10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
 
       const o = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-      const fee = Math.round(o * 0.1 * 100) / 100;
+      const fee = hasPubFee(t) ? Math.round(o * 0.1 * 100) / 100 : 0;
 
       const net = Math.round((o - fee) * 100) / 100;
+
+      const feeLabel = $('#hsOrderFeeLabel');
+
+      if (feeLabel && feeLabel.firstChild) feeLabel.firstChild.textContent = hasPubFee(t) ? '手续费(10%)：' : '手续费(无)：';
 
       if (orderFeeEl) orderFeeEl.textContent = money(fee);
 
@@ -4744,7 +4758,7 @@ document.addEventListener('click', e => {
 
         orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-        fee = Math.round(orderAmount * 0.1 * 100) / 100; /* 手续费 = 订单金额 10% */
+        fee = hasPubFee(type) ? Math.round(orderAmount * 0.1 * 100) / 100 : 0; /* 招募类收订单金额10%手续费；水下探店/水下直发无平台手续费 */
 
         net = Math.round((orderAmount - fee) * 100) / 100; /* 到手 = 订单金额 - 手续费 */
 
@@ -4954,7 +4968,7 @@ document.addEventListener('click', e => {
 
         orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-        fee = Math.round(orderAmount * 0.1 * 100) / 100; /* 手续费 = 订单金额 10% */
+        fee = hasPubFee(type) ? Math.round(orderAmount * 0.1 * 100) / 100 : 0; /* 招募类收订单金额10%手续费；水下探店/水下直发无平台手续费 */
 
         net = Math.round((orderAmount - fee) * 100) / 100; /* 到手 = 订单金额 - 手续费 */
 
