@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v55'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v56'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -2604,6 +2604,10 @@ function openXhsNoteExpModal(editId) {
 
         <option value="real" ${it.kind === 'real' ? 'selected' : ''}>真人2000+20000</option>
 
+        <option value="bot1" ${it.kind === 'bot1' ? 'selected' : ''}>机刷1000+10000</option>
+
+        <option value="bot2" ${it.kind === 'bot2' ? 'selected' : ''}>机刷2000+20000</option>
+
         <option value="comment" ${it.kind === 'comment' ? 'selected' : ''}>围绕评论</option>
 
       </select>
@@ -2694,6 +2698,10 @@ function openXhsNoteExpModal(editId) {
 
     if (sel.value === 'real') desc.value = '真人2000+20000';            // 真人推广：自动带出说明
 
+    else if (sel.value === 'bot1') desc.value = '机刷1000+10000';       // 机刷推广：自动带出说明
+
+    else if (sel.value === 'bot2') desc.value = '机刷2000+20000';       // 机刷推广：自动带出说明
+
     else if (sel.value === 'comment') desc.value = '围绕评论【】';       // 围绕评论：带出「围绕评论【】」，用户填【】内的值
 
     // 自定义：保留原说明文字，用户自由填写
@@ -2725,6 +2733,10 @@ function openXhsNoteExpModal(editId) {
         <option value="custom">自定义</option>
 
         <option value="real">真人2000+20000</option>
+
+        <option value="bot1">机刷1000+10000</option>
+
+        <option value="bot2">机刷2000+20000</option>
 
         <option value="comment">围绕评论</option>
 
