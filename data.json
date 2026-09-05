@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788585828506,
+  "_modifiedAt": 1788586001350,
   "home": {
     "rest": [
       "2026-08-01",
@@ -709,6 +709,22 @@
             "id": "mtmclgvuvo8qq",
             "desc": "机刷1000+10000",
             "amount": 9,
+            "kind": "custom"
+          }
+        ]
+      },
+      {
+        "id": "mtnxxb5ypgmk9",
+        "name": "十倍赞周车",
+        "date": "2026-09-04",
+        "account": "芽芽Mochi",
+        "type": "cart",
+        "cover": "",
+        "items": [
+          {
+            "id": "mtnxwj2qedqps",
+            "desc": "",
+            "amount": 103.8,
             "kind": "custom"
           }
         ]
