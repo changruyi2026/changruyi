@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788576387338,
+  "_modifiedAt": 1788576402200,
   "home": {
     "rest": [
       "2026-08-01",
@@ -170,6 +170,14 @@
       "cat": "居家",
       "amount": 16.9,
       "note": "盘子"
+    },
+    {
+      "id": "mtns7kewmstcp",
+      "date": "2026-09-04",
+      "type": "out",
+      "cat": "居家",
+      "amount": 126.81,
+      "note": "自拍杆"
     }
   ],
   "xhs": {
