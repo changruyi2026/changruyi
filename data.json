@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788685502982,
+  "_modifiedAt": 1788685522548,
   "home": {
     "rest": [
       "2026-08-01",
@@ -242,6 +242,14 @@
       "cat": "餐饮",
       "amount": 87,
       "note": "东北菜"
+    },
+    {
+      "id": "mtpl6e7oqqz16",
+      "date": "2026-09-06",
+      "type": "out",
+      "cat": "交通",
+      "amount": 15,
+      "note": "停车费"
     }
   ],
   "xhs": {
