@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v58'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v59'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -3003,7 +3003,7 @@ function renderLedger() {
 
       <span class="r-amt ${r.type === 'in' ? 'in' : 'out'}">${r.type === 'in' ? '+' : '-'}${money(r.amount).replace('¥', '¥')}</span>
 
-      ${r.fromXhs ? '<span class="xhs-tag">小红书</span>' : `<button class="icon-btn danger" data-action="ledger-del" data-id="${r.id}">${icTrash()}</button>`}
+      ${r.fromXhs ? '<span class="xhs-tag">小红书</span>' : `<span class="rec-actions"><button class="icon-btn" data-action="ledger-edit" data-id="${r.id}" title="修改">${icPencil()}</button><button class="icon-btn danger" data-action="ledger-del" data-id="${r.id}" title="删除">${icTrash()}</button></span>`}
 
     </div>`).join('') : '<div class="empty">这一天还没有账单</div>';
 
@@ -3149,17 +3149,21 @@ function renderLedger() {
 
 
 
-function openLedgerModal(date) {
+function openLedgerModal(date, rec) {
+
+  const edit = !!(rec && rec.id);
+
+  let type = edit ? rec.type : 'out';
 
   openModal(`
 
-    <h3>💰 记一笔 · ${fmtDateCN(date)}</h3>
+    <h3>${edit ? '✏️ 修改记账' : '💰 记一笔'} · ${fmtDateCN(date)}</h3>
 
     <div class="field"><label>类型</label>
 
       <div class="seg" id="lgType">
 
-        <button class="on" data-type="out">支出</button><button data-type="in">收入</button>
+        <button data-type="out">支出</button><button data-type="in">收入</button>
 
       </div>
 
@@ -3167,7 +3171,7 @@ function openLedgerModal(date) {
 
     <div class="field"><label>分类</label>
 
-      <select class="select" id="lgCat">${EXP_CATS.map(c => `<option>${c}</option>`).join('')}</select>
+      <select class="select" id="lgCat"></select>
 
     </div>
 
@@ -3187,11 +3191,31 @@ function openLedgerModal(date) {
 
       <button class="btn btn-ghost" data-action="close-modal">取消</button>
 
-      <button class="btn btn-primary" data-action="ledger-save" data-date="${date}">保存</button>
+      <button class="btn btn-primary" data-action="ledger-save" data-date="${date}">${edit ? '保存修改' : '保存'}</button>
 
     </div>`);
 
-  let type = 'out';
+  function syncTypeUI() {
+
+    $$('#lgType button').forEach(x => x.classList.toggle('on', x.dataset.type === type));
+
+    $('#lgCat').innerHTML = (type === 'out' ? EXP_CATS : INC_CATS).map(c => `<option>${c}</option>`).join('');
+
+  }
+
+  syncTypeUI();
+
+  if (edit) {
+
+    const c = catName(rec.cat);
+
+    $('#lgCat').value = c;
+
+    $('#lgAmt').value = rec.amount;
+
+    $('#lgNote').value = rec.note || '';
+
+  }
 
   $('#lgType').addEventListener('click', e => {
 
@@ -3199,13 +3223,15 @@ function openLedgerModal(date) {
 
     type = b.dataset.type;
 
-    $$('#lgType button').forEach(x => x.classList.toggle('on', x === b));
+    syncTypeUI();
 
-    $('#lgCat').innerHTML = (type === 'out' ? EXP_CATS : INC_CATS).map(c => `<option>${c}</option>`).join('');
+    if (edit) $('#lgCat').value = ''; /* 切换收支后分类需重新选择 */
 
   });
 
   window.__lgType = () => type;
+
+  window.__lgEditId = edit ? rec.id : null;
 
 }
 
@@ -4279,6 +4305,8 @@ document.addEventListener('click', e => {
 
     case 'ledger-add': openLedgerModal(el.dataset.date); break;
 
+    case 'ledger-edit': { const rec = S.ledger.find(r => r.id === id); if (rec) openLedgerModal(rec.date, rec); break; }
+
     case 'ledger-save': {
 
       const type = window.__lgType ? window.__lgType() : 'out';
@@ -4290,6 +4318,18 @@ document.addEventListener('click', e => {
       const note = ($('#lgNote').value || '').trim();
 
       if (!amount) { toast('请输入金额', 'warn'); return; }
+
+      const editId = window.__lgEditId;
+
+      if (editId) {
+
+        const rec = S.ledger.find(r => r.id === editId);
+
+        if (rec) { rec.type = type; rec.cat = cat; rec.amount = amount; rec.note = note; }
+
+        save(); closeModal(); renderLedger(); toast('已修改'); break;
+
+      }
 
       S.ledger.push({ id: uid(), date: el.dataset.date, type, cat, amount, note });
 
@@ -5100,6 +5140,8 @@ $('#nav').addEventListener('click', e => {
 function icCheck() { return '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>'; }
 
 function icTrash() { return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>'; }
+
+function icPencil() { return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'; }
 
 function icPin() { return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 7 3 3H7l3-3-1-7zM12 14v6"/></svg>'; }
 
