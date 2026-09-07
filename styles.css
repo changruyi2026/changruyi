@@ -348,6 +348,8 @@ input,textarea,select{font-family:inherit;color:inherit}
 .bar-col .lab{font-size:11px;color:var(--ink-faint);font-weight:600}
 
 .rec-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;background:var(--card-2);margin-bottom:8px}
+
+.rec-actions{margin-left:auto;display:inline-flex;gap:6px;align-items:center}
 .rec-item .r-cat{font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .rec-item .r-note{flex:1;min-width:0;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rec-item .r-amt{font-family:"Nunito";font-weight:800;white-space:nowrap}
