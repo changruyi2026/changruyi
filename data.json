@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788752317001,
+  "_modifiedAt": 1788765050839,
   "home": {
     "rest": [
       "2026-08-01",
@@ -258,6 +258,14 @@
       "cat": "小雨",
       "amount": 200,
       "note": "面膜"
+    },
+    {
+      "id": "mtqwiymvm2h35",
+      "date": "2026-09-07",
+      "type": "out",
+      "cat": "买菜",
+      "amount": 118.13,
+      "note": "山姆"
     }
   ],
   "xhs": {
