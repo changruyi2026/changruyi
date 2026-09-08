@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1788831984847,
+  "_modifiedAt": 1788832007157,
   "home": {
     "rest": [
       "2026-08-01",
@@ -282,6 +282,14 @@
       "cat": "小雨",
       "amount": 9.9,
       "note": "瑞幸"
+    },
+    {
+      "id": "mts0e2glixvbk",
+      "date": "2026-09-07",
+      "type": "out",
+      "cat": "买菜",
+      "amount": 16.17,
+      "note": "盒马买菜"
     }
   ],
   "xhs": {
