@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789003500925,
+  "_modifiedAt": 1789006324229,
   "home": {
     "rest": [
       "2026-08-01",
@@ -322,6 +322,14 @@
       "cat": "小雨",
       "amount": 19,
       "note": "午饭-鸡腿饭"
+    },
+    {
+      "id": "mtuw6adhudg4c",
+      "date": "2026-09-09",
+      "type": "in",
+      "cat": "红包",
+      "amount": 180,
+      "note": "卖奶粉"
     }
   ],
   "xhs": {
