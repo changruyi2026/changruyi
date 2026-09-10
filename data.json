@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789006324229,
+  "_modifiedAt": 1789016981994,
   "home": {
     "rest": [
       "2026-08-01",
@@ -330,6 +330,14 @@
       "cat": "红包",
       "amount": 180,
       "note": "卖奶粉"
+    },
+    {
+      "id": "mtv2ipyiodq0l",
+      "date": "2026-09-10",
+      "type": "out",
+      "cat": "小雨",
+      "amount": 13.9,
+      "note": "泡面*2"
     }
   ],
   "xhs": {
