@@ -352,8 +352,8 @@ input,textarea,select{font-family:inherit;color:inherit}
 .rec-actions{margin-left:auto;display:inline-flex;gap:6px;align-items:center}
 .rec-item .r-cat{font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .rec-item .r-note{flex:1;min-width:0;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rec-item .r-amt{font-family:"Nunito";font-weight:800;white-space:nowrap}
-.rec-item .r-amt.in{color:var(--sage-deep)}
+.rec-item .r-amt{font-family:"Nunito";font-weight:800;white-space:nowrap;font-size:15px}
+.rec-item .r-amt.in{color:#3E9E6B}
 .rec-item .r-amt.out{color:var(--rose-deep)}
 .etype-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex:0 0 auto}
 .etype-tag.note{background:rgba(224,169,138,.22);color:var(--rose-deep)}
@@ -704,7 +704,8 @@ input,textarea,select{font-family:inherit;color:inherit}
 .bp-group .bp-med-row{margin:0 0 8px;background:rgba(122,107,255,.10)}
 .cal-day.poop{background:rgba(217,142,94,.16);box-shadow:inset 0 0 0 1px rgba(217,142,94,.32)}
 .cal-day.poop .d{color:var(--rose-deep)}
-.poop-badge{display:block;font-size:13px;line-height:1;margin-top:2px}
+.poop-badge{display:inline-flex;align-items:center;gap:1px;font-size:12px;line-height:1;margin-top:2px;flex-wrap:wrap}
+.poop-badge b{font-size:10px;color:var(--ink-soft);margin-left:2px;font-weight:700}
 .bp-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 8px}
 .bp-med-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 12px;padding:8px 10px;border-radius:10px;background:rgba(182,173,161,.12)}
 .bp-med-check{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
