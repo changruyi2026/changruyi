@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789096991009,
+  "_modifiedAt": 1789097027009,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1065,6 +1065,22 @@
             "kind": "bot2"
           }
         ]
+      },
+      {
+        "id": "mtwe6d351dk45",
+        "name": "十倍赞周车",
+        "date": "2026-09-11",
+        "account": "芽芽Mochi",
+        "type": "cart",
+        "cover": "",
+        "items": [
+          {
+            "id": "mtwe5yel1imvb",
+            "desc": "",
+            "amount": 257.4,
+            "kind": "custom"
+          }
+        ]
       }
     ]
   },
@@ -1620,7 +1636,7 @@
     },
     {
       "id": "mtnxsuk6ec8fv",
-      "date": "2026-09-12",
+      "date": "2026-09-13",
       "item": "牛肉烧麦",
       "type": "水下直发",
       "status": "待出稿",
