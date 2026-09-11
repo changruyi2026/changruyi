@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v60'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v61'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -840,7 +840,20 @@ function renderYaya() {
 
 /* ===================== 芽芽拉屎记录模块（独立页面，侧边栏第3） ===================== */
 
-const BABY_TYPES = ['正常（金黄软糊）', '偏稀（水样）', '偏干（颗粒便）', '便秘', '腹泻', '绿便', '奶瓣', '其他'];
+const BABY_TYPES = ['正常', '偏稀', '偏干', '颗粒'];
+const BABY_VOLUMES = ['一点点', '少', '通常', '多'];
+const BABY_TYPE_META = {
+  '正常': { icon: '💩', color: '#9E8B7D', label: '正常' },
+  '偏稀': { icon: '💧', color: '#6B9BCF', label: '偏稀' },
+  '偏干': { icon: '🧱', color: '#B8935E', label: '偏干' },
+  '颗粒': { icon: '🌾', color: '#8FA8B8', label: '颗粒' }
+};
+const BABY_TYPE_ALIAS = {
+  '正常（金黄软糊）': '正常', '偏稀（水样）': '偏稀', '偏干（颗粒便）': '偏干',
+  '便秘': '偏干', '腹泻': '偏稀', '绿便': '正常', '奶瓣': '颗粒', '其他': '正常'
+};
+function babyTypeName(t) { return BABY_TYPE_ALIAS[t] || (BABY_TYPES.includes(t) ? t : '正常'); }
+function babyTypeMeta(t) { return BABY_TYPE_META[babyTypeName(t)] || BABY_TYPE_META['正常']; }
 
 
 
@@ -916,7 +929,9 @@ function renderBabyCalendar() {
 
     const medMg = ms.reduce((s, r) => s + (parseFloat(r.medMg) || 0), 0);
 
-    const mark = cnt ? `<span class="poop-badge">💩${cnt > 1 ? cnt : ''}</span>` : '';
+    const uniqTypes = [...new Set(ps.map(p => babyTypeName(p.type)))];
+
+    const mark = cnt ? `<span class="poop-badge">${uniqTypes.map(t => { const m = babyTypeMeta(t); return `<span style="color:${m.color}">${m.icon}</span>`; }).join('')}${cnt > 1 ? `<b>${cnt}</b>` : ''}</span>` : '';
 
     const medMark = ms.length ? `<span class="med-badge">💊${medMg > 0 ? medMg + 'mg' : ''}</span>` : '';
 
@@ -948,21 +963,29 @@ function openBabyDayModal(ds) {
 
   const curTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-  const typeOpts = BABY_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
+  const typeOpts = BABY_TYPES.map(t => { const m = BABY_TYPE_META[t]; return `<option value="${t}">${m.icon} ${m.label}</option>`; }).join('');
 
-  const poopList = poops.length ? `<div class="bp-list">` + poops.map(r => `
+  const volOpts = BABY_VOLUMES.map(v => `<option value="${v}" ${v === '通常' ? 'selected' : ''}>${v}</option>`).join('');
+
+  const poopList = poops.length ? `<div class="bp-list">` + poops.map(r => {
+
+    const m = babyTypeMeta(r.type);
+
+    return `
 
     <div class="bp-item">
 
       <span class="bp-time">${esc(r.time || '')}</span>
 
-      <span class="bp-type">${esc(r.type || '')}</span>
+      <span class="bp-type" style="background:${m.color}22;color:${m.color}">${m.icon} ${m.label}${r.vol ? ' · ' + esc(r.vol) : ''}</span>
 
       <span class="bp-note">${esc(r.note || '')}</span>
 
       <button class="icon-btn danger" data-action="baby-del-poop" data-id="${r.id}" title="删除这条">${icTrash()}</button>
 
-    </div>`).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录</div>';
+    </div>`;
+
+  }).join('') + `</div>` : '<div class="empty">这一天还没有拉屎记录</div>';
 
   const medList = meds.length ? `<div class="bp-list">` + meds.map(r => `
 
@@ -992,7 +1015,9 @@ function openBabyDayModal(ds) {
 
         <input class="input" type="time" id="bpTime" value="${curTime}" style="width:108px" />
 
-        <select class="input" id="bpType" style="flex:1;min-width:120px">${typeOpts}</select>
+        <select class="input" id="bpType" style="flex:1;min-width:100px">${typeOpts}</select>
+
+        <select class="input" id="bpVol" style="flex:0 0 auto;min-width:76px"><option value="" disabled>排便量</option>${volOpts}</select>
 
         <input class="input" id="bpNote" placeholder="备注（可选）" style="flex:1;min-width:80px" />
 
@@ -1056,7 +1081,7 @@ function renderBaby() {
 
     <span class="rb-sum">累计拉屎 <b>${poops.length}</b> 次</span>
 
-    <span class="rb-sum">${last ? ('最近 ' + fmtDateCN(last.date) + ' ' + esc(last.time || '')) : '还没有记录'}</span>
+    <span class="rb-sum">${last ? (() => { const m = babyTypeMeta(last.type); return '最近 ' + fmtDateCN(last.date) + ' ' + esc(last.time || '') + ' ' + m.icon + ' ' + m.label + (last.vol ? '·' + esc(last.vol) : ''); })() : '还没有记录'}</span>
 
   </div>`;
 
@@ -1088,9 +1113,9 @@ function renderBaby() {
 
     return `<div class="hist-day">
 
-      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span>${recs.length ? ` <span class="hist-cnt">💩 ${recs.length} 次</span>` : ''}${medTotal > 0 ? ` <span class="hist-med">💊 ${medTotal}mg</span>` : ''}</div>
+      <div class="hist-date">${ds.slice(5)} <span class="hist-wk">周${wk}</span>${recs.length ? ` <span class="hist-cnt">${[...new Set(recs.map(r => babyTypeName(r.type)))].map(t => babyTypeMeta(t).icon).join('')} ${recs.length} 次</span>` : ''}${medTotal > 0 ? ` <span class="hist-med">💊 ${medTotal}mg</span>` : ''}</div>
 
-      <div class="hist-items">${recs.map(r => `<span class="hist-tag">${esc(r.time || '')} · ${esc(r.type || '')}</span>`).join('')}${medRecs.map(r => `<span class="hist-tag med">💊 ${esc(r.time || '')} · ${r.medMg || 0}mg</span>`).join('')}</div>
+      <div class="hist-items">${recs.map(r => { const m = babyTypeMeta(r.type); return `<span class="hist-tag" style="background:${m.color}22;color:${m.color}">${esc(r.time || '')} · ${m.icon} ${m.label}${r.vol ? ' · ' + esc(r.vol) : ''}</span>`; }).join('')}${medRecs.map(r => `<span class="hist-tag med">💊 ${esc(r.time || '')} · ${r.medMg || 0}mg</span>`).join('')}</div>
 
     </div>`;
 
@@ -4199,11 +4224,13 @@ document.addEventListener('click', e => {
 
       const type = ($('#bpType').value || BABY_TYPES[0]).trim();
 
+      const vol = ($('#bpVol').value || '通常').trim();
+
       const note = ($('#bpNote').value || '').trim();
 
-      S.baby.poops.push({ id: uid(), date: ds, time, type, note });
+      S.baby.poops.push({ id: uid(), date: ds, time, type, vol, note });
 
-      save(); openBabyDayModal(ds); toast('已记录女鹅拉屎 💩'); break;
+      save(); closeModal(); toast('已记录女鹅拉屎 💩'); break;
 
     }
 
