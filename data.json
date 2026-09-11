@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789092019569,
+  "_modifiedAt": 1789092432017,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1047,6 +1047,22 @@
             "desc": "机刷1000+10000",
             "amount": 7,
             "kind": "bot1"
+          }
+        ]
+      },
+      {
+        "id": "mtwbfvkh2mxa8",
+        "name": "叽里呱啦",
+        "date": "2026-09-10",
+        "account": "芽芽Mochi",
+        "type": "note",
+        "cover": "",
+        "items": [
+          {
+            "id": "mtwbfljvtnblc",
+            "desc": "机刷2000+20000",
+            "amount": 13,
+            "kind": "bot2"
           }
         ]
       }
