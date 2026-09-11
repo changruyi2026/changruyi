@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v63'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v64'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1725,7 +1725,7 @@ function openRuyiDayModal(ds) {
 
             <span>返点金额：<b id="hsRebateAmt">-¥0</b></span>
 
-            <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
+            <span class="hs-net">到手金额(¥)：<input class="input" id="hsNet" type="number" min="0" step="0.01" placeholder="0" style="width:90px;padding:4px 6px;text-align:right" /></span>
 
           </div>
 
@@ -1781,7 +1781,11 @@ function openRuyiDayModal(ds) {
 
   toggleAmounts();
 
-  const recompute = () => {
+  let updating = false;
+
+  const recompute = (fromId) => {
+
+    if (updating) return;
 
     const t = typeSel.value;
 
@@ -1793,21 +1797,47 @@ function openRuyiDayModal(ds) {
 
       const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
 
-      const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
-
       const fee = Math.round(q * 0.1 * 100) / 100;
 
-      const rebate = -Math.round(q * pct / 100 * 100) / 100; /* 返点为支出，记为负数 */
+      if (fromId === 'hsNet' && netEl) {
 
-      const net = Math.round((q - fee + rebate) * 100) / 100;
+        let net = Math.max(0, parseFloat(netEl.value || '0') || 0);
 
-      if (feeEl) feeEl.textContent = money(fee);
+        const maxNet = Math.round((q - fee) * 100) / 100;
 
-      if (rebateEl) rebateEl.textContent = money(rebate);
+        if (net > maxNet) { net = maxNet; netEl.value = net; }
 
-      if (netEl) netEl.textContent = money(net);
+        if (q > 0) {
 
-  if (orderFeeEl) orderFeeEl.textContent = money(0);
+          const pct = Math.max(0, Math.min(100, (q - fee - net) / q * 100));
+
+          const rebate = -Math.round(q * pct / 100 * 100) / 100;
+
+          updating = true; $('#hsRebatePct').value = Math.round(pct * 100) / 100; updating = false;
+
+          if (feeEl) feeEl.textContent = money(fee);
+
+          if (rebateEl) rebateEl.textContent = money(rebate);
+
+        }
+
+      } else {
+
+        const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
+
+        const rebate = -Math.round(q * pct / 100 * 100) / 100;
+
+        const net = Math.round((q - fee + rebate) * 100) / 100;
+
+        if (feeEl) feeEl.textContent = money(fee);
+
+        if (rebateEl) rebateEl.textContent = money(rebate);
+
+        updating = true; if (netEl) netEl.value = net; updating = false;
+
+      }
+
+      if (orderFeeEl) orderFeeEl.textContent = money(0);
 
       if (orderNetEl) orderNetEl.textContent = money(0);
 
@@ -1833,7 +1863,7 @@ function openRuyiDayModal(ds) {
 
       if (rebateEl) rebateEl.textContent = money(0);
 
-      if (netEl) netEl.textContent = money(0);
+      updating = true; if (netEl) netEl.value = 0; updating = false;
 
     } else {
 
@@ -1841,7 +1871,7 @@ function openRuyiDayModal(ds) {
 
       if (rebateEl) rebateEl.textContent = money(0);
 
-      if (netEl) netEl.textContent = money(0);
+      updating = true; if (netEl) netEl.value = 0; updating = false;
 
       if (orderFeeEl) orderFeeEl.textContent = money(0);
 
@@ -1851,11 +1881,15 @@ function openRuyiDayModal(ds) {
 
   };
 
-  $('#hsQuote').addEventListener('input', recompute);
+  const handleInput = (e) => { if (updating) return; recompute(e.target.id); };
 
-  $('#hsRebatePct').addEventListener('input', recompute);
+  $('#hsQuote').addEventListener('input', handleInput);
 
-  $('#hsOrderAmount').addEventListener('input', recompute);
+  $('#hsRebatePct').addEventListener('input', handleInput);
+
+  $('#hsNet').addEventListener('input', handleInput);
+
+  $('#hsOrderAmount').addEventListener('input', handleInput);
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -2233,7 +2267,7 @@ function openYayaDayModal(ds) {
 
             <span>返点金额：<b id="hsRebateAmt">-¥0</b></span>
 
-            <span class="hs-net">到手金额：<b id="hsNet">¥0</b></span>
+            <span class="hs-net">到手金额(¥)：<input class="input" id="hsNet" type="number" min="0" step="0.01" placeholder="0" style="width:90px;padding:4px 6px;text-align:right" /></span>
 
           </div>
 
@@ -2289,7 +2323,11 @@ function openYayaDayModal(ds) {
 
   toggleAmounts();
 
-  const recompute = () => {
+  let updating = false;
+
+  const recompute = (fromId) => {
+
+    if (updating) return;
 
     const t = typeSel.value;
 
@@ -2301,21 +2339,47 @@ function openYayaDayModal(ds) {
 
       const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
 
-      const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
-
       const fee = Math.round(q * 0.1 * 100) / 100;
 
-      const rebate = -Math.round(q * pct / 100 * 100) / 100; /* 返点为支出，记为负数 */
+      if (fromId === 'hsNet' && netEl) {
 
-      const net = Math.round((q - fee + rebate) * 100) / 100;
+        let net = Math.max(0, parseFloat(netEl.value || '0') || 0);
 
-      if (feeEl) feeEl.textContent = money(fee);
+        const maxNet = Math.round((q - fee) * 100) / 100;
 
-      if (rebateEl) rebateEl.textContent = money(rebate);
+        if (net > maxNet) { net = maxNet; netEl.value = net; }
 
-      if (netEl) netEl.textContent = money(net);
+        if (q > 0) {
 
-  if (orderFeeEl) orderFeeEl.textContent = money(0);
+          const pct = Math.max(0, Math.min(100, (q - fee - net) / q * 100));
+
+          const rebate = -Math.round(q * pct / 100 * 100) / 100;
+
+          updating = true; $('#hsRebatePct').value = Math.round(pct * 100) / 100; updating = false;
+
+          if (feeEl) feeEl.textContent = money(fee);
+
+          if (rebateEl) rebateEl.textContent = money(rebate);
+
+        }
+
+      } else {
+
+        const pct = parseFloat($('#hsRebatePct').value || '0') || 0;
+
+        const rebate = -Math.round(q * pct / 100 * 100) / 100;
+
+        const net = Math.round((q - fee + rebate) * 100) / 100;
+
+        if (feeEl) feeEl.textContent = money(fee);
+
+        if (rebateEl) rebateEl.textContent = money(rebate);
+
+        updating = true; if (netEl) netEl.value = net; updating = false;
+
+      }
+
+      if (orderFeeEl) orderFeeEl.textContent = money(0);
 
       if (orderNetEl) orderNetEl.textContent = money(0);
 
@@ -2341,7 +2405,7 @@ function openYayaDayModal(ds) {
 
       if (rebateEl) rebateEl.textContent = money(0);
 
-      if (netEl) netEl.textContent = money(0);
+      updating = true; if (netEl) netEl.value = 0; updating = false;
 
     } else {
 
@@ -2349,7 +2413,7 @@ function openYayaDayModal(ds) {
 
       if (rebateEl) rebateEl.textContent = money(0);
 
-      if (netEl) netEl.textContent = money(0);
+      updating = true; if (netEl) netEl.value = 0; updating = false;
 
       if (orderFeeEl) orderFeeEl.textContent = money(0);
 
@@ -2359,11 +2423,15 @@ function openYayaDayModal(ds) {
 
   };
 
-  $('#hsQuote').addEventListener('input', recompute);
+  const handleInput = (e) => { if (updating) return; recompute(e.target.id); };
 
-  $('#hsRebatePct').addEventListener('input', recompute);
+  $('#hsQuote').addEventListener('input', handleInput);
 
-  $('#hsOrderAmount').addEventListener('input', recompute);
+  $('#hsRebatePct').addEventListener('input', handleInput);
+
+  $('#hsNet').addEventListener('input', handleInput);
+
+  $('#hsOrderAmount').addEventListener('input', handleInput);
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
