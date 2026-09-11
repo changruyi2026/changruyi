@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789119088684,
+  "_modifiedAt": 1789129231747,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -1691,9 +1691,9 @@
   "backups": [
     {
       "date": "2026-09-11",
-      "ts": 1789091991438,
+      "ts": 1789129231749,
       "data": {
-        "_modifiedAt": 1789091991437,
+        "_modifiedAt": 1789129231747,
         "home": {
           "rest": [
             "2026-08-01",
@@ -2667,6 +2667,14 @@
                   "ts": "2026-09-10T05:21:11.945Z",
                   "f": 2378,
                   "z": 11233
+                },
+                {
+                  "id": "mtwb71blm6fsb",
+                  "date": "2026-09-11",
+                  "account": "芽芽Mochi",
+                  "ts": "2026-09-11T02:00:19.569Z",
+                  "f": 2404,
+                  "z": 11336
                 }
               ]
             }
@@ -2733,6 +2741,38 @@
                   "desc": "机刷1000+10000",
                   "amount": 7,
                   "kind": "bot1"
+                }
+              ]
+            },
+            {
+              "id": "mtwbfvkh2mxa8",
+              "name": "叽里呱啦",
+              "date": "2026-09-10",
+              "account": "芽芽Mochi",
+              "type": "note",
+              "cover": "",
+              "items": [
+                {
+                  "id": "mtwbfljvtnblc",
+                  "desc": "机刷2000+20000",
+                  "amount": 13,
+                  "kind": "bot2"
+                }
+              ]
+            },
+            {
+              "id": "mtwe6d351dk45",
+              "name": "十倍赞周车",
+              "date": "2026-09-11",
+              "account": "芽芽Mochi",
+              "type": "cart",
+              "cover": "",
+              "items": [
+                {
+                  "id": "mtwe5yel1imvb",
+                  "desc": "",
+                  "amount": 257.4,
+                  "kind": "custom"
                 }
               ]
             }
@@ -2874,13 +2914,37 @@
               "time": "18:34",
               "type": "正常（金黄软糊）",
               "note": "一点点"
+            },
+            {
+              "id": "mtwrb7zgunvr1",
+              "date": "2026-09-11",
+              "time": "17:31",
+              "type": "偏干",
+              "vol": "通常",
+              "note": ""
             }
           ]
         },
         "publish": {
           "notes": []
         },
-        "ruyiNotes": [],
+        "ruyiNotes": [
+          {
+            "id": "mtwcx9wddotvy",
+            "date": "2026-09-20",
+            "item": "泡泡米",
+            "type": "水下探店",
+            "status": "待出稿",
+            "account": "常如意i",
+            "deadline": "2026-09-23",
+            "quote": 0,
+            "rebatePct": 0,
+            "rebate": 0,
+            "fee": 0,
+            "net": 0,
+            "orderAmount": 0
+          }
+        ],
         "yayaNotes": [
           {
             "id": "mt2dsmohzs3y0",
@@ -3286,6 +3350,36 @@
             "fee": 0,
             "net": 25,
             "orderAmount": 25
+          },
+          {
+            "id": "mtwl769i10r7n",
+            "date": "2026-09-18",
+            "item": "nuna推车",
+            "type": "蒲公英商单",
+            "status": "待出稿",
+            "account": "芽芽Mochi",
+            "deadline": "",
+            "quote": 290,
+            "rebatePct": 55.52,
+            "rebate": -161.01,
+            "fee": 29,
+            "net": 99.99,
+            "orderAmount": 0
+          },
+          {
+            "id": "mtwl9zh0kzraq",
+            "date": "2026-09-11",
+            "item": "小琥珀",
+            "type": "蒲公英商单",
+            "status": "待出稿",
+            "account": "芽芽Mochi",
+            "deadline": "",
+            "quote": 360,
+            "rebatePct": 50,
+            "rebate": -180,
+            "fee": 36,
+            "net": 144,
+            "orderAmount": 0
           }
         ],
         "deletedIds": {
@@ -3295,9 +3389,9 @@
     },
     {
       "date": "2026-09-10",
-      "ts": 1789003500927,
+      "ts": 1789040081440,
       "data": {
-        "_modifiedAt": 1789003500925,
+        "_modifiedAt": 1789040081438,
         "home": {
           "rest": [
             "2026-08-01",
@@ -3620,6 +3714,30 @@
             "cat": "小雨",
             "amount": 19,
             "note": "午饭-鸡腿饭"
+          },
+          {
+            "id": "mtuw6adhudg4c",
+            "date": "2026-09-09",
+            "type": "in",
+            "cat": "红包",
+            "amount": 180,
+            "note": "卖奶粉"
+          },
+          {
+            "id": "mtv2ipyiodq0l",
+            "date": "2026-09-10",
+            "type": "out",
+            "cat": "小雨",
+            "amount": 13.9,
+            "note": "泡面*2"
+          },
+          {
+            "id": "mtvahg7baxlns",
+            "date": "2026-09-10",
+            "type": "in",
+            "cat": "蒲公英",
+            "amount": 577.8,
+            "note": "脱发液+爱婴室探店"
           }
         ],
         "xhs": {
@@ -3831,6 +3949,14 @@
               "ts": "2026-09-08T02:28:33.592Z",
               "f": 7110,
               "z": 118417
+            },
+            {
+              "id": "mtv2wwd0jky1m",
+              "date": "2026-09-10",
+              "account": "常如意i",
+              "ts": "2026-09-10T05:20:43.476Z",
+              "f": 7095,
+              "z": 118420
             }
           ],
           "accounts": {
@@ -4034,6 +4160,14 @@
                   "ts": "2026-09-08T02:28:33.592Z",
                   "f": 7110,
                   "z": 118417
+                },
+                {
+                  "id": "mtv2wwd0jky1m",
+                  "date": "2026-09-10",
+                  "account": "常如意i",
+                  "ts": "2026-09-10T05:20:43.476Z",
+                  "f": 7095,
+                  "z": 118420
                 }
               ]
             },
@@ -4207,6 +4341,14 @@
                   "ts": "2026-09-09T05:46:11.578Z",
                   "f": 2344,
                   "z": 11115
+                },
+                {
+                  "id": "mtv2xibtxmm4q",
+                  "date": "2026-09-10",
+                  "account": "芽芽Mochi",
+                  "ts": "2026-09-10T05:21:11.945Z",
+                  "f": 2378,
+                  "z": 11233
                 }
               ]
             }
@@ -4742,7 +4884,7 @@
             "date": "2026-09-10",
             "item": "叽里呱啦",
             "type": "蒲公英商单",
-            "status": "审核中",
+            "status": "已出稿",
             "account": "芽芽Mochi",
             "deadline": "",
             "quote": 300,
@@ -4835,9 +4977,9 @@
     },
     {
       "date": "2026-09-09",
-      "ts": 1788922952313,
+      "ts": 1788920092077,
       "data": {
-        "_modifiedAt": 1788922952312,
+        "_modifiedAt": 1788920092077,
         "home": {
           "rest": [
             "2026-08-01",
