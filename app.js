@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v62'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v63'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -608,9 +608,9 @@ function homeDraftNotes() {
 
   const ds = todayStr();
 
-  const ruyi = (S.ruyiNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').map(n => ({ ...n, cal: '常如意i' }));
-
-  const yaya = (S.yayaNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').map(n => ({ ...n, cal: '芽芽Mochi' }));
+  const matchDue = n => (n.deadline === ds || n.date === ds) && normStatus(n.status) === '待出稿';
+  const ruyi = (S.ruyiNotes || []).filter(matchDue).map(n => ({ ...n, cal: '常如意i' }));
+  const yaya = (S.yayaNotes || []).filter(matchDue).map(n => ({ ...n, cal: '芽芽Mochi' }));
 
   const list = [...ruyi, ...yaya];
 
@@ -628,9 +628,9 @@ function totalPendingCount() {
 
   const ds = todayStr();
 
-  const ruyi = (S.ruyiNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').length;
-
-  const yaya = (S.yayaNotes || []).filter(n => n.deadline === ds && normStatus(n.status) === '待出稿').length;
+  const matchDue = n => (n.deadline === ds || n.date === ds) && normStatus(n.status) === '待出稿';
+  const ruyi = (S.ruyiNotes || []).filter(matchDue).length;
+  const yaya = (S.yayaNotes || []).filter(matchDue).length;
 
   return ruyi + yaya;
 
@@ -662,9 +662,9 @@ function renderHomeWeekCalendar() {
 
   const cells = dates.map(({ ds, md, dow, isToday }) => {
 
-    const ruyi = (S.ruyiNotes || []).filter(n => n.deadline === ds && normStatus(n.status) !== '已出稿').map(n => ({ ...n, acct: '常如意i' }));
-
-    const yaya = (S.yayaNotes || []).filter(n => n.deadline === ds && normStatus(n.status) !== '已出稿').map(n => ({ ...n, acct: '芽芽Mochi' }));
+    const matchDue = n => (n.deadline === ds || n.date === ds) && normStatus(n.status) !== '已出稿';
+    const ruyi = (S.ruyiNotes || []).filter(matchDue).map(n => ({ ...n, acct: '常如意i' }));
+    const yaya = (S.yayaNotes || []).filter(matchDue).map(n => ({ ...n, acct: '芽芽Mochi' }));
 
     const notes = [...ruyi, ...yaya].sort((a, b) => (PUB_STATUS_ORDER[normStatus(a.status)] ?? 9) - (PUB_STATUS_ORDER[normStatus(b.status)] ?? 9));
 
