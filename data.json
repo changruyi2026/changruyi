@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789108953300,
+  "_modifiedAt": 1789109045902,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 0
+    "hsReadCount": 1
   },
   "ledger": [
     {
@@ -1652,7 +1652,7 @@
     {
       "id": "mtwl769i10r7n",
       "date": "2026-09-18",
-      "item": "nuna推车-直发",
+      "item": "nuna推车",
       "type": "蒲公英商单",
       "status": "待出稿",
       "account": "芽芽Mochi",
