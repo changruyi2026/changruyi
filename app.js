@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v61'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v62'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -638,6 +638,80 @@ function totalPendingCount() {
 
 
 
+/* 首页：近一周出稿日历（今天 + 未来6天，双账号合并显示） */
+
+function renderHomeWeekCalendar() {
+
+  const today = todayStr();
+
+  const dates = [];
+
+  const base = new Date();
+
+  const dows = ['日', '一', '二', '三', '四', '五', '六'];
+
+  for (let i = 0; i < 7; i++) {
+
+    const d = new Date(base); d.setDate(base.getDate() + i);
+
+    const ds = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    dates.push({ ds, md: `${d.getMonth() + 1}/${d.getDate()}`, dow: dows[d.getDay()], isToday: ds === today });
+
+  }
+
+  const cells = dates.map(({ ds, md, dow, isToday }) => {
+
+    const ruyi = (S.ruyiNotes || []).filter(n => n.deadline === ds && normStatus(n.status) !== '已出稿').map(n => ({ ...n, acct: '常如意i' }));
+
+    const yaya = (S.yayaNotes || []).filter(n => n.deadline === ds && normStatus(n.status) !== '已出稿').map(n => ({ ...n, acct: '芽芽Mochi' }));
+
+    const notes = [...ruyi, ...yaya].sort((a, b) => (PUB_STATUS_ORDER[normStatus(a.status)] ?? 9) - (PUB_STATUS_ORDER[normStatus(b.status)] ?? 9));
+
+    const hasDue = notes.length > 0;
+
+    const todayDue = isToday && hasDue;
+
+    const noteList = notes.length ? notes.slice(0, 3).map(n => {
+
+      const theme = XHS_ACCOUNT_THEME[n.acct] || { soft: '#888' };
+
+      const abbr = XHS_ACCOUNT_BADGE[n.acct] || '?';
+
+      return `<div class="wk-item"><span class="wk-acct" style="background:${theme.soft};color:#fff">${abbr}</span><span class="wk-name">${esc((n.item || '未命名').slice(0, 6))}</span></div>`;
+
+    }).join('') + (notes.length > 3 ? `<div class="wk-more">+${notes.length - 3}</div>` : '') : '<div class="wk-empty">—</div>';
+
+    return `<div class="wk-day ${isToday ? 'today' : ''} ${todayDue ? 'today-due' : ''} ${hasDue ? 'has' : ''}">
+
+      <div class="wk-day-header">
+
+        <span class="wk-dow">${isToday ? '今天' : '周' + dow}</span>
+
+        <span class="wk-date">${md}</span>
+
+        ${todayDue ? '<span class="wk-dot">🔴</span>' : ''}
+
+      </div>
+
+      <div class="wk-list">${noteList}</div>
+
+    </div>`;
+
+  }).join('');
+
+  return `<div class="card home-week-card">
+
+    <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>📅 近一周出稿日历</div>
+
+    <div class="wk-cal">${cells}</div>
+
+  </div>`;
+
+}
+
+
+
 function renderHome() {
 
   const now = new Date();
@@ -751,6 +825,8 @@ function renderHome() {
       </div>
 
     </div>
+
+    ${renderHomeWeekCalendar()}
 
     ${draftCard}
 
