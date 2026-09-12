@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v64'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v65'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -3212,29 +3212,47 @@ function renderLedger() {
 
 
 
-  // 当月每日柱状（收入/支出）
+  // 当月占比前五的分类明细
 
-  const bars = [];
+  const sortedCats = Object.entries(expByCat).sort((a, b) => b[1] - a[1]);
 
-  for (let d = 1; d <= daysIn; d++) {
+  const top5 = sortedCats.slice(0, 5);
 
-    const ds = `${y}-${pad(m + 1)}-${pad(d)}`;
+  const top5Max = top5.length ? top5[0][1] : 1;
 
-    const recs = S.ledger.filter(r => r.date === ds);
+  const top5HTML = expTotal > 0
 
-    const i2 = recs.filter(r => r.type === 'in').reduce((s, r) => s + r.amount, 0);
+    ? `<div class="top5-list">` + top5.map(([cat, v], idx) => {
 
-    const o2 = allOut.filter(r => r.date === ds).reduce((s, r) => s + r.amount, 0);
+        const col = CAT_COLOR[cat] || '#B6ADA1';
 
-    const max = Math.max(i2, o2, 1);
+        const pct = Math.round(v / expTotal * 100);
 
-    bars.push(`<div class="bar-col"><div class="bars-stack">
+        return `
 
-      <div class="b in" style="height:${i2 / max * 100}%"></div>
+          <div class="top5-row">
 
-      <div class="b out" style="height:${o2 / max * 100}%"></div></div><div class="lab">${d}</div></div>`);
+            <div class="top5-head">
 
-  }
+              <span class="top5-rank">${idx + 1}</span>
+
+              <span class="top5-sw" style="background:${col}"></span>
+
+              <span class="top5-nm">${cat}</span>
+
+              <span class="top5-amt">${money(v)}</span>
+
+              <span class="top5-pc">${pct}%</span>
+
+            </div>
+
+            <div class="top5-track"><div class="top5-bar" style="width:${Math.max(4, v / top5Max * 100)}%;background:${col}"></div></div>
+
+          </div>`;
+
+      }).join('') + `</div>`
+
+    : '<div class="empty">本月暂无支出</div>';
 
 
 
@@ -3306,9 +3324,9 @@ function renderLedger() {
 
       <div class="card">
 
-        <div class="card-title"><span class="dot" style="background:var(--sage)"></span>本月每日收支趋势</div>
+        <div class="card-title"><span class="dot" style="background:var(--sage)"></span>本月占比前五的分类明细</div>
 
-        <div class="bars">${bars.join('')}</div>
+        ${top5HTML}
 
       </div>
 
