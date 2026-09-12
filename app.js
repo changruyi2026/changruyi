@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v65'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v66'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -3230,7 +3230,7 @@ function renderLedger() {
 
         return `
 
-          <div class="top5-row">
+          <div class="top5-row" data-action="ledger-top5-detail" data-cat="${esc(cat)}">
 
             <div class="top5-head">
 
@@ -3331,6 +3331,60 @@ function renderLedger() {
       </div>
 
     </div>`;
+
+}
+
+
+
+function openLedgerCatDetail(cat) {
+
+  const { y, m } = ledgerMonth;
+
+  const monthRecs = S.ledger.filter(r => {
+
+    const d = new Date(r.date + 'T00:00:00');
+
+    return d.getFullYear() === y && d.getMonth() === m;
+
+  });
+
+  const xhsExpMonth = xhsFlatExpenses().filter(e => {
+
+    const d = new Date(e.date + 'T00:00:00');
+
+    return d.getFullYear() === y && d.getMonth() === m;
+
+  }).map(xhsExpenseToRec);
+
+  const allOut = [...monthRecs.filter(r => r.type === 'out'), ...xhsExpMonth];
+
+  const items = allOut.filter(r => catName(r.cat) === cat).sort((a, b) => (a.date > b.date ? -1 : 1) || (b.amount - a.amount));
+
+  const total = items.reduce((s, r) => s + r.amount, 0);
+
+  const col = CAT_COLOR[cat] || '#B6ADA1';
+
+  const rows = items.length ? items.map(r => `
+
+    <div class="rec-item">
+
+      <span class="r-cat" style="background:${col}33;color:${col}">${fmtDateCN(r.date)}</span>
+
+      <span class="r-note">${esc(r.note || (r.fromXhs ? '小红书支出' : '支出'))}</span>
+
+      <span class="r-amt out">-${money(r.amount)}</span>
+
+    </div>`).join('') : '<div class="empty">该分类本月暂无明细</div>';
+
+  openModal(`
+
+    <h3><span style="display:inline-flex;align-items:center;gap:8px"><span class="top5-sw" style="background:${col};width:12px;height:12px"></span>${cat}</span> · ${y}年${m + 1}月</h3>
+
+    <div style="margin-bottom:12px;font-size:14px;font-weight:700;color:var(--ink-soft)">合计：<span style="color:var(--rose-deep)">${money(total)}</span></div>
+
+    <div style="max-height:60vh;overflow:auto">${rows}</div>
+
+  `);
 
 }
 
@@ -4527,6 +4581,8 @@ document.addEventListener('click', e => {
     }
 
     case 'ledger-del': S.ledger = S.ledger.filter(r => r.id !== id); save(); renderLedger(); break;
+
+    case 'ledger-top5-detail': openLedgerCatDetail(el.dataset.cat); break;
 
 
 
