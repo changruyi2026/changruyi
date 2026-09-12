@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789182464227,
+  "_modifiedAt": 1789182488110,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1716,12 +1716,12 @@
     },
     {
       "id": "mtnxsuk6ec8fv",
-      "date": "2026-09-13",
+      "date": "2026-09-15",
       "item": "牛肉烧麦",
       "type": "水下直发",
       "status": "待出稿",
       "account": "芽芽Mochi",
-      "deadline": "",
+      "deadline": "2026-09-18",
       "quote": 0,
       "rebatePct": 0,
       "rebate": 0,
