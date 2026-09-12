@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789182490991,
+  "_modifiedAt": 1789192925936,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 0
+    "hsReadCount": 1
   },
   "ledger": [
     {
@@ -1721,7 +1721,7 @@
       "type": "水下直发",
       "status": "待出稿",
       "account": "芽芽Mochi",
-      "deadline": "2026-09-18",
+      "deadline": "",
       "quote": 0,
       "rebatePct": 0,
       "rebate": 0,
