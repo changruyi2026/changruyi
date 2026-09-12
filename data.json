@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789192944376,
+  "_modifiedAt": 1789192954194,
   "home": {
     "rest": [
       "2026-08-01",
@@ -410,6 +410,14 @@
       "cat": "居家",
       "amount": 26.34,
       "note": "厨房纸抽"
+    },
+    {
+      "id": "mtxzaez6r4cdv",
+      "date": "2026-09-12",
+      "type": "out",
+      "cat": "芽芽",
+      "amount": 9.17,
+      "note": "发夹"
     }
   ],
   "xhs": {
