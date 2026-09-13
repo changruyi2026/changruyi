@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789301064478,
+  "_modifiedAt": 1789310279547,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -1370,6 +1370,14 @@
         "date": "2026-09-12",
         "time": "09:17",
         "type": "偏干",
+        "vol": "通常",
+        "note": ""
+      },
+      {
+        "id": "mtzx53sr0chmn",
+        "date": "2026-09-13",
+        "time": "22:37",
+        "type": "正常",
         "vol": "通常",
         "note": ""
       }
