@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438652709,
+  "_modifiedAt": 1789438663167,
   "home": {
     "rest": [
       "2026-08-01",
@@ -498,6 +498,14 @@
       "cat": "餐饮",
       "amount": 49,
       "note": "饺子季"
+    },
+    {
+      "id": "mu21kt8f2vjv5",
+      "date": "2026-09-14",
+      "type": "out",
+      "cat": "交通",
+      "amount": 10,
+      "note": "ETC"
     }
   ],
   "xhs": {
