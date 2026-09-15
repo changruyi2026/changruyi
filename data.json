@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438727095,
+  "_modifiedAt": 1789438742342,
   "home": {
     "rest": [
       "2026-08-01",
@@ -538,6 +538,14 @@
       "cat": "餐饮",
       "amount": 6,
       "note": "水和香肠"
+    },
+    {
+      "id": "mu21mibq3drt2",
+      "date": "2026-09-13",
+      "type": "out",
+      "cat": "交通",
+      "amount": 19,
+      "note": "ETC"
     }
   ],
   "xhs": {
