@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438482497,
+  "_modifiedAt": 1789438526821,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -474,6 +474,14 @@
       "cat": "餐饮",
       "amount": 10,
       "note": "酱香饼"
+    },
+    {
+      "id": "mu21hw11qb0he",
+      "date": "2026-09-15",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 1.98,
+      "note": "早餐"
     }
   ],
   "xhs": {
