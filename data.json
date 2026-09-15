@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438613304,
+  "_modifiedAt": 1789438634862,
   "home": {
     "rest": [
       "2026-08-01",
@@ -482,6 +482,14 @@
       "cat": "交通",
       "amount": 30,
       "note": "ETC"
+    },
+    {
+      "id": "mu21k7e6xj80t",
+      "date": "2026-09-14",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 400,
+      "note": ""
     }
   ],
   "xhs": {
