@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438675700,
+  "_modifiedAt": 1789438693428,
   "home": {
     "rest": [
       "2026-08-01",
@@ -514,6 +514,14 @@
       "cat": "交通",
       "amount": 6.65,
       "note": "ETC"
+    },
+    {
+      "id": "mu21lgl0bsyo2",
+      "date": "2026-09-13",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 25,
+      "note": "梁根咖啡"
     }
   ],
   "xhs": {
