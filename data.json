@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438578860,
+  "_modifiedAt": 1789438582118,
   "home": {
     "rest": [
       "2026-08-01",
@@ -306,14 +306,6 @@
       "cat": "餐饮",
       "amount": 17,
       "note": "午餐-鸡腿饭"
-    },
-    {
-      "id": "mtsudau00ores",
-      "date": "2026-09-08",
-      "type": "out",
-      "cat": "买菜",
-      "amount": 28.8,
-      "note": "西梅"
     },
     {
       "id": "mttijl5hkkits",
