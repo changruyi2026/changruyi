@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438742342,
+  "_modifiedAt": 1789438786402,
   "home": {
     "rest": [
       "2026-08-01",
@@ -546,6 +546,14 @@
       "cat": "交通",
       "amount": 19,
       "note": "ETC"
+    },
+    {
+      "id": "mu21ngbmf4odb",
+      "date": "2026-09-12",
+      "type": "out",
+      "cat": "小雨",
+      "amount": 220,
+      "note": "剪映会员"
     }
   ],
   "xhs": {
