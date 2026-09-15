@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789438663167,
+  "_modifiedAt": 1789438675700,
   "home": {
     "rest": [
       "2026-08-01",
@@ -505,6 +505,14 @@
       "type": "out",
       "cat": "交通",
       "amount": 10,
+      "note": "ETC"
+    },
+    {
+      "id": "mu21l2wk7n6f9",
+      "date": "2026-09-13",
+      "type": "out",
+      "cat": "交通",
+      "amount": 6.65,
       "note": "ETC"
     }
   ],
