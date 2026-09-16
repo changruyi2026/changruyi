@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v66'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v67'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1581,6 +1581,8 @@ function fillRuyiEdit(n) {
 
   $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
 
+  $('#hsCommission').value = (n.commission != null && n.commission !== 0) ? n.commission : '';
+
   $('#hsSaveBtn').textContent = '💾 保存修改';
 
   $('#hsCancelEditBtn').style.display = 'block';
@@ -1634,6 +1636,8 @@ function openRuyiDayModal(ds) {
         <span>订单金额 ${money(n.orderAmount || 0)}</span>
 
         <span>手续费 ${money(n.fee || 0)}</span>
+
+        ${(n.commission != null && n.commission !== 0) ? `<span>提成 ${money(n.commission)}</span>` : ''}
 
         <span class="hs-net">到手 ${money(n.net || 0)}</span>
 
@@ -1735,9 +1739,17 @@ function openRuyiDayModal(ds) {
 
           <div class="hs-amount-row"><label>订单金额(¥)</label><input class="input" id="hsOrderAmount" type="number" min="0" step="0.01" placeholder="0" /></div>
 
+          <div id="hsCommWrap" style="display:none">
+
+            <div class="hs-amount-row"><label>提成(¥)</label><input class="input" id="hsCommission" type="number" min="0" step="0.01" placeholder="可为空" /></div>
+
+          </div>
+
           <div class="hs-calc">
 
             <span id="hsOrderFeeLabel">手续费(10%)：<b id="hsOrderFee">¥0</b></span>
+
+            <span>提成：<b id="hsOrderComm">¥0</b></span>
 
             <span class="hs-net">到手金额：<b id="hsOrderNet">¥0</b></span>
 
@@ -1774,6 +1786,10 @@ function openRuyiDayModal(ds) {
     if (pg) pg.style.display = (t === '蒲公英商单') ? 'block' : 'none';
 
     if (ord) ord.style.display = (PUB_ORD_TYPES.includes(t)) ? 'block' : 'none';
+
+    const commWrap = $('#hsCommWrap');
+
+    if (commWrap) commWrap.style.display = (t === '众测招募') ? 'block' : 'none';
 
   };
 
@@ -1849,7 +1865,9 @@ function openRuyiDayModal(ds) {
 
       const fee = hasPubFee(t) ? Math.round(o * 0.1 * 100) / 100 : 0;
 
-      const net = Math.round((o - fee) * 100) / 100;
+      const comm = (t === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0;
+
+      const net = Math.round((o - fee + comm) * 100) / 100;
 
       const feeLabel = $('#hsOrderFeeLabel');
 
@@ -1858,6 +1876,8 @@ function openRuyiDayModal(ds) {
       if (orderFeeEl) orderFeeEl.textContent = money(fee);
 
       if (orderNetEl) orderNetEl.textContent = money(net);
+
+      if ($('#hsOrderComm')) $('#hsOrderComm').textContent = money(comm);
 
       if (feeEl) feeEl.textContent = money(0);
 
@@ -1890,6 +1910,8 @@ function openRuyiDayModal(ds) {
   $('#hsNet').addEventListener('input', handleInput);
 
   $('#hsOrderAmount').addEventListener('input', handleInput);
+
+  $('#hsCommission').addEventListener('input', handleInput);
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -2123,6 +2145,8 @@ function fillYayaEdit(n) {
 
   $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
 
+  $('#hsCommission').value = (n.commission != null && n.commission !== 0) ? n.commission : '';
+
   $('#hsSaveBtn').textContent = '💾 保存修改';
 
   $('#hsCancelEditBtn').style.display = 'block';
@@ -2176,6 +2200,8 @@ function openYayaDayModal(ds) {
         <span>订单金额 ${money(n.orderAmount || 0)}</span>
 
         <span>手续费 ${money(n.fee || 0)}</span>
+
+        ${(n.commission != null && n.commission !== 0) ? `<span>提成 ${money(n.commission)}</span>` : ''}
 
         <span class="hs-net">到手 ${money(n.net || 0)}</span>
 
@@ -2277,9 +2303,17 @@ function openYayaDayModal(ds) {
 
           <div class="hs-amount-row"><label>订单金额(¥)</label><input class="input" id="hsOrderAmount" type="number" min="0" step="0.01" placeholder="0" /></div>
 
+          <div id="hsCommWrap" style="display:none">
+
+            <div class="hs-amount-row"><label>提成(¥)</label><input class="input" id="hsCommission" type="number" min="0" step="0.01" placeholder="可为空" /></div>
+
+          </div>
+
           <div class="hs-calc">
 
             <span id="hsOrderFeeLabel">手续费(10%)：<b id="hsOrderFee">¥0</b></span>
+
+            <span>提成：<b id="hsOrderComm">¥0</b></span>
 
             <span class="hs-net">到手金额：<b id="hsOrderNet">¥0</b></span>
 
@@ -2316,6 +2350,10 @@ function openYayaDayModal(ds) {
     if (pg) pg.style.display = (t === '蒲公英商单') ? 'block' : 'none';
 
     if (ord) ord.style.display = (PUB_ORD_TYPES.includes(t)) ? 'block' : 'none';
+
+    const commWrap = $('#hsCommWrap');
+
+    if (commWrap) commWrap.style.display = (t === '众测招募') ? 'block' : 'none';
 
   };
 
@@ -2391,7 +2429,9 @@ function openYayaDayModal(ds) {
 
       const fee = hasPubFee(t) ? Math.round(o * 0.1 * 100) / 100 : 0;
 
-      const net = Math.round((o - fee) * 100) / 100;
+      const comm = (t === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0;
+
+      const net = Math.round((o - fee + comm) * 100) / 100;
 
       const feeLabel = $('#hsOrderFeeLabel');
 
@@ -2400,6 +2440,8 @@ function openYayaDayModal(ds) {
       if (orderFeeEl) orderFeeEl.textContent = money(fee);
 
       if (orderNetEl) orderNetEl.textContent = money(net);
+
+      if ($('#hsOrderComm')) $('#hsOrderComm').textContent = money(comm);
 
       if (feeEl) feeEl.textContent = money(0);
 
@@ -2432,6 +2474,8 @@ function openYayaDayModal(ds) {
   $('#hsNet').addEventListener('input', handleInput);
 
   $('#hsOrderAmount').addEventListener('input', handleInput);
+
+  $('#hsCommission').addEventListener('input', handleInput);
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -5042,7 +5086,7 @@ document.addEventListener('click', e => {
 
       if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
 
-      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0;
+      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0;
 
       if (type === '蒲公英商单') {
 
@@ -5062,7 +5106,9 @@ document.addEventListener('click', e => {
 
         fee = hasPubFee(type) ? Math.round(orderAmount * 0.1 * 100) / 100 : 0; /* 招募类收订单金额10%手续费；水下探店/水下直发无平台手续费 */
 
-        net = Math.round((orderAmount - fee) * 100) / 100; /* 到手 = 订单金额 - 手续费 */
+        commission = (type === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0; /* 众测招募可填提成，可为空 */
+
+        net = Math.round((orderAmount - fee + commission) * 100) / 100; /* 到手 = 订单金额 - 手续费 + 提成 */
 
       }
 
@@ -5072,7 +5118,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount };
+          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission };
 
           toast('已修改出稿笔记 🍠');
 
@@ -5080,7 +5126,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount });
+        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission });
 
         toast('已保存出稿笔记 🍠');
 
@@ -5127,6 +5173,8 @@ document.addEventListener('click', e => {
       $('#hsRebatePct').value = '';
 
       $('#hsOrderAmount').value = '';
+
+      $('#hsCommission').value = '';
 
       $('#hsSaveBtn').textContent = '+ 保存出稿笔记';
 
@@ -5252,7 +5300,7 @@ document.addEventListener('click', e => {
 
       if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
 
-      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0;
+      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0;
 
       if (type === '蒲公英商单') {
 
@@ -5272,7 +5320,9 @@ document.addEventListener('click', e => {
 
         fee = hasPubFee(type) ? Math.round(orderAmount * 0.1 * 100) / 100 : 0; /* 招募类收订单金额10%手续费；水下探店/水下直发无平台手续费 */
 
-        net = Math.round((orderAmount - fee) * 100) / 100; /* 到手 = 订单金额 - 手续费 */
+        commission = (type === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0; /* 众测招募可填提成，可为空 */
+
+        net = Math.round((orderAmount - fee + commission) * 100) / 100; /* 到手 = 订单金额 - 手续费 + 提成 */
 
       }
 
@@ -5282,7 +5332,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount };
+          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission };
 
           toast('已修改出稿笔记 🍠');
 
@@ -5290,7 +5340,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount });
+        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission });
 
         toast('已保存出稿笔记 🍠');
 
@@ -5337,6 +5387,8 @@ document.addEventListener('click', e => {
       $('#hsRebatePct').value = '';
 
       $('#hsOrderAmount').value = '';
+
+      $('#hsCommission').value = '';
 
       $('#hsSaveBtn').textContent = '+ 保存出稿笔记';
 
