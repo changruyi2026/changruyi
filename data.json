@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789523902380,
+  "_modifiedAt": 1789528584101,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1902,7 +1902,7 @@
     {
       "id": "mt30qb4ygmbip",
       "fee": 26,
-      "net": 234,
+      "net": 465.99,
       "date": "2026-08-21",
       "item": "吕 防脱液",
       "type": "众测招募",
@@ -1912,7 +1912,8 @@
       "account": "芽芽Mochi",
       "deadline": "2026-08-21",
       "rebatePct": 0,
-      "orderAmount": 260
+      "orderAmount": 260,
+      "commission": 231.99
     },
     {
       "id": "mt30r62unak7a",
