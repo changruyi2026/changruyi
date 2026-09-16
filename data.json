@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789528646472,
+  "_modifiedAt": 1789528696944,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1863,11 +1863,12 @@
       "type": "众测招募",
       "quote": 0,
       "rebate": 0,
-      "status": "审核中",
+      "status": "已出稿",
       "account": "芽芽Mochi",
       "deadline": "",
       "rebatePct": 0,
-      "orderAmount": 0
+      "orderAmount": 0,
+      "commission": 0
     },
     {
       "id": "mt2ll7orjvlme",
