@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789528584101,
+  "_modifiedAt": 1789528646472,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2064,6 +2064,22 @@
       "fee": 36,
       "net": 180,
       "orderAmount": 0
+    },
+    {
+      "id": "mu3j5gsop92wc",
+      "date": "2026-09-20",
+      "item": "纽倍思",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "芽芽Mochi",
+      "deadline": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 10,
+      "net": 90,
+      "orderAmount": 100,
+      "commission": 0
     }
   ],
   "backups": [
