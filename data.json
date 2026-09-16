@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789539794222,
+  "_modifiedAt": 1789552664713,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1648,7 +1648,7 @@
     {
       "id": "mt2dsxjpsw9aw",
       "fee": 0,
-      "net": 0,
+      "net": 50,
       "date": "2026-07-24",
       "item": "好奇纸尿裤",
       "type": "水下直发",
@@ -1658,7 +1658,8 @@
       "account": "芽芽Mochi",
       "deadline": "",
       "rebatePct": 0,
-      "orderAmount": 0
+      "orderAmount": 50,
+      "commission": 0
     },
     {
       "id": "mt2dt8t5c44mz",
