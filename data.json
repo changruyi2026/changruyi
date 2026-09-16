@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789539778225,
+  "_modifiedAt": 1789539794222,
   "home": {
     "rest": [
       "2026-08-01",
@@ -618,6 +618,14 @@
       "cat": "餐饮",
       "amount": 20.5,
       "note": "老乡鸡"
+    },
+    {
+      "id": "mu3psegeihur3",
+      "date": "2026-09-15",
+      "type": "out",
+      "cat": "交通",
+      "amount": 9.9,
+      "note": "特斯拉会员"
     }
   ],
   "xhs": {
