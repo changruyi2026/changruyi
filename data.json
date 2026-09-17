@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789611404958,
+  "_modifiedAt": 1789627230117,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -642,6 +642,14 @@
       "cat": "买菜",
       "amount": 56.08,
       "note": "盒马"
+    },
+    {
+      "id": "mu55ugf94tlrm",
+      "date": "2026-09-17",
+      "type": "out",
+      "cat": "居家",
+      "amount": 175,
+      "note": "日常用品-淘宝"
     }
   ],
   "xhs": {
