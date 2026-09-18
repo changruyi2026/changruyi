@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789695199279,
+  "_modifiedAt": 1789695208189,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2094,11 +2094,11 @@
       "status": "已出稿",
       "account": "芽芽Mochi",
       "deadline": "",
-      "quote": 290,
+      "quote": 288,
       "rebatePct": 55.52,
-      "rebate": -161.01,
-      "fee": 29,
-      "net": 99.99,
+      "rebate": -159.9,
+      "fee": 28.8,
+      "net": 99.3,
       "orderAmount": 0,
       "commission": 0
     },
