@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v68'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v69'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -454,8 +454,6 @@ const TITLES = {
 
   ledger: ['记账', '每一笔，都是生活的痕迹'],
 
-  xhs: ['红薯概况', '发芽芽的日常 · 常如意i'],
-
   baby: ['女鹅记录', '女鹅的成长日记 · 拉屎打卡 💩'],
 
   ruyi: ['🟠常如意i', '大号常如意i · 出稿笔记'],
@@ -494,8 +492,6 @@ function renderView(v) {
   if (v === 'home') renderHome();
 
   else if (v === 'ledger') renderLedger();
-
-  else if (v === 'xhs') renderXhs();
 
   else if (v === 'baby') renderBaby();
 
@@ -856,8 +852,6 @@ function xhsAcctDataCard(acct) {
       <div class="card-title"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)} · 数据记录
 
         <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="xhs-open-history" data-account="${esc(acct)}">📊 查看统计</button>
-
-        <button class="btn btn-sm btn-ghost" data-action="xhs-reset" title="清掉两个账号所有记录与基准数，从头开始">🧹 重置</button>
 
       </div>
 
@@ -3565,7 +3559,12 @@ function openLedgerModal(date, rec) {
 
 function openXhsAddModal(presetAcct) {
 
-  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}"${a === presetAcct ? ' selected' : ''}>${a}</option>`).join('');
+  /* 账号锁定：从哪里（常如意i / 芽芽Mochi 页面）打开就只记录那个号，不出现下拉切换 */
+  const acct = presetAcct || (currentView === 'yaya' ? '芽芽Mochi' : '常如意i');
+
+  const badge = XHS_ACCOUNT_BADGE[acct] || '常';
+
+  const theme = XHS_ACCOUNT_THEME[acct] || { soft: '#C4886E' };
 
   openModal(`
 
@@ -3573,7 +3572,7 @@ function openXhsAddModal(presetAcct) {
 
     <p class="modal-tip">填「当前的累计总数」。只改动的那一项就填，没动的留空——会自动沿用上一次的数值，不会变成 0。</p>
 
-    <div class="field"><label>账号</label><select class="input" id="xAccount">${acctOpts}</select></div>
+    <div class="field"><label>账号</label><div class="acct-lock" style="border-color:${theme.soft}"><span class="acct-badge" style="background:${theme.soft}">${badge}</span><b>${esc(acct)}</b></div><input type="hidden" id="xAccount" value="${esc(acct)}" /></div>
 
     <div class="field"><label>日期</label><input class="input" id="xDate" type="date" value="${todayStr()}" /></div>
 
@@ -3593,177 +3592,12 @@ function openXhsAddModal(presetAcct) {
 
 /* 小红书：限流笔记备注 */
 
-function openXhsLimitModal(account) {
-
-  const acct = account || XHS_ACCOUNTS[0];
-
-  const L = xhsLimit(acct);
-
-  openModal(`
-
-    <h3>🚫 ${esc(acct)} · 限流笔记备注</h3>
-
-    <div class="field"><label>限流笔记数量（篇）</label><input class="input" id="xLimitCount" type="number" min="0" value="${L.count || 0}" /></div>
-
-    <div class="field"><label>限流笔记名称（用顿号/逗号分隔）</label><textarea class="textarea" id="xLimitNames" placeholder="如：周末去哪儿 Vol.3、芽芽辅食记">${esc(L.names || '')}</textarea></div>
-
-    <div class="modal-actions">
-
-      <button class="btn btn-ghost" data-action="close-modal">取消</button>
-
-      <button class="btn btn-primary" data-action="xhs-save-limit" data-account="${esc(acct)}">保存</button>
-
-    </div>`);
-
-}
 
 /* 小红书：待返款 / 蒲公英商单 */
 
-function openRebrateModal(presetSrc) {
-
-  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
-
-  openModal(`
-
-    <h3>💸 添加待返款</h3>
-
-    <div class="field"><label>发布账号</label><select class="input" id="rbAccount">${acctOpts}</select></div>
-
-    <div class="field"><label>来源</label>
-
-      <div class="seg" id="rbSrc">
-
-        <button class="on" data-type="rebate">普通返款</button><button data-type="pgy">🌼 蒲公英商单</button>
-
-      </div>
-
-    </div>
-
-    <div class="field" id="rbDirField"><label>类型</label>
-
-      <div class="seg" id="rbDir">
-
-        <button class="on" data-type="out">我返款给PR（-）</button><button data-type="in">PR返款给我（+）</button>
-
-      </div>
-
-    </div>
-
-    <div class="field"><label>金额</label><input class="input" id="rbAmt" type="number" min="0" step="0.01" placeholder="0.00" /></div>
-
-    <div class="field"><label id="rbItemLabel">物品名称</label><input class="input" id="rbItem" placeholder="如：联名零食礼盒" /></div>
-
-    <div class="field"><label>笔记发布日期</label><input class="input" id="rbPub" type="date" value="${todayStr()}" /></div>
-
-    <div class="field"><label id="rbPromLabel">PR承诺最晚返款日期</label><input class="input" id="rbProm" type="date" value="${todayStr()}" /></div>
-
-    <div class="modal-actions">
-
-      <button class="btn btn-ghost" data-action="close-modal">取消</button>
-
-      <button class="btn btn-primary" data-action="rebrate-save">保存</button>
-
-    </div>`);
-
-  let dir = 'out';
-
-  let src = presetSrc || 'rebate';
-
-  const applySrcUI = () => {
-
-    const isPgy = src === 'pgy';
-
-    // 蒲公英商单都是品牌收款（收入），无需选择类型，直接隐藏该栏
-
-    const dirField = $('#rbDirField');
-
-    if (dirField) dirField.style.display = isPgy ? 'none' : '';
-
-    $('#rbItemLabel').textContent = isPgy ? '笔记名称' : '物品名称';
-
-    $('#rbItem').placeholder = isPgy ? '如：XX品牌联名测评' : '如：联名零食礼盒';
-
-    $('#rbPromLabel').textContent = isPgy ? '最晚交易确认时间' : 'PR承诺最晚返款日期';
-
-  };
-
-  const lockDirForPgy = () => { if (src === 'pgy') dir = 'in'; };
-
-  $('#rbSrc').addEventListener('click', e => {
-
-    const b = e.target.closest('button'); if (!b) return;
-
-    src = b.dataset.type;
-
-    $$('#rbSrc button').forEach(x => x.classList.toggle('on', x === b));
-
-    lockDirForPgy();
-
-    applySrcUI();
-
-  });
-
-  $('#rbDir').addEventListener('click', e => {
-
-    const b = e.target.closest('button'); if (!b || b.disabled) return;
-
-    dir = b.dataset.type;
-
-    $$('#rbDir button').forEach(x => x.classList.toggle('on', x === b));
-
-  });
-
-  if (src === 'pgy') {
-
-    $$('#rbSrc button').forEach(x => x.classList.toggle('on', x.dataset.type === 'pgy'));
-
-    lockDirForPgy();
-
-  }
-
-  applySrcUI();
-
-  window.__rbDir = () => dir;
-
-  window.__rbSrc = () => src;
-
-}
 
 /* 打勾确认弹窗：记录实际返款日期 + 渠道（PR返我 → 同时记入账本收入） */
 
-function openRebateConfirmModal(r) {
-
-  const isIn = r.dir !== 'out';
-
-  const isPgy = r.src === 'pgy';
-
-  openModal(`
-
-    <h3>✅ 确认${isIn ? (isPgy ? '收到蒲公英商单款' : '收到 PR 返款') : '已返款给 PR'}</h3>
-
-    <p class="modal-tip">${isIn ? (isPgy ? '确认后，这笔蒲公英商单款会按「返款日期」记到记账「收入 · 蒲公英」里，分类颜色为绿色。' : '确认后，这笔返款会按「返款日期」记到记账「收入 · 返款」里；PR承诺最晚返款日期只是提醒，不参与记账。') : '这是你给 PR 的返款，按你说的<span style="color:#D6453D;font-weight:700">不计入记账收入</span>，仅在此记录日期与渠道。'}</p>
-
-    <div class="field"><label>${isIn ? '返款日期（你收到钱的日期）' : '返款日期（你支付给 PR 的日期）'}</label><input class="input" id="rbDate" type="date" value="${todayStr()}" /></div>
-
-    <div class="field"><label>返款渠道</label>
-
-      <select class="input" id="rbChannel">
-
-        <option>微信</option><option>支付宝</option><option>银行卡</option><option>现金</option><option>其他</option>
-
-      </select>
-
-    </div>
-
-    <div class="modal-actions">
-
-      <button class="btn btn-ghost" data-action="close-modal">取消</button>
-
-      <button class="btn btn-primary" data-action="rebrate-confirm-save" data-id="${r.id}">确认</button>
-
-    </div>`);
-
-}
 
 
 
@@ -4021,131 +3855,6 @@ function xhsMonthChart() {
 
 
 
-function renderXhs() {
-
-  migrateXhsAccounts();
-
-
-
-  /* 账号数据记录（粉丝/赞藏 + 记录/统计入口）已挪至各账号页（常如意i / 芽芽Mochi） */
-
-
-
-  // 待返款
-
-  const rebates = S.xhs.rebates || [];
-
-  const outPending = rebates.filter(r => r.dir === 'out' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
-
-  const inPending = rebates.filter(r => r.dir === 'in' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
-
-  const pgyPending = rebates.filter(r => r.src === 'pgy' && !r.done).reduce((s, r) => s + (r.amount || 0), 0);
-
-  const doneCount = rebates.filter(r => r.done).length;
-
-  const rebateHTML = rebates.length ? rebates.map(r => {
-
-    const isOut = r.dir === 'out';
-
-    const isPgy = r.src === 'pgy';
-
-    const amtColor = isOut ? 'var(--rose-deep)' : 'var(--sage-deep)';
-
-    const acct = r.account || XHS_ACCOUNTS[0];
-
-    const abg = XHS_ACCOUNT_BADGE[acct] || '常';
-
-    const theme = XHS_ACCOUNT_THEME[acct] || { soft: '#C4886E' };
-
-    const typeTag = isPgy
-
-      ? `<span class="t-type pgy">🌼 蒲公英</span>`
-
-      : `<span class="t-type ${isOut ? 'cash' : 'note'}">${isOut ? '我返PR' : 'PR返我'}</span>`;
-
-    return `<div class="xhs-todo ${r.done ? 'done' : ''}">
-
-      <div class="check ${r.done ? 'on' : ''}" data-action="rebrate-toggle" data-id="${r.id}">${r.done ? icCheck() : ''}</div>
-
-      ${typeTag}
-
-      <span class="tl-text"><span class="xhs-acct-tag" style="background:${theme.soft}">${abg}</span><b>${esc(r.item || '未命名物品')}</b>
-
-        <span class="date-chip soft">📅 发布 ${esc(r.pub || '—')}</span>
-
-        <span class="date-chip">${isPgy ? '⏰ 交易确认 ' : '⏰ 最晚 '}${esc(r.prom || '—')}</span>
-
-        ${r.done && r.rdate ? `<span class="date-chip ok">✓ ${esc(r.rdate)}${r.channel ? ' · ' + esc(r.channel) : ''}</span>` : ''}
-
-      </span>
-
-      <span class="r-amt" style="color:${amtColor};font-weight:800">${isOut ? '-' : '+'}${money(r.amount || 0)}</span>
-
-      <button class="icon-btn danger" data-action="rebrate-del" data-id="${r.id}">${icTrash()}</button>
-
-    </div>`;
-
-  }).join('') : '<div class="empty">暂无返款记录，点右上角「+ 添加」</div>';
-
-
-
-  /* 笔记支出与金额统计表已按需求删除（2026-09-19） */
-
-
-
-  $('#view-xhs').innerHTML = `
-
-    <div class="card">
-
-      <div class="card-title"><span class="dot" style="background:var(--sage)"></span>待返款
-
-        <button class="btn btn-sm btn-ghost" data-action="rebrate-add-pgy">🌼 蒲公英商单</button>
-
-        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="rebrate-add">+ 添加</button>
-
-      </div>
-
-      <div class="rb-summary">
-
-        <span class="rb-sum out">我返PR 还需 <b>${money(outPending)}</b></span>
-
-        <span class="rb-sum in">PR返我 待收 <b>${money(inPending)}</b></span>
-
-        ${pgyPending ? `<span class="rb-sum pgy">🌼 蒲公英待收 <b>${money(pgyPending)}</b></span>` : ''}
-
-        ${doneCount ? `<span class="rb-done">已完成 ${doneCount} 笔</span>` : ''}
-
-      </div>
-
-      ${rebateHTML}
-
-    </div>
-
-
-
-      <div class="card" style="margin-top:20px">
-
-        <div class="card-title"><span class="dot" style="background:var(--blue)"></span>数据备份
-
-          <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
-
-            <button class="btn btn-sm btn-ghost" data-action="xhs-export-backup">⬇️ 导出备份</button>
-
-            <button class="btn btn-sm btn-ghost" data-action="xhs-import-backup">⬆️ 导入备份</button>
-
-            <button class="btn btn-sm btn-ghost" data-action="xhs-cloud-backup">🛡 本地快照</button>
-
-          </span>
-
-        </div>
-
-        <div style="color:var(--ink-soft);font-size:13px">建议定期点「导出备份」把数据下载到电脑。换浏览器、清缓存或同步异常时，可用「导入备份」恢复。</div>
-
-        <button class="btn btn-primary" style="width:100%;margin-top:12px" data-action="xhs-restore-cloud">🔄 从云端恢复数据（把服务器上的最新数据拉回本机）</button>
-
-      </div>`;
-
-}
 
 
 
@@ -4521,37 +4230,11 @@ document.addEventListener('click', e => {
 
 
 
-    /* 小红书 */
-
-    case 'goto-xhs': showView('xhs'); break;
+    /* 账号数据记录（常如意i / 芽芽Mochi 各自页面） */
 
     case 'xhs-add': openXhsAddModal(el.dataset.account || null); break;
 
     case 'xhs-open-history': openXhsHistoryModal(el.dataset.account || null); break;
-
-    case 'xhs-reset': {
-
-      if (window.confirm('确定要重置小红书统计吗？\n\n会清空两个账号的「基准数」和所有已记录的数据（粉丝/笔记/赞藏），之后你需要重新用「记录当前数据」填入真实数字。\n\n此操作无法撤销。')) {
-
-        migrateXhsAccounts();
-
-        XHS_ACCOUNTS.forEach(acct => {
-
-          S.xhs.accounts[acct] = { base: { followers: 0, notes: 0, zanCang: 0 }, records: [] };
-
-        });
-
-        S.xhs.base = { followers: 0, notes: 0, zanCang: 0 };
-
-        S.xhs.records = [];
-
-        save(); closeModal(); renderXhs(); toast('已重置，请重新记录真实数据');
-
-      }
-
-      break;
-
-    }
 
     case 'xhs-hist-del': {
 
@@ -4621,259 +4304,10 @@ document.addEventListener('click', e => {
 
       S.xhs.accounts[account].records.push(rec);
 
-      save(); closeModal(); renderXhs(); toast('已记录（最新一条即为当前数）'); break;
+      save(); closeModal(); renderView(currentView); toast('已记录（最新一条即为当前数）'); break;
 
     }
 
-    case 'xhs-edit-limit':
-
-    case 'xhs-open-limit': openXhsLimitModal(el.dataset.account || XHS_ACCOUNTS[0]); break;
-
-    case 'xhs-export-backup': exportBackup(); break;
-
-    case 'xhs-import-backup': openImportPicker(); break;
-
-    case 'xhs-cloud-backup': openCloudBackup(); break;
-
-    case 'xhs-restore-cloud': {
-
-      pendingForceRestore = true;
-
-      toast('正在从云端恢复数据，请稍候…', 'warn');
-
-      if (!cloudReady) { initSync(); }   // 未初始化则先连接云端（内部会触发强制拉取）
-
-      else { pullSync(true); }            // 已连接则直接强制从云端恢复
-
-      break;
-
-    }
-
-    case 'xhs-save-limit': {
-
-      const account = el.dataset.account || XHS_ACCOUNTS[0];
-
-      const count = Math.max(0, parseInt($('#xLimitCount').value || '0', 10) || 0);
-
-      const names = ($('#xLimitNames').value || '').trim();
-
-      if (!S.xhs.limit) S.xhs.limit = {};
-
-      S.xhs.limit[account] = { count, names };
-
-      save(); closeModal(); renderXhs(); toast(`已保存 ${esc(account)} 的限流笔记备注`); break;
-
-    }
-
-    case 'xhs-exp-add': openXhsNoteExpModal(); break;
-
-    case 'xhs-note-edit': openXhsNoteExpModal(id); break;
-
-    case 'xhs-note-detail': openXhsNoteDetail(id); break;
-
-    case 'xhs-item-del': {
-
-      const iid = el.dataset.iid || id;
-
-      const row = document.querySelector(`#neItems .exp-item-row[data-iid="${iid}"]`);
-
-      if (row) {
-
-        row.remove();
-
-        let s = 0; $$('#neItems .exp-amt').forEach(inp => { s += parseFloat(inp.value || '0') || 0; });
-
-        const tv = $('#neTotalVal'); if (tv) tv.textContent = money(s);
-
-      }
-
-      break;
-
-    }
-
-    case 'xhs-note-save': {
-
-      const editId = id || '';
-
-      const name = ($('#neName').value || '').trim();
-
-      const date = ($('#neDate').value || '').trim();
-
-      const account = ($('#neAccount').value || XHS_ACCOUNTS[0]).trim();
-
-      const type = (window.__neType ? window.__neType() : 'note');
-
-      const cover = (window.__neCover ? window.__neCover() : '');
-
-      const items = [];
-
-      $$('#neItems .exp-item-row').forEach(row => {
-
-        const desc = (row.querySelector('.exp-desc').value || '').trim();
-
-        const amt = Math.max(0, parseFloat(row.querySelector('.exp-amt').value || '0'));
-
-        const kindSel = row.querySelector('.exp-kind');
-
-        const kind = kindSel ? kindSel.value : 'custom';
-
-        if (desc || amt) items.push({ id: row.dataset.iid && !row.dataset.iid.startsWith('_') ? row.dataset.iid : uid(), desc, amount: amt, kind });
-
-      });
-
-      if (!name) { toast('请填写笔记名称', 'warn'); return; }
-
-      if (!items.length) { toast('请至少填写一项支出金额或说明', 'warn'); return; }
-
-      S.xhs.noteExpenses = S.xhs.noteExpenses || [];
-
-      if (editId) {
-
-        const n = S.xhs.noteExpenses.find(x => x.id === editId);
-
-        if (n) { n.name = name; n.date = date; n.account = account; n.type = type; n.cover = cover; n.items = items; }
-
-      } else {
-
-        S.xhs.noteExpenses.push({ id: uid(), name, date, account, type, cover, items });
-
-      }
-
-      save(); closeModal(); renderXhs(); toast(editId ? '已更新笔记支出' : '已记一笔笔记支出'); break;
-
-    }
-
-    case 'xhs-note-del': {
-
-      if (window.confirm('确定删除这条笔记支出（含封面图与全部明细）吗？此操作无法撤销。')) {
-
-        S.xhs.noteExpenses = (S.xhs.noteExpenses || []).filter(n => n.id !== id);
-
-        save(); renderXhs();
-
-      }
-
-      break;
-
-    }
-
-    case 'xhs-rec-del': {
-
-      migrateXhsAccounts();
-
-      XHS_ACCOUNTS.forEach(acct => {
-
-        if (S.xhs.accounts[acct]) S.xhs.accounts[acct].records = (S.xhs.accounts[acct].records || []).filter(r => r.id !== id);
-
-      });
-
-      save(); renderXhs(); toast('已删除该条记录'); break;
-
-    }
-
-    case 'rebrate-add': openRebrateModal(); break;
-
-    case 'rebrate-add-pgy': openRebrateModal('pgy'); break;
-
-    case 'rebrate-save': {
-
-      const amount = Math.max(0, parseFloat($('#rbAmt').value || '0'));
-
-      const item = ($('#rbItem').value || '').trim();
-
-      const pub = ($('#rbPub').value || '').trim();
-
-      const prom = ($('#rbProm').value || todayStr()).trim();
-
-      const account = ($('#rbAccount').value || XHS_ACCOUNTS[0]).trim();
-
-      if (!amount || !item) { toast('请输入金额和物品名称', 'warn'); return; }
-
-      S.xhs.rebates = S.xhs.rebates || [];
-
-      S.xhs.rebates.push({ id: uid(), dir: window.__rbDir ? window.__rbDir() : 'out', src: window.__rbSrc ? window.__rbSrc() : 'rebate', account, amount, item, pub, prom, done: false });
-
-      save(); closeModal(); renderXhs(); toast('已添加待返款'); break;
-
-    }
-
-    case 'rebrate-toggle': {
-
-      const r = (S.xhs.rebates || []).find(z => z.id === id);
-
-      if (!r) break;
-
-      if (r.done) {
-
-        // 取消打勾：撤销已完成状态（含账本收入）
-
-        r.done = false;
-
-        if (r.dir === 'in' && r.ledgerId) S.ledger = S.ledger.filter(x => x.id !== r.ledgerId);
-
-        delete r.ledgerId; delete r.rdate; delete r.channel;
-
-        save(); renderXhs();
-
-        toast('已取消，从账本移除');
-
-      } else {
-
-        // 打勾：弹窗填写实际返款日期 + 渠道
-
-        openRebateConfirmModal(r);
-
-      }
-
-      break;
-
-    }
-
-    case 'rebrate-confirm-save': {
-
-      const r = (S.xhs.rebates || []).find(z => z.id === id);
-
-      if (!r) break;
-
-      const rdate = ($('#rbDate').value || todayStr()).trim();
-
-      const channel = ($('#rbChannel').value || '其他').trim();
-
-      r.done = true; r.rdate = rdate; r.channel = channel;
-
-      S.ledger = S.ledger || [];
-
-      if (r.dir === 'in') {
-
-        const lid = uid();
-
-        r.ledgerId = lid;
-
-        const cat = (r.src === 'pgy') ? '蒲公英' : '返款';
-
-        S.ledger.push({ id: lid, date: rdate, type: 'in', cat, amount: r.amount || 0, note: `${cat} · ${r.item || '待返款'} · ${channel}` });
-
-      }
-
-      save(); closeModal(); renderXhs();
-
-      toast(r.dir === 'in' ? '已确认收款并记入账本' : '已确认返款给 PR');
-
-      break;
-
-    }
-
-    case 'rebrate-del': {
-
-      const r = (S.xhs.rebates || []).find(z => z.id === id);
-
-      if (r && r.ledgerId) S.ledger = S.ledger.filter(x => x.id !== r.ledgerId);
-
-      S.xhs.rebates = (S.xhs.rebates || []).filter(z => z.id !== id);
-
-      save(); renderXhs(); break;
-
-    }
 
 
 
