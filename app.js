@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v67'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v68'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -842,9 +842,46 @@ function renderHome() {
 
 
 
+/* 账号页顶部的「数据记录」卡片：粉丝/赞藏 当前值 + 记录入口 + 统计入口（从红薯概况挪来，按账号拆分） */
+function xhsAcctDataCard(acct) {
+
+  const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
+
+  const cur = { f: xhsCurrent('f', acct), z: xhsCurrent('z', acct) };
+
+  return `
+
+    <div class="card xhs-acct-data" style="background:${theme.bg};border:1px solid ${theme.soft}33">
+
+      <div class="card-title"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)} · 数据记录
+
+        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="xhs-open-history" data-account="${esc(acct)}">📊 查看统计</button>
+
+        <button class="btn btn-sm btn-ghost" data-action="xhs-reset" title="清掉两个账号所有记录与基准数，从头开始">🧹 重置</button>
+
+      </div>
+
+      <div class="xhs-stat xhs-stat-compact">
+
+        <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f', acct))}</div>
+
+        <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z', acct))}</div>
+
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;margin-top:10px" data-action="xhs-add" data-account="${esc(acct)}">+ 记录当前数据（粉丝 / 赞藏 当前总数）</button>
+
+      <div style="color:var(--ink-soft);font-size:13px;margin-top:8px">点「查看统计」可按日期查看累计值与<span style="color:#D6453D;font-weight:700">每日增长</span>（涨红跌绿）。</div>
+
+    </div>`;
+
+}
+
 function renderRuyi() {
 
   $('#view-ruyi').innerHTML = `
+
+    ${xhsAcctDataCard('常如意i')}
 
     <div class="card">
 
@@ -879,6 +916,8 @@ function renderRuyi() {
 function renderYaya() {
 
   $('#view-yaya').innerHTML = `
+
+    ${xhsAcctDataCard('芽芽Mochi')}
 
     <div class="card">
 
@@ -3524,9 +3563,9 @@ function openLedgerModal(date, rec) {
 
 /* 小红书：记录当前累计数据（每条是「当前总数快照」，只填变动项即可，其余自动沿用上一次） */
 
-function openXhsAddModal() {
+function openXhsAddModal(presetAcct) {
 
-  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
+  const acctOpts = XHS_ACCOUNTS.map(a => `<option value="${a}"${a === presetAcct ? ' selected' : ''}>${a}</option>`).join('');
 
   openModal(`
 
@@ -3988,31 +4027,7 @@ function renderXhs() {
 
 
 
-  // 账号统计卡片（双账号：常如意i / 芽芽Mochi）
-
-  const accountBlocks = XHS_ACCOUNTS.map((acct) => {
-
-    const theme = XHS_ACCOUNT_THEME[acct] || { bg: '#F8E8DF', soft: '#C4886E' };
-
-    const cur = { f: xhsCurrent('f', acct), z: xhsCurrent('z', acct) };
-
-    return `
-
-    <div class="xhs-account-block" style="background:${theme.bg};border:1px solid ${theme.soft}33">
-
-      <div class="xhs-account-title" style="color:${theme.soft}"><span class="acct-badge" style="background:${theme.soft};color:#fff">${XHS_ACCOUNT_BADGE[acct]}</span>${esc(acct)}</div>
-
-      <div class="xhs-stat xhs-stat-compact">
-
-        <div class="xhs-cell"><div class="big">${cur.f.toLocaleString()}</div><div class="lbl">粉丝量</div>${deltaHTML(xhsDelta('f', acct))}</div>
-
-        <div class="xhs-cell"><div class="big">${cur.z.toLocaleString()}</div><div class="lbl">赞藏数量</div>${deltaHTML(xhsDelta('z', acct))}</div>
-
-      </div>
-
-    </div>`;
-
-  }).join('');
+  /* 账号数据记录（粉丝/赞藏 + 记录/统计入口）已挪至各账号页（常如意i / 芽芽Mochi） */
 
 
 
@@ -4074,101 +4089,13 @@ function renderXhs() {
 
 
 
-  // 笔记支出（按笔记名称分组，每条含封面图 + 多条明细）
-
-  const now = new Date();
-
-  const notes = S.xhs.noteExpenses || [];
-
-  const flatExp = xhsFlatExpenses();
-
-  const mKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
-
-  const monthTotal = flatExp.filter(e => (e.date || '').slice(0, 7) === mKey).reduce((s, e) => s + (e.amount || 0), 0);
-
-  const totalAll = flatExp.reduce((s, e) => s + (e.amount || 0), 0);
-
-  const expCount = flatExp.length;
-
-  const noteCards = notes.map(n => {
-
-    const isCart = (n.type || 'note') === 'cart';
-
-    const noteTotal = xhsNoteItemsTotal(n.items);
-
-    const acct = n.account || XHS_ACCOUNTS[0];
-
-    const abg = XHS_ACCOUNT_BADGE[acct] || '常';
-
-    const theme = XHS_ACCOUNT_THEME[acct] || { soft: '#C4886E' };
-
-    return `
-
-    <div class="note-exp-card ${isCart ? 'cart' : ''}">
-
-      <div class="note-cover" data-action="xhs-note-detail" data-id="${n.id}" title="点封面看支出明细">
-
-        <img src="${noteCoverUrl(n)}" alt="封面" />
-
-        <span class="note-cover-acct" style="background:${theme.soft}">${abg}</span>
-
-      </div>
-
-      <div class="note-info">
-
-        <div class="note-name"><span class="xhs-acct-tag" style="background:${theme.soft}">${abg}</span><b>${esc(n.name || '未命名笔记')}</b> <span class="etype-tag ${isCart ? 'cart' : 'note'}">${isCart ? '作业车' : '笔记'}</span></div>
-
-        <div class="note-sub">${(n.items || []).length} 项明细${n.date ? ' · ' + esc(n.date) : ''}</div>
-
-        <div class="note-total">总花费 <b>${money(noteTotal)}</b></div>
-
-      </div>
-
-      <div class="note-ops">
-
-        <button class="icon-btn" data-action="xhs-note-edit" data-id="${n.id}" title="编辑">✏️</button>
-
-        <button class="icon-btn danger" data-action="xhs-note-del" data-id="${n.id}" title="删除整条">${icTrash()}</button>
-
-      </div>
-
-    </div>`;
-
-  }).join('');
-
-
-
-  // 数据记录入口（点「查看统计」弹窗查看按日期的累计值与每日增长）
-
-  const recHistory = `
-
-    <div class="card">
-
-      <div class="card-title"><span class="dot" style="background:var(--clay)"></span>数据记录历史
-
-        <button class="btn btn-sm btn-ghost" data-action="xhs-open-history">📊 查看统计</button>
-
-        <button class="btn btn-sm btn-ghost" style="margin-left:auto" data-action="xhs-reset" title="清掉所有记录与基准数，从头开始">🧹 重置统计</button>
-
-      </div>
-
-      <div style="color:var(--ink-soft);font-size:13px">点「查看统计」可按日期查看每条数据的累计值，以及<span style="color:#D6453D;font-weight:700">每日增长</span>（涨红跌绿）。顶部数字会随你记录的变动自动更新。</div>
-
-    </div>`;
+  /* 笔记支出与金额统计表已按需求删除（2026-09-19） */
 
 
 
   $('#view-xhs').innerHTML = `
 
-    <div class="xhs-accounts" style="margin-bottom:18px">${accountBlocks}</div>
-
-    <button class="btn btn-primary" style="margin-bottom:16px" data-action="xhs-add">+ 记录当前数据（粉丝 / 赞藏 当前总数）</button>
-
-    ${recHistory}
-
-
-
-    <div class="card" style="margin-top:20px">
+    <div class="card">
 
       <div class="card-title"><span class="dot" style="background:var(--sage)"></span>待返款
 
@@ -4191,44 +4118,6 @@ function renderXhs() {
       </div>
 
       ${rebateHTML}
-
-    </div>
-
-
-
-    <div class="card" style="margin-top:20px">
-
-      <div class="card-title"><span class="dot" style="background:var(--clay)"></span>笔记支出
-
-        <span class="stat-pill" style="margin-left:auto">金额合计<b>${money(totalAll)}</b></span>
-
-      </div>
-
-      ${notes.length ? `<div class="note-exp-list">${noteCards}</div>` : '<div class="empty">还没有笔记支出。点下方「+ 记一笔」，按<b>笔记名称</b>记录，可上传封面图、填多条花费（如真人推广、评论互动），点封面即可看明细合计。</div>'}
-
-      <div class="note-exp-foot"><button class="btn btn-sm btn-primary" data-action="xhs-exp-add">+ 记一笔</button></div>
-
-    </div>
-
-
-
-    <div class="card" style="margin-top:20px">
-
-      <div class="card-title"><span class="dot" style="background:var(--sand)"></span>金额统计表
-
-        <span class="stat-pills">
-
-          <span class="stat-pill">月度<b>${money(monthTotal)}</b></span>
-
-          <span class="stat-pill">总支出<b>${money(totalAll)}</b></span>
-
-        </span>
-
-      </div>
-
-      <div class="xhs-chart">${xhsMonthChart()}</div>
-
-      <div class="total-line">总支出金额 <b>${money(totalAll)}</b><span class="total-sub">共 ${expCount} 笔（含笔记支出与作业车）</span></div>
 
     </div>
 
@@ -4338,11 +4227,13 @@ function initialMetricCell(val) {
 
 }
 
-function openXhsHistoryModal() {
+function openXhsHistoryModal(onlyAcct) {
 
   let body = '';
 
-  XHS_ACCOUNTS.forEach((acct, idx) => {
+  const accts = onlyAcct ? [onlyAcct] : XHS_ACCOUNTS;
+
+  accts.forEach((acct, idx) => {
 
     const rows = xhsHistoryRows(acct);
 
@@ -4634,9 +4525,9 @@ document.addEventListener('click', e => {
 
     case 'goto-xhs': showView('xhs'); break;
 
-    case 'xhs-add': openXhsAddModal(); break;
+    case 'xhs-add': openXhsAddModal(el.dataset.account || null); break;
 
-    case 'xhs-open-history': openXhsHistoryModal(); break;
+    case 'xhs-open-history': openXhsHistoryModal(el.dataset.account || null); break;
 
     case 'xhs-reset': {
 
