@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789780905709,
+  "_modifiedAt": 1789780923259,
   "home": {
     "rest": [
       "2026-08-01",
@@ -674,6 +674,14 @@
       "cat": "餐饮",
       "amount": 6,
       "note": "拌面"
+    },
+    {
+      "id": "mu7pcmt7nsmk3",
+      "date": "2026-09-19",
+      "type": "out",
+      "cat": "人情",
+      "amount": 1000,
+      "note": "婆婆生日"
     }
   ],
   "xhs": {
