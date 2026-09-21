@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789983349324,
+  "_modifiedAt": 1789983365770,
   "home": {
     "rest": [
       "2026-08-01",
@@ -770,6 +770,14 @@
       "cat": "餐饮",
       "amount": 69,
       "note": "饼干芽芽"
+    },
+    {
+      "id": "mub1vogaxhn4h",
+      "date": "2026-09-21",
+      "type": "out",
+      "cat": "小红书",
+      "amount": 300,
+      "note": "充值"
     }
   ],
   "xhs": {
