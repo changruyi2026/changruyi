@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789981230355,
+  "_modifiedAt": 1789983349324,
   "home": {
     "rest": [
       "2026-08-01",
@@ -762,6 +762,14 @@
       "cat": "交通",
       "amount": 35,
       "note": "打车"
+    },
+    {
+      "id": "mub1vbrgx535x",
+      "date": "2026-09-21",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 69,
+      "note": "饼干芽芽"
     }
   ],
   "xhs": {
