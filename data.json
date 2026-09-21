@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789981133137,
+  "_modifiedAt": 1789981156390,
   "home": {
     "rest": [
       "2026-08-01",
@@ -706,6 +706,14 @@
       "cat": "买菜",
       "amount": 35.2,
       "note": "怡宝"
+    },
+    {
+      "id": "mub0kbomr8xvv",
+      "date": "2026-09-19",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 351.45,
+      "note": "海底捞"
     }
   ],
   "xhs": {
