@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1789981223322,
+  "_modifiedAt": 1789981230355,
   "home": {
     "rest": [
       "2026-08-01",
@@ -754,6 +754,14 @@
       "cat": "餐饮",
       "amount": 93.3,
       "note": "肯德基"
+    },
+    {
+      "id": "mub0lwr7ttdew",
+      "date": "2026-09-17",
+      "type": "out",
+      "cat": "交通",
+      "amount": 35,
+      "note": "打车"
     }
   ],
   "xhs": {
