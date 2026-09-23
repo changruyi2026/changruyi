@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790176235503,
+  "_modifiedAt": 1790176248437,
   "home": {
     "rest": [
       "2026-08-01",
@@ -802,6 +802,14 @@
       "cat": "餐饮",
       "amount": 8.8,
       "note": "早餐"
+    },
+    {
+      "id": "mue8pto5zhc1u",
+      "date": "2026-09-23",
+      "type": "out",
+      "cat": "红豆",
+      "amount": 200,
+      "note": "运动会"
     }
   ],
   "xhs": {
