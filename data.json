@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790127557830,
+  "_modifiedAt": 1790130861686,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -663,7 +663,7 @@
       "id": "mu6iq4nyuyguv",
       "date": "2026-09-18",
       "type": "in",
-      "cat": "红包",
+      "cat": "梁根",
       "amount": 1000,
       "note": "梁根"
     },
