@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v69'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v70'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -3255,7 +3255,17 @@ function renderLedger() {
 
 
 
-  // 分类饼图（支出，含小红书）
+  // 收入分类统计（本月）
+
+  const inByCat = {};
+
+  monthRecs.filter(r => r.type === 'in').forEach(r => { const c = catName(r.cat); inByCat[c] = (inByCat[c] || 0) + r.amount; });
+
+  const inTotal = Object.values(inByCat).reduce((s, v) => s + v, 0);
+
+
+
+  // 当月占比前五的分类明细（支出/收入通用）
 
   const expByCat = {};
 
@@ -3263,73 +3273,51 @@ function renderLedger() {
 
   const expTotal = Object.values(expByCat).reduce((s, v) => s + v, 0);
 
-  let pieBg = 'conic-gradient(#E6DFD6 0 100%)', legend = '<div class="empty">本月暂无支出</div>';
+  const top5ListHTML = (byCat, total, action, emptyTxt) => {
 
-  if (expTotal > 0) {
+    const sorted = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    let acc = 0; const segs = []; const lg = [];
+    const max = sorted.length ? sorted[0][1] : 1;
 
-    Object.entries(expByCat).sort((a, b) => b[1] - a[1]).forEach(([cat, v]) => {
+    return total > 0
 
-      const start = acc / expTotal * 360, end = (acc + v) / expTotal * 360; acc += v;
+      ? `<div class="top5-list">` + sorted.map(([cat, v], idx) => {
 
-      const col = CAT_COLOR[cat] || '#B6ADA1';
+          const col = CAT_COLOR[cat] || '#B6ADA1';
 
-      segs.push(`${col} ${start}deg ${end}deg`);
+          const pct = Math.round(v / total * 100);
 
-      lg.push(`<div class="legend-row"><span class="sw" style="background:${col}"></span><span class="nm">${cat}</span><span class="pc">${Math.round(v / expTotal * 100)}%</span></div>`);
+          return `
 
-    });
+            <div class="top5-row" data-action="${action}" data-cat="${esc(cat)}">
 
-    pieBg = `conic-gradient(${segs.join(',')})`;
+              <div class="top5-head">
 
-    legend = lg.join('');
+                <span class="top5-rank">${idx + 1}</span>
 
-  }
+                <span class="top5-sw" style="background:${col}"></span>
 
+                <span class="top5-nm">${cat}</span>
 
+                <span class="top5-amt">${money(v)}</span>
 
-  // 当月占比前五的分类明细
+                <span class="top5-pc">${pct}%</span>
 
-  const sortedCats = Object.entries(expByCat).sort((a, b) => b[1] - a[1]);
+              </div>
 
-  const top5 = sortedCats.slice(0, 5);
+              <div class="top5-track"><div class="top5-bar" style="width:${Math.max(4, v / max * 100)}%;background:${col}"></div></div>
 
-  const top5Max = top5.length ? top5[0][1] : 1;
+            </div>`;
 
-  const top5HTML = expTotal > 0
+        }).join('') + `</div>`
 
-    ? `<div class="top5-list">` + top5.map(([cat, v], idx) => {
+      : `<div class="empty">${emptyTxt}</div>`;
 
-        const col = CAT_COLOR[cat] || '#B6ADA1';
+  };
 
-        const pct = Math.round(v / expTotal * 100);
+  const top5HTML = top5ListHTML(expByCat, expTotal, 'ledger-top5-detail', '本月暂无支出');
 
-        return `
-
-          <div class="top5-row" data-action="ledger-top5-detail" data-cat="${esc(cat)}">
-
-            <div class="top5-head">
-
-              <span class="top5-rank">${idx + 1}</span>
-
-              <span class="top5-sw" style="background:${col}"></span>
-
-              <span class="top5-nm">${cat}</span>
-
-              <span class="top5-amt">${money(v)}</span>
-
-              <span class="top5-pc">${pct}%</span>
-
-            </div>
-
-            <div class="top5-track"><div class="top5-bar" style="width:${Math.max(4, v / top5Max * 100)}%;background:${col}"></div></div>
-
-          </div>`;
-
-      }).join('') + `</div>`
-
-    : '<div class="empty">本月暂无支出</div>';
+  const inTop5HTML = top5ListHTML(inByCat, inTotal, 'ledger-top5-in-detail', '本月暂无收入');
 
 
 
@@ -3387,23 +3375,17 @@ function renderLedger() {
 
       <div class="card">
 
-        <div class="card-title"><span class="dot" style="background:var(--sand)"></span>支出分类占比</div>
+        <div class="card-title"><span class="dot" style="background:var(--rose)"></span>本月支出排行 · 前五分类</div>
 
-        <div class="chart-wrap">
-
-          <div class="pie" style="background:${pieBg}"></div>
-
-          <div class="pie-legend">${legend}</div>
-
-        </div>
+        ${top5HTML}
 
       </div>
 
       <div class="card">
 
-        <div class="card-title"><span class="dot" style="background:var(--sage)"></span>本月占比前五的分类明细</div>
+        <div class="card-title"><span class="dot" style="background:var(--sage)"></span>本月收入排行 · 前五分类</div>
 
-        ${top5HTML}
+        ${inTop5HTML}
 
       </div>
 
@@ -3413,7 +3395,11 @@ function renderLedger() {
 
 
 
-function openLedgerCatDetail(cat) {
+function openLedgerCatDetail(cat, type) {
+
+  type = type || 'out';
+
+  const isIn = type === 'in';
 
   const { y, m } = ledgerMonth;
 
@@ -3425,17 +3411,27 @@ function openLedgerCatDetail(cat) {
 
   });
 
-  const xhsExpMonth = xhsFlatExpenses().filter(e => {
+  let pool;
 
-    const d = new Date(e.date + 'T00:00:00');
+  if (isIn) {
 
-    return d.getFullYear() === y && d.getMonth() === m;
+    pool = monthRecs.filter(r => r.type === 'in');
 
-  }).map(xhsExpenseToRec);
+  } else {
 
-  const allOut = [...monthRecs.filter(r => r.type === 'out'), ...xhsExpMonth];
+    const xhsExpMonth = xhsFlatExpenses().filter(e => {
 
-  const items = allOut.filter(r => catName(r.cat) === cat).sort((a, b) => (a.date > b.date ? -1 : 1) || (b.amount - a.amount));
+      const d = new Date(e.date + 'T00:00:00');
+
+      return d.getFullYear() === y && d.getMonth() === m;
+
+    }).map(xhsExpenseToRec);
+
+    pool = [...monthRecs.filter(r => r.type === 'out'), ...xhsExpMonth];
+
+  }
+
+  const items = pool.filter(r => catName(r.cat) === cat).sort((a, b) => (a.date > b.date ? -1 : 1) || (b.amount - a.amount));
 
   const total = items.reduce((s, r) => s + r.amount, 0);
 
@@ -3447,17 +3443,17 @@ function openLedgerCatDetail(cat) {
 
       <span class="r-cat" style="background:${col}33;color:${col}">${fmtDateCN(r.date)}</span>
 
-      <span class="r-note">${esc(r.note || (r.fromXhs ? '小红书支出' : '支出'))}</span>
+      <span class="r-note">${esc(r.note || (isIn ? '收入' : (r.fromXhs ? '小红书支出' : '支出')))}</span>
 
-      <span class="r-amt out">-${money(r.amount)}</span>
+      <span class="r-amt ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}${money(r.amount)}</span>
 
     </div>`).join('') : '<div class="empty">该分类本月暂无明细</div>';
 
   openModal(`
 
-    <h3><span style="display:inline-flex;align-items:center;gap:8px"><span class="top5-sw" style="background:${col};width:12px;height:12px"></span>${cat}</span> · ${y}年${m + 1}月</h3>
+    <h3><span style="display:inline-flex;align-items:center;gap:8px"><span class="top5-sw" style="background:${col};width:12px;height:12px"></span>${cat} · ${isIn ? '收入' : '支出'}</span> · ${y}年${m + 1}月</h3>
 
-    <div style="margin-bottom:12px;font-size:14px;font-weight:700;color:var(--ink-soft)">合计：<span style="color:var(--rose-deep)">${money(total)}</span></div>
+    <div style="margin-bottom:12px;font-size:14px;font-weight:700;color:var(--ink-soft)">合计：<span style="color:${isIn ? 'var(--sage-deep)' : 'var(--rose-deep)'}">${isIn ? '+' : '-'}${money(total)}</span></div>
 
     <div style="max-height:60vh;overflow:auto">${rows}</div>
 
@@ -4227,6 +4223,8 @@ document.addEventListener('click', e => {
     case 'ledger-del': S.ledger = S.ledger.filter(r => r.id !== id); save(); renderLedger(); break;
 
     case 'ledger-top5-detail': openLedgerCatDetail(el.dataset.cat); break;
+
+    case 'ledger-top5-in-detail': openLedgerCatDetail(el.dataset.cat, 'in'); break;
 
 
 
