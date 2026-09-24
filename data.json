@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790238566706,
+  "_modifiedAt": 1790241576959,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -882,6 +882,14 @@
       "cat": "还款",
       "amount": 3976.22,
       "note": "信用卡"
+    },
+    {
+      "id": "mufbm1hbo0a0c",
+      "date": "2026-09-24",
+      "type": "out",
+      "cat": "买菜",
+      "amount": 175.8,
+      "note": "山姆"
     }
   ],
   "xhs": {
