@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790220746343,
+  "_modifiedAt": 1790220766334,
   "home": {
     "rest": [
       "2026-08-01",
@@ -834,6 +834,14 @@
       "cat": "工资",
       "amount": 8851.92,
       "note": ""
+    },
+    {
+      "id": "muez7zwe5ksrh",
+      "date": "2026-09-24",
+      "type": "out",
+      "cat": "还款",
+      "amount": 3544.12,
+      "note": "花呗"
     }
   ],
   "xhs": {
