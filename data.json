@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790221237538,
+  "_modifiedAt": 1790238566706,
   "home": {
     "rest": [
       "2026-08-01",
@@ -874,6 +874,14 @@
       "cat": "梁根",
       "amount": 1470.87,
       "note": "社保"
+    },
+    {
+      "id": "muf6y1d3z2hlk",
+      "date": "2026-09-24",
+      "type": "out",
+      "cat": "还款",
+      "amount": 3976.22,
+      "note": "信用卡"
     }
   ],
   "xhs": {
@@ -2604,7 +2612,7 @@
       "date": "2026-09-24",
       "item": "稳健湿巾",
       "type": "蒲公英商单",
-      "status": "待出稿",
+      "status": "已出稿",
       "account": "芽芽Mochi",
       "deadline": "",
       "quote": 360,
