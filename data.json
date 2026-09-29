@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790660747529,
+  "_modifiedAt": 1790660760142,
   "home": {
     "rest": [
       "2026-08-01",
@@ -986,6 +986,14 @@
       "cat": "居家",
       "amount": 35,
       "note": "陶阳新村陶瓷玩具"
+    },
+    {
+      "id": "mum96lamakytu",
+      "date": "2026-09-27",
+      "type": "out",
+      "cat": "小雨",
+      "amount": 39.9,
+      "note": "按摩"
     }
   ],
   "xhs": {
