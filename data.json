@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790745458949,
+  "_modifiedAt": 1790745468712,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1097,6 +1097,14 @@
       "type": "out",
       "cat": "餐饮",
       "amount": 7.3,
+      "note": "早餐"
+    },
+    {
+      "id": "munnm6ug33cql",
+      "date": "2026-09-29",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 1.98,
       "note": "早餐"
     }
   ],
