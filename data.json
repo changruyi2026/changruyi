@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790734316644,
+  "_modifiedAt": 1790734341402,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2384,6 +2384,22 @@
       "item": "左江鲜奶",
       "type": "水下置换",
       "status": "已出稿",
+      "account": "常如意i",
+      "deadline": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 0,
+      "net": 0,
+      "orderAmount": 0,
+      "commission": 0
+    },
+    {
+      "id": "mungzoyivr9ir",
+      "date": "2026-10-02",
+      "item": "乌村",
+      "type": "水下探店",
+      "status": "待出稿",
       "account": "常如意i",
       "deadline": "",
       "quote": 0,
