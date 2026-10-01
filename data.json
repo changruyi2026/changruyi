@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790858143089,
+  "_modifiedAt": 1790858171434,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1146,6 +1146,14 @@
       "cat": "居家",
       "amount": 499,
       "note": "玩具柜"
+    },
+    {
+      "id": "mupipstmv1jbl",
+      "date": "2026-10-01",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 113,
+      "note": "泡菜"
     }
   ],
   "xhs": {
