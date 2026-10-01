@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790858191246,
+  "_modifiedAt": 1790858203094,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1162,6 +1162,14 @@
       "cat": "芽芽",
       "amount": 50.2,
       "note": "帽子"
+    },
+    {
+      "id": "mupiqh92zexa9",
+      "date": "2026-10-01",
+      "type": "out",
+      "cat": "小雨",
+      "amount": 500,
+      "note": "衣服"
     }
   ],
   "xhs": {
