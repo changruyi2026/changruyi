@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1790858097152,
+  "_modifiedAt": 1790858129878,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1138,6 +1138,14 @@
       "cat": "红豆",
       "amount": 1812.79,
       "note": "冰箱"
+    },
+    {
+      "id": "mupiowrabsjot",
+      "date": "2026-09-30",
+      "type": "out",
+      "cat": "居家",
+      "amount": 499,
+      "note": "玩具柜"
     }
   ],
   "xhs": {
