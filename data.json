@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791081949670,
+  "_modifiedAt": 1791081960977,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1234,6 +1234,14 @@
       "cat": "芽芽",
       "amount": 148,
       "note": "爬行垫"
+    },
+    {
+      "id": "mut7ydxtxb2eq",
+      "date": "2026-10-03",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 30,
+      "note": "早餐"
     }
   ],
   "xhs": {
