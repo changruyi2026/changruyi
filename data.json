@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791081900466,
+  "_modifiedAt": 1791081914323,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1210,6 +1210,14 @@
       "cat": "居家",
       "amount": 11.6,
       "note": "水费"
+    },
+    {
+      "id": "mut7xdxvqkawr",
+      "date": "2026-10-02",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 39.7,
+      "note": "午饭"
     }
   ],
   "xhs": {
