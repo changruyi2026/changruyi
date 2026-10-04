@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791081932744,
+  "_modifiedAt": 1791081949670,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1226,6 +1226,14 @@
       "cat": "交通",
       "amount": 10,
       "note": "停车费"
+    },
+    {
+      "id": "mut7y57pyzqwp",
+      "date": "2026-10-02",
+      "type": "out",
+      "cat": "芽芽",
+      "amount": 148,
+      "note": "爬行垫"
     }
   ],
   "xhs": {
