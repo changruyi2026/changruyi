@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v72'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v73'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1112,7 +1112,7 @@ function openBabyDayModal(ds) {
 
   const html = `
 
-    <h3>👶 ${fmtDateCN(ds)} · ${ld}</h3>
+    <h3>👶 ${fmtDateCN(ds)}${ds === todayStr() ? ' <span style="display:inline-block;background:var(--rose-deep);color:#fff;font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;vertical-align:2px;margin-left:4px">今天</span>' : ''} · ${ld}</h3>
 
 
 
