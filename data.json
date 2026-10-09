@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791511371478,
+  "_modifiedAt": 1791511477258,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1266,6 +1266,14 @@
       "cat": "梁根",
       "amount": 1000,
       "note": ""
+    },
+    {
+      "id": "mv0boetm6ahjy",
+      "date": "2026-10-09",
+      "type": "out",
+      "cat": "小雨",
+      "amount": 100,
+      "note": "话费"
     }
   ],
   "xhs": {
