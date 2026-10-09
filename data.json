@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791511507987,
+  "_modifiedAt": 1791511516162,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1298,6 +1298,14 @@
       "cat": "餐饮",
       "amount": 24,
       "note": "午餐"
+    },
+    {
+      "id": "mv0bp8uaavyu3",
+      "date": "2026-10-08",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 3.96,
+      "note": "早餐"
     }
   ],
   "xhs": {
