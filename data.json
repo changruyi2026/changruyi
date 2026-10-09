@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791511554980,
+  "_modifiedAt": 1791511567403,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1322,6 +1322,14 @@
       "cat": "居家",
       "amount": 299,
       "note": "冬季被子"
+    },
+    {
+      "id": "mv0bqcdnvw1uw",
+      "date": "2026-10-06",
+      "type": "out",
+      "cat": "买菜",
+      "amount": 25.9,
+      "note": "无花果"
     }
   ],
   "xhs": {
