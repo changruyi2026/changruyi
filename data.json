@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791512470403,
+  "_modifiedAt": 1791513259276,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1450,6 +1450,14 @@
       "cat": "医疗",
       "amount": 39.4,
       "note": "药"
+    },
+    {
+      "id": "mv0cqlu4msngp",
+      "date": "2026-10-09",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 31.6,
+      "note": "午餐"
     }
   ],
   "xhs": {
