@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791596611421,
+  "_modifiedAt": 1791596642581,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3411,6 +3411,22 @@
       "fee": 26,
       "net": 234,
       "orderAmount": 0,
+      "commission": 0
+    },
+    {
+      "id": "mv1qdst1vvahj",
+      "date": "2026-10-17",
+      "item": "窗帘",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "芽芽Mochi",
+      "deadline": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 30,
+      "net": 270,
+      "orderAmount": 300,
       "commission": 0
     }
   ],
