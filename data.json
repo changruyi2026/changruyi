@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791782902611,
+  "_modifiedAt": 1791782917977,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2920,6 +2920,22 @@
       "item": "牙膏香薰合集",
       "type": "水下置换",
       "status": "已出稿",
+      "account": "芽芽Mochi",
+      "deadline": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 0,
+      "net": 0,
+      "orderAmount": 0,
+      "commission": 0
+    },
+    {
+      "id": "mv4tabtljekuu",
+      "date": "2026-10-25",
+      "item": "吸尘器",
+      "type": "水下置换",
+      "status": "待出稿",
       "account": "芽芽Mochi",
       "deadline": "",
       "quote": 0,
