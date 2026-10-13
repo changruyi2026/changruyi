@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791869165734,
+  "_modifiedAt": 1791869195444,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3601,7 +3601,7 @@
     },
     {
       "id": "mv4zxd1kqk6wm",
-      "date": "2026-10-19",
+      "date": "2026-10-18",
       "item": "康宁锅",
       "type": "蒲公英商单",
       "status": "待出稿",
@@ -3613,7 +3613,9 @@
       "fee": 30,
       "net": 150,
       "orderAmount": 0,
-      "commission": 0
+      "commission": 0,
+      "pajing": "",
+      "disc80": 0
     }
   ],
   "backups": [
