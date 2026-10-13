@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791869120825,
+  "_modifiedAt": 1791869165734,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3046,6 +3046,24 @@
       "status": "待出稿",
       "account": "常如意i",
       "deadline": "2026-10-22",
+      "pajing": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 10,
+      "net": 90,
+      "orderAmount": 100,
+      "commission": 0,
+      "disc80": 0
+    },
+    {
+      "id": "mv68mx0mwbmi6",
+      "date": "2026-10-23",
+      "item": "英氏拉拉裤",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "常如意i",
+      "deadline": "",
       "pajing": "",
       "quote": 0,
       "rebatePct": 0,
