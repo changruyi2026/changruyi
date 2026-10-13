@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791868232947,
+  "_modifiedAt": 1791868552073,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3019,6 +3019,24 @@
       "commission": 0,
       "pajing": "前15后15",
       "disc80": 1
+    },
+    {
+      "id": "mv689rigr5r6p",
+      "date": "2026-10-16",
+      "item": "山山除甲醛",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "常如意i",
+      "deadline": "",
+      "pajing": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 10,
+      "net": 90,
+      "orderAmount": 100,
+      "commission": 0,
+      "disc80": 0
     }
   ],
   "yayaNotes": [
