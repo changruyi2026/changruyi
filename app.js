@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v73'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v74'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1608,6 +1608,8 @@ function fillRuyiEdit(n) {
 
   $('#hsDeadline').value = n.deadline || '';
 
+  $('#hsPaJing').value = n.pajing || '';
+
   $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
 
   $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
@@ -1615,6 +1617,8 @@ function fillRuyiEdit(n) {
   $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
 
   $('#hsCommission').value = (n.commission != null && n.commission !== 0) ? n.commission : '';
+
+  $('#hsDisc80').value = n.disc80 ? '1' : '';
 
   $('#hsSaveBtn').textContent = '💾 保存修改';
 
@@ -1650,9 +1654,11 @@ function openRuyiDayModal(ds) {
 
       const rp = (n.rebatePct != null && n.rebatePct !== '') ? `(${n.rebatePct}%)` : '';
 
+      const dBase = n.disc80 ? Math.round((n.quote || 0) * 0.8 * 100) / 100 : 0;
+
       moneyBlock = `<div class="hs-money">
 
-        <span>图文报价 ${money(n.quote || 0)}</span>
+        <span>图文报价 ${money(n.quote || 0)}${n.disc80 ? ` <b style="color:var(--rose-deep)">8折后 ${money(dBase)}</b>` : ''}</span>
 
         <span>手续费 ${money(n.fee || 0)}</span>
 
@@ -1700,6 +1706,8 @@ function openRuyiDayModal(ds) {
 
       ${n.deadline ? `<div class="hs-note-meta">📅 发布最晚：${esc(n.deadline)}</div>` : ''}
 
+      ${n.pajing ? `<div class="hs-note-meta">⚔️ 排竞：${esc(n.pajing)}</div>` : ''}
+
       ${moneyBlock}
 
     </div>`;
@@ -1717,6 +1725,14 @@ function openRuyiDayModal(ds) {
       <input type="hidden" id="hsEditId" />
 
       <input class="input" id="hsItem" placeholder="物品名称（将作为封面显示在日历当天）" />
+
+      <div class="hs-deadline-row">
+
+        <label>排竞</label>
+
+        <select class="input" id="hsPaJing"><option value="">不选</option><option>前15后15</option><option>前7后7</option><option>前后整月</option></select>
+
+      </div>
 
       <div class="hs-row">
 
@@ -1755,6 +1771,10 @@ function openRuyiDayModal(ds) {
           <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
 
           <div class="hs-amount-row"><label>返点比例(%)</label><input class="input" id="hsRebatePct" type="number" step="0.01" placeholder="如 10 表示10%" /></div>
+
+          <div class="hs-amount-row"><label>8折下单</label><select class="input" id="hsDisc80" style="width:auto;flex:0 0 130px"><option value="">不选</option><option value="1">8折下单</option></select></div>
+
+          <div class="hs-amount-row" id="hsDiscRow" style="display:none"><label>下单金额(¥)</label><input class="input" id="hsDiscAmt" readonly placeholder="0" /></div>
 
           <div class="hs-calc">
 
@@ -1844,7 +1864,15 @@ function openRuyiDayModal(ds) {
 
     if (t === '蒲公英商单') {
 
-      const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+      const q0 = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+
+      const disc = $('#hsDisc80') && $('#hsDisc80').value === '1';
+
+      const discRow = $('#hsDiscRow');
+
+      if (discRow) { discRow.style.display = disc ? 'flex' : 'none'; const da = $('#hsDiscAmt'); if (da) da.value = disc ? Math.round(q0 * 0.8 * 100) / 100 : ''; }
+
+      const q = disc ? Math.round(q0 * 0.8 * 100) / 100 : q0;
 
       const fee = Math.round(q * 0.1 * 100) / 100;
 
@@ -1945,6 +1973,8 @@ function openRuyiDayModal(ds) {
   $('#hsOrderAmount').addEventListener('input', handleInput);
 
   $('#hsCommission').addEventListener('input', handleInput);
+
+  const discSel = $('#hsDisc80'); if (discSel) discSel.addEventListener('change', () => recompute());
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -2172,6 +2202,8 @@ function fillYayaEdit(n) {
 
   $('#hsDeadline').value = n.deadline || '';
 
+  $('#hsPaJing').value = n.pajing || '';
+
   $('#hsQuote').value = (n.quote != null && n.quote !== 0) ? n.quote : '';
 
   $('#hsRebatePct').value = (n.rebatePct != null && n.rebatePct !== 0) ? n.rebatePct : '';
@@ -2179,6 +2211,8 @@ function fillYayaEdit(n) {
   $('#hsOrderAmount').value = (n.orderAmount != null && n.orderAmount !== 0) ? n.orderAmount : '';
 
   $('#hsCommission').value = (n.commission != null && n.commission !== 0) ? n.commission : '';
+
+  $('#hsDisc80').value = n.disc80 ? '1' : '';
 
   $('#hsSaveBtn').textContent = '💾 保存修改';
 
@@ -2214,9 +2248,11 @@ function openYayaDayModal(ds) {
 
       const rp = (n.rebatePct != null && n.rebatePct !== '') ? `(${n.rebatePct}%)` : '';
 
+      const dBase = n.disc80 ? Math.round((n.quote || 0) * 0.8 * 100) / 100 : 0;
+
       moneyBlock = `<div class="hs-money">
 
-        <span>图文报价 ${money(n.quote || 0)}</span>
+        <span>图文报价 ${money(n.quote || 0)}${n.disc80 ? ` <b style="color:var(--rose-deep)">8折后 ${money(dBase)}</b>` : ''}</span>
 
         <span>手续费 ${money(n.fee || 0)}</span>
 
@@ -2264,6 +2300,8 @@ function openYayaDayModal(ds) {
 
       ${n.deadline ? `<div class="hs-note-meta">📅 发布最晚：${esc(n.deadline)}</div>` : ''}
 
+      ${n.pajing ? `<div class="hs-note-meta">⚔️ 排竞：${esc(n.pajing)}</div>` : ''}
+
       ${moneyBlock}
 
     </div>`;
@@ -2281,6 +2319,14 @@ function openYayaDayModal(ds) {
       <input type="hidden" id="hsEditId" />
 
       <input class="input" id="hsItem" placeholder="物品名称（将作为封面显示在日历当天）" />
+
+      <div class="hs-deadline-row">
+
+        <label>排竞</label>
+
+        <select class="input" id="hsPaJing"><option value="">不选</option><option>前15后15</option><option>前7后7</option><option>前后整月</option></select>
+
+      </div>
 
       <div class="hs-row">
 
@@ -2319,6 +2365,10 @@ function openYayaDayModal(ds) {
           <div class="hs-amount-row"><label>图文报价(¥)</label><input class="input" id="hsQuote" type="number" min="0" step="0.01" placeholder="0" /></div>
 
           <div class="hs-amount-row"><label>返点比例(%)</label><input class="input" id="hsRebatePct" type="number" step="0.01" placeholder="如 10 表示10%" /></div>
+
+          <div class="hs-amount-row"><label>8折下单</label><select class="input" id="hsDisc80" style="width:auto;flex:0 0 130px"><option value="">不选</option><option value="1">8折下单</option></select></div>
+
+          <div class="hs-amount-row" id="hsDiscRow" style="display:none"><label>下单金额(¥)</label><input class="input" id="hsDiscAmt" readonly placeholder="0" /></div>
 
           <div class="hs-calc">
 
@@ -2408,7 +2458,15 @@ function openYayaDayModal(ds) {
 
     if (t === '蒲公英商单') {
 
-      const q = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+      const q0 = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
+
+      const disc = $('#hsDisc80') && $('#hsDisc80').value === '1';
+
+      const discRow = $('#hsDiscRow');
+
+      if (discRow) { discRow.style.display = disc ? 'flex' : 'none'; const da = $('#hsDiscAmt'); if (da) da.value = disc ? Math.round(q0 * 0.8 * 100) / 100 : ''; }
+
+      const q = disc ? Math.round(q0 * 0.8 * 100) / 100 : q0;
 
       const fee = Math.round(q * 0.1 * 100) / 100;
 
@@ -2509,6 +2567,8 @@ function openYayaDayModal(ds) {
   $('#hsOrderAmount').addEventListener('input', handleInput);
 
   $('#hsCommission').addEventListener('input', handleInput);
+
+  const discSel = $('#hsDisc80'); if (discSel) discSel.addEventListener('change', () => recompute());
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -4405,23 +4465,29 @@ document.addEventListener('click', e => {
 
       const deadline = ($('#hsDeadline').value || '').trim();
 
+      const pajing = ($('#hsPaJing') ? $('#hsPaJing').value : '') || '';
+
       if (!item) { toast('请填写物品名称', 'warn'); return; }
 
       if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
 
-      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0;
+      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0, disc80 = 0;
 
       if (type === '蒲公英商单') {
 
         quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
 
+        disc80 = ($('#hsDisc80') && $('#hsDisc80').value === '1') ? 1 : 0;
+
+        const base = disc80 ? Math.round(quote * 0.8 * 100) / 100 : quote;
+
         rebatePct = parseFloat($('#hsRebatePct').value || '0') || 0;
 
-        fee = Math.round(quote * 0.1 * 100) / 100;
+        fee = Math.round(base * 0.1 * 100) / 100;
 
-        rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
+        rebate = -Math.round(base * rebatePct / 100 * 100) / 100;
 
-        net = Math.round((quote - fee + rebate) * 100) / 100;
+        net = Math.round((base - fee + rebate) * 100) / 100;
 
       } else if (PUB_ORD_TYPES.includes(type)) {
 
@@ -4441,7 +4507,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission };
+          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 };
 
           toast('已修改出稿笔记 🍠');
 
@@ -4449,7 +4515,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission });
+        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 });
 
         toast('已保存出稿笔记 🍠');
 
@@ -4498,6 +4564,10 @@ document.addEventListener('click', e => {
       $('#hsOrderAmount').value = '';
 
       $('#hsCommission').value = '';
+
+      $('#hsPaJing').value = '';
+
+      $('#hsDisc80').value = '';
 
       $('#hsSaveBtn').textContent = '+ 保存出稿笔记';
 
@@ -4619,23 +4689,29 @@ document.addEventListener('click', e => {
 
       const deadline = ($('#hsDeadline').value || '').trim();
 
+      const pajing = ($('#hsPaJing') ? $('#hsPaJing').value : '') || '';
+
       if (!item) { toast('请填写物品名称', 'warn'); return; }
 
       if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
 
-      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0;
+      let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0, disc80 = 0;
 
       if (type === '蒲公英商单') {
 
         quote = Math.max(0, parseFloat($('#hsQuote').value || '0') || 0);
 
+        disc80 = ($('#hsDisc80') && $('#hsDisc80').value === '1') ? 1 : 0;
+
+        const base = disc80 ? Math.round(quote * 0.8 * 100) / 100 : quote;
+
         rebatePct = parseFloat($('#hsRebatePct').value || '0') || 0;
 
-        fee = Math.round(quote * 0.1 * 100) / 100;
+        fee = Math.round(base * 0.1 * 100) / 100;
 
-        rebate = -Math.round(quote * rebatePct / 100 * 100) / 100;
+        rebate = -Math.round(base * rebatePct / 100 * 100) / 100;
 
-        net = Math.round((quote - fee + rebate) * 100) / 100;
+        net = Math.round((base - fee + rebate) * 100) / 100;
 
       } else if (PUB_ORD_TYPES.includes(type)) {
 
@@ -4655,7 +4731,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission };
+          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 };
 
           toast('已修改出稿笔记 🍠');
 
@@ -4663,7 +4739,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, quote, rebatePct, rebate, fee, net, orderAmount, commission });
+        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 });
 
         toast('已保存出稿笔记 🍠');
 
@@ -4712,6 +4788,10 @@ document.addEventListener('click', e => {
       $('#hsOrderAmount').value = '';
 
       $('#hsCommission').value = '';
+
+      $('#hsPaJing').value = '';
+
+      $('#hsDisc80').value = '';
 
       $('#hsSaveBtn').textContent = '+ 保存出稿笔记';
 
