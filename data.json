@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1791868188238,
+  "_modifiedAt": 1791868215481,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3010,13 +3010,15 @@
       "status": "待出稿",
       "account": "常如意i",
       "deadline": "",
-      "quote": 640,
+      "quote": 800,
       "rebatePct": 0,
       "rebate": 0,
       "fee": 64,
       "net": 576,
       "orderAmount": 0,
-      "commission": 0
+      "commission": 0,
+      "pajing": "前15后15",
+      "disc80": 1
     }
   ],
   "yayaNotes": [
