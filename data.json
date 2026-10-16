@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792116740179,
+  "_modifiedAt": 1792116752023,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1586,6 +1586,14 @@
       "cat": "芽芽",
       "amount": 39.9,
       "note": "衣服"
+    },
+    {
+      "id": "mvac1jtjj1u0b",
+      "date": "2026-10-15",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 26,
+      "note": "晚餐"
     }
   ],
   "xhs": {
