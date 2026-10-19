@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v74'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v75'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1824,6 +1824,8 @@ function openRuyiDayModal(ds) {
 
   openModal(html, 'ruyi');
 
+  $('#hsAccount').value = '常如意i'; /* 常如意界面新建默认常如意i（编辑回填会覆盖） */
+
   const typeSel = $('#hsType');
 
   const amounts = $('#hsAmounts');
@@ -2417,6 +2419,8 @@ function openYayaDayModal(ds) {
     ${list}`;
 
   openModal(html, 'yaya');
+
+  $('#hsAccount').value = '芽芽Mochi'; /* 芽芽界面新建默认芽芽Mochi（编辑回填会覆盖） */
 
   const typeSel = $('#hsType');
 
