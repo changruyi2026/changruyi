@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792373586538,
+  "_modifiedAt": 1792375977870,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3336,6 +3336,24 @@
       "type": "众测招募",
       "status": "待出稿",
       "account": "常如意i",
+      "deadline": "",
+      "pajing": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 10,
+      "net": 90,
+      "orderAmount": 100,
+      "commission": 0,
+      "disc80": 0
+    },
+    {
+      "id": "mvemdnriur0nx",
+      "date": "2026-10-27",
+      "item": "贝易保温杯",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "芽芽Mochi",
       "deadline": "",
       "pajing": "",
       "quote": 0,
