@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792373343283,
+  "_modifiedAt": 1792373358517,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1626,6 +1626,14 @@
       "cat": "居家",
       "amount": 29.85,
       "note": "怡宝"
+    },
+    {
+      "id": "mvektinp6ug0q",
+      "date": "2026-10-16",
+      "type": "out",
+      "cat": "买菜",
+      "amount": 60,
+      "note": "叮咚"
     }
   ],
   "xhs": {
