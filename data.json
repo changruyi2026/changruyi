@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792373391982,
+  "_modifiedAt": 1792373424143,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1642,6 +1642,14 @@
       "cat": "餐饮",
       "amount": 165.88,
       "note": "费大厨"
+    },
+    {
+      "id": "mvekuxancv3yx",
+      "date": "2026-10-16",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 296.98,
+      "note": "海底捞"
     }
   ],
   "xhs": {
