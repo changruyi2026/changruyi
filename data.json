@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792373358517,
+  "_modifiedAt": 1792373391982,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1634,6 +1634,14 @@
       "cat": "买菜",
       "amount": 60,
       "note": "叮咚"
+    },
+    {
+      "id": "mveku8hak9wfq",
+      "date": "2026-10-18",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 165.88,
+      "note": "费大厨"
     }
   ],
   "xhs": {
