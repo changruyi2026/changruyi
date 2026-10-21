@@ -896,6 +896,14 @@ input,textarea,select{font-family:inherit;color:inherit}
 .wk-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 .wk-more{font-size:11px;font-weight:700;color:var(--ink-faint);text-align:center}
 .wk-empty{font-size:13px;color:var(--ink-faint);text-align:center}
+.paid-pending-card{margin-top:18px;border-left:4px solid var(--rose-deep)}
+.paid-pending-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.paid-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--card-2);border:1px solid var(--line);cursor:pointer;transition:all .12s ease}
+.paid-row:hover{background:rgba(217,142,94,.10);box-shadow:0 0 0 1px rgba(217,142,94,.25)}
+.paid-acct{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;border-radius:11px;font-size:11px;font-weight:800;color:#fff;background:var(--sand-deep);flex-shrink:0}
+.paid-item{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--ink);font-weight:600}
+.paid-amt{font-size:13px;font-weight:800;color:var(--rose-deep);flex-shrink:0}
+.paid-row .hs-status{flex-shrink:0;font-size:12px}
 @media(max-width:600px){
 .wk-cal{grid-template-columns:repeat(4,1fr);gap:8px}
 .wk-day{min-height:100px;padding:8px 4px}
