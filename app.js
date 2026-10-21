@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v78'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v79'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1553,13 +1553,17 @@ function renderRuyiCalendar() {
 
     let coverAmt = topMoney ? money(topMoney) : '';
 
+    /* 拍单待返款标识：填了拍单金额且未返 → 🍚；已返 → 不显示 */
+
+    const paidMark = top && top.paidOrder === 1 && (top.paidBack || '待返') !== '是' ? `<span class="paid-rice" title="拍单待返款">🍚</span>` : '';
+
     const itemText = top && top.item ? esc(top.item) : '未命名';
 
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
 
     const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
 
-    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
+    const amtRow = (coverAmt || paidMark) ? `<div class="hs-amt-row ${stCls}">${paidMark}<span class="hs-amt">${coverAmt}</span></div>` : '';
 
     /* 手机端简化：只显示一条，取物品前 2 个字；金额（到手）放在日期右上角 */
 
@@ -2173,13 +2177,17 @@ function renderYayaCalendar() {
 
     let coverAmt = topMoney ? money(topMoney) : '';
 
+    /* 拍单待返款标识：填了拍单金额且未返 → 🍚；已返 → 不显示 */
+
+    const paidMark = top && top.paidOrder === 1 && (top.paidBack || '待返') !== '是' ? `<span class="paid-rice" title="拍单待返款">🍚</span>` : '';
+
     const itemText = top && top.item ? esc(top.item) : '未命名';
 
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
 
     const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
 
-    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
+    const amtRow = (coverAmt || paidMark) ? `<div class="hs-amt-row ${stCls}">${paidMark}<span class="hs-amt">${coverAmt}</span></div>` : '';
 
     /* 手机端简化：只显示一条，取物品前 2 个字；金额（到手）放在日期右上角 */
 
