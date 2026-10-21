@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v75'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v76'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1602,7 +1602,13 @@ function fillRuyiEdit(n) {
 
   $('#hsStatus').value = normStatus(n.status) || '待出稿';
 
-  $('#hsAccount').value = n.account || '常如意i';
+  $('#hsPaidOrder').value = n.paidOrder ? '1' : '';
+
+  $('#hsPaidAmt').value = (n.paidAmt != null && n.paidAmt !== 0) ? n.paidAmt : '';
+
+  $('#hsPaidBack').value = n.paidBack || '待返';
+
+  const _poF = $('#hsPaidOrder'); if (_poF) _poF.dispatchEvent(new Event('change'));
 
   $('#hsDate').value = n.date || '';
 
@@ -1643,8 +1649,6 @@ function openRuyiDayModal(ds) {
   const typeOpts = PUB_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
 
   const statusOpts = PUB_STATUSES.map(s => `<option value="${s.label}">${s.label}</option>`).join('');
-
-  const accountOpts = PUB_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
 
   const list = notes.length ? `<div class="hs-list">` + notes.map(n => {
 
@@ -1708,6 +1712,8 @@ function openRuyiDayModal(ds) {
 
       ${n.pajing ? `<div class="hs-note-meta">⚔️ 排竞：${esc(n.pajing)}</div>` : ''}
 
+      ${n.paidOrder ? `<div class="hs-note-meta">🧾 拍单 ${money(n.paidAmt || 0)} · ${n.paidBack === '是' ? '已返' : '待返'}</div>` : ''}
+
       ${moneyBlock}
 
     </div>`;
@@ -1742,9 +1748,21 @@ function openRuyiDayModal(ds) {
 
       </div>
 
-      <div class="hs-row">
+      <div class="hs-deadline-row">
 
-        <select class="input" id="hsAccount">${accountOpts}</select>
+        <label>是否拍单</label>
+
+        <select class="input" id="hsPaidOrder" style="flex:0 0 90px"><option value="">否</option><option value="1">是</option></select>
+
+        <input class="input" id="hsPaidAmt" type="number" min="0" step="0.01" placeholder="拍单金额(¥)" style="display:none" />
+
+      </div>
+
+      <div class="hs-deadline-row" id="hsPaidRow" style="display:none">
+
+        <label>是否已返</label>
+
+        <select class="input" id="hsPaidBack" style="flex:0 0 90px"><option value="待返">待返</option><option value="是">是</option></select>
 
       </div>
 
@@ -1823,8 +1841,6 @@ function openRuyiDayModal(ds) {
     ${list}`;
 
   openModal(html, 'ruyi');
-
-  $('#hsAccount').value = '常如意i'; /* 常如意界面新建默认常如意i（编辑回填会覆盖） */
 
   const typeSel = $('#hsType');
 
@@ -1977,6 +1993,14 @@ function openRuyiDayModal(ds) {
   $('#hsCommission').addEventListener('input', handleInput);
 
   const discSel = $('#hsDisc80'); if (discSel) discSel.addEventListener('change', () => recompute());
+
+  const poSel = $('#hsPaidOrder');
+
+  const poToggle = () => { const on = poSel && poSel.value === '1'; const amt = $('#hsPaidAmt'), row = $('#hsPaidRow'); if (amt) amt.style.display = on ? '' : 'none'; if (row) row.style.display = on ? 'flex' : 'none'; };
+
+  if (poSel) poSel.addEventListener('change', poToggle);
+
+  poToggle();
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -2198,7 +2222,13 @@ function fillYayaEdit(n) {
 
   $('#hsStatus').value = normStatus(n.status) || '待出稿';
 
-  $('#hsAccount').value = n.account || '芽芽Mochi';
+  $('#hsPaidOrder').value = n.paidOrder ? '1' : '';
+
+  $('#hsPaidAmt').value = (n.paidAmt != null && n.paidAmt !== 0) ? n.paidAmt : '';
+
+  $('#hsPaidBack').value = n.paidBack || '待返';
+
+  const _poF = $('#hsPaidOrder'); if (_poF) _poF.dispatchEvent(new Event('change'));
 
   $('#hsDate').value = n.date || '';
 
@@ -2239,8 +2269,6 @@ function openYayaDayModal(ds) {
   const typeOpts = PUB_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
 
   const statusOpts = PUB_STATUSES.map(s => `<option value="${s.label}">${s.label}</option>`).join('');
-
-  const accountOpts = PUB_ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
 
   const list = notes.length ? `<div class="hs-list">` + notes.map(n => {
 
@@ -2304,6 +2332,8 @@ function openYayaDayModal(ds) {
 
       ${n.pajing ? `<div class="hs-note-meta">⚔️ 排竞：${esc(n.pajing)}</div>` : ''}
 
+      ${n.paidOrder ? `<div class="hs-note-meta">🧾 拍单 ${money(n.paidAmt || 0)} · ${n.paidBack === '是' ? '已返' : '待返'}</div>` : ''}
+
       ${moneyBlock}
 
     </div>`;
@@ -2338,9 +2368,21 @@ function openYayaDayModal(ds) {
 
       </div>
 
-      <div class="hs-row">
+      <div class="hs-deadline-row">
 
-        <select class="input" id="hsAccount">${accountOpts}</select>
+        <label>是否拍单</label>
+
+        <select class="input" id="hsPaidOrder" style="flex:0 0 90px"><option value="">否</option><option value="1">是</option></select>
+
+        <input class="input" id="hsPaidAmt" type="number" min="0" step="0.01" placeholder="拍单金额(¥)" style="display:none" />
+
+      </div>
+
+      <div class="hs-deadline-row" id="hsPaidRow" style="display:none">
+
+        <label>是否已返</label>
+
+        <select class="input" id="hsPaidBack" style="flex:0 0 90px"><option value="待返">待返</option><option value="是">是</option></select>
 
       </div>
 
@@ -2419,8 +2461,6 @@ function openYayaDayModal(ds) {
     ${list}`;
 
   openModal(html, 'yaya');
-
-  $('#hsAccount').value = '芽芽Mochi'; /* 芽芽界面新建默认芽芽Mochi（编辑回填会覆盖） */
 
   const typeSel = $('#hsType');
 
@@ -2573,6 +2613,14 @@ function openYayaDayModal(ds) {
   $('#hsCommission').addEventListener('input', handleInput);
 
   const discSel = $('#hsDisc80'); if (discSel) discSel.addEventListener('change', () => recompute());
+
+  const poSel = $('#hsPaidOrder');
+
+  const poToggle = () => { const on = poSel && poSel.value === '1'; const amt = $('#hsPaidAmt'), row = $('#hsPaidRow'); if (amt) amt.style.display = on ? '' : 'none'; if (row) row.style.display = on ? 'flex' : 'none'; };
+
+  if (poSel) poSel.addEventListener('change', poToggle);
+
+  poToggle();
 
   /* 关键：当天已有记录 → 自动进入「编辑第一条」模式（填充已记录事项）；无记录 → 空白新增界面 */
 
@@ -4465,7 +4513,7 @@ document.addEventListener('click', e => {
 
       const status = ($('#hsStatus').value || '待出稿').trim();
 
-      const account = ($('#hsAccount').value || '常如意i').trim();
+      const account = '常如意i'; /* 弹窗归属当前界面，不再由表单选择 */
 
       const deadline = ($('#hsDeadline').value || '').trim();
 
@@ -4474,6 +4522,14 @@ document.addEventListener('click', e => {
       if (!item) { toast('请填写物品名称', 'warn'); return; }
 
       if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
+
+      const paidOrder = ($('#hsPaidOrder') && $('#hsPaidOrder').value === '1') ? 1 : 0;
+
+      if (paidOrder && !($('#hsPaidAmt').value)) { toast('选择了拍单，请填写拍单金额', 'warn'); return; }
+
+      const paidAmt = paidOrder ? Math.max(0, parseFloat($('#hsPaidAmt').value || '0') || 0) : 0;
+
+      const paidBack = paidOrder ? (($('#hsPaidBack') && $('#hsPaidBack').value) || '待返') : '';
 
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0, disc80 = 0;
 
@@ -4511,7 +4567,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 };
+          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack };
 
           toast('已修改出稿笔记 🍠');
 
@@ -4519,7 +4575,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 });
+        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack });
 
         toast('已保存出稿笔记 🍠');
 
@@ -4555,7 +4611,13 @@ document.addEventListener('click', e => {
 
       $('#hsStatus').value = '待出稿';
 
-      $('#hsAccount').value = '常如意i';
+      $('#hsPaidOrder').value = '';
+
+      $('#hsPaidAmt').value = '';
+
+      $('#hsPaidBack').value = '待返';
+
+      const _poC = $('#hsPaidOrder'); if (_poC) _poC.dispatchEvent(new Event('change'));
 
       $('#hsDate').value = ds;
 
@@ -4689,7 +4751,7 @@ document.addEventListener('click', e => {
 
       const status = ($('#hsStatus').value || '待出稿').trim();
 
-      const account = ($('#hsAccount').value || '芽芽Mochi').trim();
+      const account = '芽芽Mochi'; /* 弹窗归属当前界面，不再由表单选择 */
 
       const deadline = ($('#hsDeadline').value || '').trim();
 
@@ -4698,6 +4760,14 @@ document.addEventListener('click', e => {
       if (!item) { toast('请填写物品名称', 'warn'); return; }
 
       if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) { toast('请选择有效的归属日期', 'warn'); return; }
+
+      const paidOrder = ($('#hsPaidOrder') && $('#hsPaidOrder').value === '1') ? 1 : 0;
+
+      if (paidOrder && !($('#hsPaidAmt').value)) { toast('选择了拍单，请填写拍单金额', 'warn'); return; }
+
+      const paidAmt = paidOrder ? Math.max(0, parseFloat($('#hsPaidAmt').value || '0') || 0) : 0;
+
+      const paidBack = paidOrder ? (($('#hsPaidBack') && $('#hsPaidBack').value) || '待返') : '';
 
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0, disc80 = 0;
 
@@ -4735,7 +4805,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 };
+          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack };
 
           toast('已修改出稿笔记 🍠');
 
@@ -4743,7 +4813,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80 });
+        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack });
 
         toast('已保存出稿笔记 🍠');
 
@@ -4779,7 +4849,13 @@ document.addEventListener('click', e => {
 
       $('#hsStatus').value = '待出稿';
 
-      $('#hsAccount').value = '芽芽Mochi';
+      $('#hsPaidOrder').value = '';
+
+      $('#hsPaidAmt').value = '';
+
+      $('#hsPaidBack').value = '待返';
+
+      const _poC = $('#hsPaidOrder'); if (_poC) _poC.dispatchEvent(new Event('change'));
 
       $('#hsDate').value = ds;
 
