@@ -903,6 +903,8 @@ input,textarea,select{font-family:inherit;color:inherit}
 .paid-acct{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;border-radius:11px;font-size:11px;font-weight:800;color:#fff;background:var(--sand-deep);flex-shrink:0}
 .paid-item{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--ink);font-weight:600}
 .paid-amt{font-size:13px;font-weight:800;color:var(--rose-deep);flex-shrink:0}
+.paid-total{display:flex;justify-content:flex-end;align-items:baseline;gap:5px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-soft);font-weight:600}
+.paid-total b{color:var(--rose-deep);font-size:16px;font-weight:800}
 .paid-row .hs-status{flex-shrink:0;font-size:12px}
 @media(max-width:600px){
 .wk-cal{grid-template-columns:repeat(4,1fr);gap:8px}
