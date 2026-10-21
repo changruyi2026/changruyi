@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792550184855,
+  "_modifiedAt": 1792566215336,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1666,6 +1666,14 @@
       "cat": "小雨",
       "amount": 30,
       "note": "洗头"
+    },
+    {
+      "id": "mvhrn3xkjvfpn",
+      "date": "2026-10-21",
+      "type": "out",
+      "cat": "居家",
+      "amount": 168.7,
+      "note": "双十一购物"
     }
   ],
   "xhs": {
