@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v77'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v78'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -799,6 +799,8 @@ function renderHome() {
 
   const paidPending = homePaidPending();
 
+  const paidTotal = paidPending.reduce((s, n) => s + (n.paidAmt || 0), 0);
+
   const paidPendingHTML = paidPending.length ? paidPending.map(n => {
 
     const st = PUB_STATUS_MAP[normStatus(n.status)] || { cls: '', icon: '', label: n.status || '' };
@@ -846,6 +848,8 @@ function renderHome() {
         </div>
 
         <div class="paid-pending-list">${paidPendingHTML}</div>
+
+        ${paidPending.length ? `<div class="paid-total">待返合计：<b>${money(paidTotal)}</b></div>` : ''}
 
       </div>
 
