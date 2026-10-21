@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792566222250,
+  "_modifiedAt": 1792566243826,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1682,6 +1682,14 @@
       "cat": "餐饮",
       "amount": 550,
       "note": "肉本家"
+    },
+    {
+      "id": "mvhrnpwyce47g",
+      "date": "2026-10-21",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 15,
+      "note": "午饭"
     }
   ],
   "xhs": {
