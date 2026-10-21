@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v76'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v77'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -708,6 +708,13 @@ function renderHomeWeekCalendar() {
 
 
 
+/* 首页待返款清单：两个号所有「拍单=是 且 是否已返=待返」的笔记 */
+function homePaidPending() {
+  const all = [].concat(S.ruyiNotes || [], S.yayaNotes || []);
+  const list = all.filter(n => n.paidOrder === 1 && (n.paidBack || '待返') === '待返');
+  return list.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
 function renderHome() {
 
   const now = new Date();
@@ -790,6 +797,28 @@ function renderHome() {
 
 
 
+  const paidPending = homePaidPending();
+
+  const paidPendingHTML = paidPending.length ? paidPending.map(n => {
+
+    const st = PUB_STATUS_MAP[normStatus(n.status)] || { cls: '', icon: '', label: n.status || '' };
+
+    const ab = n.account && PUB_ACCOUNT_BADGE[n.account] ? `<span class="paid-acct">${esc(PUB_ACCOUNT_BADGE[n.account])}</span>` : '';
+
+    return `<div class="paid-row" data-action="paid-goto" data-account="${esc(n.account || '')}" data-date="${esc(n.date || '')}">
+
+      ${ab}
+
+      <span class="paid-item">${esc(n.item || '未命名')}</span>
+
+      <span class="paid-amt">${money(n.paidAmt || 0)}</span>
+
+      <span class="hs-status ${st.cls}"><span class="hs-ico">${st.icon}</span>${esc(st.label)}</span>
+
+    </div>`;
+
+  }).join('') : '<div class="empty">🎉 目前没有待返款的拍单</div>';
+
   $('#view-home').innerHTML = `
 
     ${alertBanner}
@@ -808,15 +837,15 @@ function renderHome() {
 
       </div>
 
-      <div class="card weather-card" id="weatherCard" data-action="weather-open" style="cursor:pointer">
+      <div class="card paid-pending-card">
 
-        <div class="card-title"><span class="dot" style="background:var(--blue)"></span>杭州天气
+        <div class="card-title"><span class="dot" style="background:var(--rose-deep)"></span>💰 待返款清单
 
-          <span class="weather-loc">📍杭州</span>
+          <span class="cal-hint" style="margin-left:auto">${paidPending.length} 笔待返</span>
 
         </div>
 
-        <div class="weather-body" id="weatherBody"><div class="weather-loading">天气加载中…</div></div>
+        <div class="paid-pending-list">${paidPendingHTML}</div>
 
       </div>
 
@@ -829,8 +858,6 @@ function renderHome() {
   `;
 
   tickClock();
-
-  fetchWeather();
 
   updateHomeBadge();
 
@@ -4254,7 +4281,15 @@ document.addEventListener('click', e => {
 
     case 'del-cd': S.home.countdowns = S.home.countdowns.filter(c => c.id !== id); save(); renderHome(); break;
 
-    case 'weather-open': openWeatherModal(); break;
+    case 'paid-goto': {
+
+      const acct = el.dataset.account, ds = el.dataset.date;
+
+      if (ds) { if (acct === '芽芽Mochi') openYayaDayModal(ds); else openRuyiDayModal(ds); }
+
+      break;
+
+    }
 
     case 'cd-save': {
 
