@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792633937967,
+  "_modifiedAt": 1792633942929,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1706,6 +1706,14 @@
       "cat": "芽芽",
       "amount": 200,
       "note": "衣服"
+    },
+    {
+      "id": "mvivyqvlb7peb",
+      "date": "2026-10-22",
+      "type": "out",
+      "cat": "居家",
+      "amount": 200,
+      "note": "购物"
     }
   ],
   "xhs": {
