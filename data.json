@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792737976982,
+  "_modifiedAt": 1792737996219,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1738,6 +1738,14 @@
       "cat": "工资",
       "amount": 9029.02,
       "note": ""
+    },
+    {
+      "id": "mvklwywrfpsir",
+      "date": "2026-10-23",
+      "type": "out",
+      "cat": "还款",
+      "amount": 2995.91,
+      "note": "信用卡"
     }
   ],
   "xhs": {
