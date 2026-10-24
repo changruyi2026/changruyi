@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792805982605,
+  "_modifiedAt": 1792805997935,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1778,6 +1778,14 @@
       "cat": "红豆",
       "amount": 790.5,
       "note": "洗地机"
+    },
+    {
+      "id": "mvlqehdbpt2hw",
+      "date": "2026-10-23",
+      "type": "out",
+      "cat": "居家",
+      "amount": 56.6,
+      "note": "洗头椅"
     }
   ],
   "xhs": {
