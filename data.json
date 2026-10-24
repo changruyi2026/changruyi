@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792852270741,
+  "_modifiedAt": 1792852304659,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3589,7 +3589,7 @@
     },
     {
       "id": "mvemdnriur0nx",
-      "date": "2026-10-27",
+      "date": "2026-11-02",
       "item": "贝易保温杯",
       "type": "众测招募",
       "status": "待出稿",
@@ -3603,7 +3603,10 @@
       "net": 90,
       "orderAmount": 100,
       "commission": 0,
-      "disc80": 0
+      "disc80": 0,
+      "paidOrder": 0,
+      "paidAmt": 0,
+      "paidBack": ""
     },
     {
       "id": "mvevygrqmvyps",
