@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792806006905,
+  "_modifiedAt": 1792806202409,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1794,6 +1794,14 @@
       "cat": "餐饮",
       "amount": 69.3,
       "note": "午餐"
+    },
+    {
+      "id": "mvlqiv55jzsge",
+      "date": "2026-10-24",
+      "type": "out",
+      "cat": "还款",
+      "amount": 5000,
+      "note": "花呗"
     }
   ],
   "xhs": {
