@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792917644438,
+  "_modifiedAt": 1792917653175,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1810,6 +1810,14 @@
       "cat": "梁根",
       "amount": 1470,
       "note": "社保"
+    },
+    {
+      "id": "mvnkvn3roozr7",
+      "date": "2026-10-25",
+      "type": "out",
+      "cat": "红豆",
+      "amount": 3000,
+      "note": ""
     }
   ],
   "xhs": {
