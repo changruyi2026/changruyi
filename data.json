@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792917653175,
+  "_modifiedAt": 1792978025777,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 0
+    "hsReadCount": 2
   },
   "ledger": [
     {
@@ -308,14 +308,6 @@
       "note": "午餐-鸡腿饭"
     },
     {
-      "id": "mtsudau00ores",
-      "date": "2026-09-08",
-      "type": "out",
-      "cat": "买菜",
-      "amount": 28.8,
-      "note": "西梅"
-    },
-    {
       "id": "mttijl5hkkits",
       "date": "2026-09-09",
       "type": "out",
@@ -346,14 +338,6 @@
       "cat": "蒲公英",
       "amount": 577.8,
       "note": "脱发液+爱婴室探店"
-    },
-    {
-      "id": "mtwxcouedt3xf",
-      "date": "2026-09-11",
-      "type": "out",
-      "cat": "餐饮",
-      "amount": 10,
-      "note": "酱香饼"
     },
     {
       "id": "mtxp64n31mlsq",
@@ -476,6 +460,14 @@
       "note": "电动车手机夹"
     },
     {
+      "id": "mtwxcouedt3xf",
+      "date": "2026-09-11",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 10,
+      "note": "酱香饼"
+    },
+    {
       "id": "mu21hw11qb0he",
       "date": "2026-09-15",
       "type": "out",
@@ -594,6 +586,14 @@
       "cat": "餐饮",
       "amount": 17,
       "note": "鸡腿饭"
+    },
+    {
+      "id": "mtsudau00ores",
+      "date": "2026-09-08",
+      "type": "out",
+      "cat": "买菜",
+      "amount": 28.8,
+      "note": "西梅"
     },
     {
       "id": "mu3fwyarighy3",
@@ -1084,6 +1084,14 @@
       "note": "梁根阳爸阳妈-我怕老婆"
     },
     {
+      "id": "munnlrx17fzpi",
+      "date": "2026-09-30",
+      "type": "out",
+      "cat": "餐饮",
+      "amount": 21.5,
+      "note": "午餐"
+    },
+    {
       "id": "munnlzb98uwlw",
       "date": "2026-09-30",
       "type": "out",
@@ -1258,14 +1266,6 @@
       "cat": "梁根",
       "amount": 1000,
       "note": ""
-    },
-    {
-      "id": "munnlrx17fzpi",
-      "date": "2026-09-30",
-      "type": "out",
-      "cat": "餐饮",
-      "amount": 21.5,
-      "note": "午餐"
     },
     {
       "id": "mv0boetm6ahjy",
@@ -3348,22 +3348,6 @@
         "note": ""
       },
       {
-        "id": "mut8dtyng65ym",
-        "date": "2026-10-03",
-        "time": "10:57",
-        "type": "正常",
-        "vol": "通常",
-        "note": ""
-      },
-      {
-        "id": "muw6e8xtwmf7u",
-        "date": "2026-10-06",
-        "time": "12:25",
-        "type": "正常",
-        "vol": "通常",
-        "note": ""
-      },
-      {
         "id": "mv0nt71lttucm",
         "date": "2026-10-08",
         "time": "19:44",
@@ -3408,6 +3392,22 @@
         "date": "2026-10-16",
         "time": "09:25",
         "type": "偏干",
+        "vol": "通常",
+        "note": ""
+      },
+      {
+        "id": "mut8dtyng65ym",
+        "date": "2026-10-03",
+        "time": "10:57",
+        "type": "正常",
+        "vol": "通常",
+        "note": ""
+      },
+      {
+        "id": "muw6e8xtwmf7u",
+        "date": "2026-10-06",
+        "time": "12:25",
+        "type": "正常",
         "vol": "通常",
         "note": ""
       },
@@ -4237,7 +4237,7 @@
     },
     {
       "id": "mv4zxd1kqk6wm",
-      "date": "2026-10-26",
+      "date": "2026-10-27",
       "item": "康宁锅",
       "type": "蒲公英商单",
       "status": "待出稿",
@@ -4280,10 +4280,10 @@
   ],
   "backups": [
     {
-      "date": "2026-10-25",
-      "ts": 1792917644441,
+      "date": "2026-10-26",
+      "ts": 1792978025752,
       "data": {
-        "_modifiedAt": 1792917644438,
+        "_modifiedAt": 1792978025750,
         "home": {
           "rest": [
             "2026-08-01",
@@ -4308,7 +4308,7 @@
               }
             }
           ],
-          "hsReadCount": 0
+          "hsReadCount": 2
         },
         "ledger": [
           {
@@ -4592,14 +4592,6 @@
             "note": "午餐-鸡腿饭"
           },
           {
-            "id": "mtsudau00ores",
-            "date": "2026-09-08",
-            "type": "out",
-            "cat": "买菜",
-            "amount": 28.8,
-            "note": "西梅"
-          },
-          {
             "id": "mttijl5hkkits",
             "date": "2026-09-09",
             "type": "out",
@@ -4630,14 +4622,6 @@
             "cat": "蒲公英",
             "amount": 577.8,
             "note": "脱发液+爱婴室探店"
-          },
-          {
-            "id": "mtwxcouedt3xf",
-            "date": "2026-09-11",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 10,
-            "note": "酱香饼"
           },
           {
             "id": "mtxp64n31mlsq",
@@ -4760,6 +4744,14 @@
             "note": "电动车手机夹"
           },
           {
+            "id": "mtwxcouedt3xf",
+            "date": "2026-09-11",
+            "type": "out",
+            "cat": "餐饮",
+            "amount": 10,
+            "note": "酱香饼"
+          },
+          {
             "id": "mu21hw11qb0he",
             "date": "2026-09-15",
             "type": "out",
@@ -4878,6 +4870,14 @@
             "cat": "餐饮",
             "amount": 17,
             "note": "鸡腿饭"
+          },
+          {
+            "id": "mtsudau00ores",
+            "date": "2026-09-08",
+            "type": "out",
+            "cat": "买菜",
+            "amount": 28.8,
+            "note": "西梅"
           },
           {
             "id": "mu3fwyarighy3",
@@ -5368,6 +5368,14 @@
             "note": "梁根阳爸阳妈-我怕老婆"
           },
           {
+            "id": "munnlrx17fzpi",
+            "date": "2026-09-30",
+            "type": "out",
+            "cat": "餐饮",
+            "amount": 21.5,
+            "note": "午餐"
+          },
+          {
             "id": "munnlzb98uwlw",
             "date": "2026-09-30",
             "type": "out",
@@ -5542,14 +5550,6 @@
             "cat": "梁根",
             "amount": 1000,
             "note": ""
-          },
-          {
-            "id": "munnlrx17fzpi",
-            "date": "2026-09-30",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 21.5,
-            "note": "午餐"
           },
           {
             "id": "mv0boetm6ahjy",
@@ -6094,6 +6094,14 @@
             "cat": "梁根",
             "amount": 1470,
             "note": "社保"
+          },
+          {
+            "id": "mvnkvn3roozr7",
+            "date": "2026-10-25",
+            "type": "out",
+            "cat": "红豆",
+            "amount": 3000,
+            "note": ""
           }
         ],
         "xhs": {
@@ -7624,22 +7632,6 @@
               "note": ""
             },
             {
-              "id": "mut8dtyng65ym",
-              "date": "2026-10-03",
-              "time": "10:57",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
-              "id": "muw6e8xtwmf7u",
-              "date": "2026-10-06",
-              "time": "12:25",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
               "id": "mv0nt71lttucm",
               "date": "2026-10-08",
               "time": "19:44",
@@ -7684,6 +7676,22 @@
               "date": "2026-10-16",
               "time": "09:25",
               "type": "偏干",
+              "vol": "通常",
+              "note": ""
+            },
+            {
+              "id": "mut8dtyng65ym",
+              "date": "2026-10-03",
+              "time": "10:57",
+              "type": "正常",
+              "vol": "通常",
+              "note": ""
+            },
+            {
+              "id": "muw6e8xtwmf7u",
+              "date": "2026-10-06",
+              "time": "12:25",
+              "type": "正常",
               "vol": "通常",
               "note": ""
             },
@@ -8561,9 +8569,9 @@
     },
     {
       "date": "2026-10-24",
-      "ts": 1792852270742,
+      "ts": 1792804281213,
       "data": {
-        "_modifiedAt": 1792852270741,
+        "_modifiedAt": 1792804281213,
         "home": {
           "rest": [
             "2026-08-01",
@@ -8872,14 +8880,6 @@
             "note": "午餐-鸡腿饭"
           },
           {
-            "id": "mtsudau00ores",
-            "date": "2026-09-08",
-            "type": "out",
-            "cat": "买菜",
-            "amount": 28.8,
-            "note": "西梅"
-          },
-          {
             "id": "mttijl5hkkits",
             "date": "2026-09-09",
             "type": "out",
@@ -8910,14 +8910,6 @@
             "cat": "蒲公英",
             "amount": 577.8,
             "note": "脱发液+爱婴室探店"
-          },
-          {
-            "id": "mtwxcouedt3xf",
-            "date": "2026-09-11",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 10,
-            "note": "酱香饼"
           },
           {
             "id": "mtxp64n31mlsq",
@@ -9040,6 +9032,14 @@
             "note": "电动车手机夹"
           },
           {
+            "id": "mtwxcouedt3xf",
+            "date": "2026-09-11",
+            "type": "out",
+            "cat": "餐饮",
+            "amount": 10,
+            "note": "酱香饼"
+          },
+          {
             "id": "mu21hw11qb0he",
             "date": "2026-09-15",
             "type": "out",
@@ -9158,6 +9158,14 @@
             "cat": "餐饮",
             "amount": 17,
             "note": "鸡腿饭"
+          },
+          {
+            "id": "mtsudau00ores",
+            "date": "2026-09-08",
+            "type": "out",
+            "cat": "买菜",
+            "amount": 28.8,
+            "note": "西梅"
           },
           {
             "id": "mu3fwyarighy3",
@@ -9648,6 +9656,14 @@
             "note": "梁根阳爸阳妈-我怕老婆"
           },
           {
+            "id": "munnlrx17fzpi",
+            "date": "2026-09-30",
+            "type": "out",
+            "cat": "餐饮",
+            "amount": 21.5,
+            "note": "午餐"
+          },
+          {
             "id": "munnlzb98uwlw",
             "date": "2026-09-30",
             "type": "out",
@@ -9822,14 +9838,6 @@
             "cat": "梁根",
             "amount": 1000,
             "note": ""
-          },
-          {
-            "id": "munnlrx17fzpi",
-            "date": "2026-09-30",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 21.5,
-            "note": "午餐"
           },
           {
             "id": "mv0boetm6ahjy",
@@ -10310,62 +10318,6 @@
             "cat": "还款",
             "amount": 2995.91,
             "note": "信用卡"
-          },
-          {
-            "id": "mvlqd9tnccvw2",
-            "date": "2026-10-24",
-            "type": "out",
-            "cat": "居家",
-            "amount": 245.37,
-            "note": "居家"
-          },
-          {
-            "id": "mvlqdi995ckvf",
-            "date": "2026-10-24",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 3.96,
-            "note": "早餐"
-          },
-          {
-            "id": "mvlqdprs2q3qv",
-            "date": "2026-10-24",
-            "type": "out",
-            "cat": "买菜",
-            "amount": 68.6,
-            "note": "盒马"
-          },
-          {
-            "id": "mvlqe5jhxieh0",
-            "date": "2026-10-23",
-            "type": "out",
-            "cat": "红豆",
-            "amount": 790.5,
-            "note": "洗地机"
-          },
-          {
-            "id": "mvlqehdbpt2hw",
-            "date": "2026-10-23",
-            "type": "out",
-            "cat": "居家",
-            "amount": 56.6,
-            "note": "洗头椅"
-          },
-          {
-            "id": "mvlqeoahhun27",
-            "date": "2026-10-23",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 69.3,
-            "note": "午餐"
-          },
-          {
-            "id": "mvlqiv55jzsge",
-            "date": "2026-10-24",
-            "type": "out",
-            "cat": "还款",
-            "amount": 5000,
-            "note": "花呗"
           }
         ],
         "xhs": {
@@ -10789,14 +10741,6 @@
               "ts": "2026-10-22T02:32:04.747Z",
               "f": 7980,
               "z": 126928
-            },
-            {
-              "id": "mvly43vyc10pm",
-              "date": "2026-10-24",
-              "account": "常如意i",
-              "ts": "2026-10-24T05:15:50.830Z",
-              "f": 8030,
-              "z": 127391
             }
           ],
           "accounts": {
@@ -11212,14 +11156,6 @@
                   "ts": "2026-10-22T02:32:04.747Z",
                   "f": 7980,
                   "z": 126928
-                },
-                {
-                  "id": "mvly43vyc10pm",
-                  "date": "2026-10-24",
-                  "account": "常如意i",
-                  "ts": "2026-10-24T05:15:50.830Z",
-                  "f": 8030,
-                  "z": 127391
                 }
               ]
             },
@@ -11896,22 +11832,6 @@
               "note": ""
             },
             {
-              "id": "mut8dtyng65ym",
-              "date": "2026-10-03",
-              "time": "10:57",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
-              "id": "muw6e8xtwmf7u",
-              "date": "2026-10-06",
-              "time": "12:25",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
               "id": "mv0nt71lttucm",
               "date": "2026-10-08",
               "time": "19:44",
@@ -11956,6 +11876,22 @@
               "date": "2026-10-16",
               "time": "09:25",
               "type": "偏干",
+              "vol": "通常",
+              "note": ""
+            },
+            {
+              "id": "mut8dtyng65ym",
+              "date": "2026-10-03",
+              "time": "10:57",
+              "type": "正常",
+              "vol": "通常",
+              "note": ""
+            },
+            {
+              "id": "muw6e8xtwmf7u",
+              "date": "2026-10-06",
+              "time": "12:25",
+              "type": "正常",
               "vol": "通常",
               "note": ""
             },
@@ -12132,7 +12068,7 @@
           },
           {
             "id": "mv68mx0mwbmi6",
-            "date": "2026-10-28",
+            "date": "2026-10-25",
             "item": "英氏拉拉裤",
             "type": "众测招募",
             "status": "待出稿",
@@ -12782,7 +12718,7 @@
           },
           {
             "id": "mv4zxd1kqk6wm",
-            "date": "2026-10-26",
+            "date": "2026-10-25",
             "item": "康宁锅",
             "type": "蒲公英商单",
             "status": "待出稿",
@@ -12796,10 +12732,7 @@
             "orderAmount": 0,
             "commission": 0,
             "pajing": "",
-            "disc80": 0,
-            "paidOrder": 0,
-            "paidAmt": 0,
-            "paidBack": ""
+            "disc80": 0
           },
           {
             "id": "mveygiyfak5lb",
@@ -12830,9 +12763,9 @@
     },
     {
       "date": "2026-10-23",
-      "ts": 1792737976984,
+      "ts": 1792719008469,
       "data": {
-        "_modifiedAt": 1792737976982,
+        "_modifiedAt": 1792719008468,
         "home": {
           "rest": [
             "2026-08-01",
@@ -12857,7 +12790,7 @@
               }
             }
           ],
-          "hsReadCount": 0
+          "hsReadCount": 1
         },
         "ledger": [
           {
@@ -13141,14 +13074,6 @@
             "note": "午餐-鸡腿饭"
           },
           {
-            "id": "mtsudau00ores",
-            "date": "2026-09-08",
-            "type": "out",
-            "cat": "买菜",
-            "amount": 28.8,
-            "note": "西梅"
-          },
-          {
             "id": "mttijl5hkkits",
             "date": "2026-09-09",
             "type": "out",
@@ -13179,14 +13104,6 @@
             "cat": "蒲公英",
             "amount": 577.8,
             "note": "脱发液+爱婴室探店"
-          },
-          {
-            "id": "mtwxcouedt3xf",
-            "date": "2026-09-11",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 10,
-            "note": "酱香饼"
           },
           {
             "id": "mtxp64n31mlsq",
@@ -13309,6 +13226,14 @@
             "note": "电动车手机夹"
           },
           {
+            "id": "mtwxcouedt3xf",
+            "date": "2026-09-11",
+            "type": "out",
+            "cat": "餐饮",
+            "amount": 10,
+            "note": "酱香饼"
+          },
+          {
             "id": "mu21hw11qb0he",
             "date": "2026-09-15",
             "type": "out",
@@ -13427,6 +13352,14 @@
             "cat": "餐饮",
             "amount": 17,
             "note": "鸡腿饭"
+          },
+          {
+            "id": "mtsudau00ores",
+            "date": "2026-09-08",
+            "type": "out",
+            "cat": "买菜",
+            "amount": 28.8,
+            "note": "西梅"
           },
           {
             "id": "mu3fwyarighy3",
@@ -13917,6 +13850,14 @@
             "note": "梁根阳爸阳妈-我怕老婆"
           },
           {
+            "id": "munnlrx17fzpi",
+            "date": "2026-09-30",
+            "type": "out",
+            "cat": "餐饮",
+            "amount": 21.5,
+            "note": "午餐"
+          },
+          {
             "id": "munnlzb98uwlw",
             "date": "2026-09-30",
             "type": "out",
@@ -14091,14 +14032,6 @@
             "cat": "梁根",
             "amount": 1000,
             "note": ""
-          },
-          {
-            "id": "munnlrx17fzpi",
-            "date": "2026-09-30",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 21.5,
-            "note": "午餐"
           },
           {
             "id": "mv0boetm6ahjy",
@@ -14555,22 +14488,6 @@
             "cat": "还款",
             "amount": 2949.76,
             "note": "工商还款"
-          },
-          {
-            "id": "mvkamhnd7s0gv",
-            "date": "2026-10-23",
-            "type": "out",
-            "cat": "餐饮",
-            "amount": 6.39,
-            "note": "早餐"
-          },
-          {
-            "id": "mvklwk2eol03b",
-            "date": "2026-10-23",
-            "type": "in",
-            "cat": "工资",
-            "amount": 9029.02,
-            "note": ""
           }
         ],
         "xhs": {
@@ -16085,22 +16002,6 @@
               "note": ""
             },
             {
-              "id": "mut8dtyng65ym",
-              "date": "2026-10-03",
-              "time": "10:57",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
-              "id": "muw6e8xtwmf7u",
-              "date": "2026-10-06",
-              "time": "12:25",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
               "id": "mv0nt71lttucm",
               "date": "2026-10-08",
               "time": "19:44",
@@ -16149,6 +16050,22 @@
               "note": ""
             },
             {
+              "id": "mut8dtyng65ym",
+              "date": "2026-10-03",
+              "time": "10:57",
+              "type": "正常",
+              "vol": "通常",
+              "note": ""
+            },
+            {
+              "id": "muw6e8xtwmf7u",
+              "date": "2026-10-06",
+              "time": "12:25",
+              "type": "正常",
+              "vol": "通常",
+              "note": ""
+            },
+            {
               "id": "mvekkrxuyuxic",
               "date": "2026-10-18",
               "time": "19:22",
@@ -16161,14 +16078,6 @@
               "date": "2026-10-21",
               "time": "10:36",
               "type": "正常",
-              "vol": "通常",
-              "note": ""
-            },
-            {
-              "id": "mvkehk56yy52b",
-              "date": "2026-10-23",
-              "time": "11:18",
-              "type": "偏干",
               "vol": "通常",
               "note": ""
             }
@@ -16420,27 +16329,6 @@
             "paidOrder": 1,
             "paidAmt": 214.9,
             "paidBack": "待返"
-          },
-          {
-            "id": "mvkap2ro1fpx0",
-            "date": "2026-10-26",
-            "item": "合集",
-            "type": "水下置换",
-            "status": "待出稿",
-            "account": "常如意i",
-            "deadline": "",
-            "pajing": "",
-            "quote": 0,
-            "rebatePct": 0,
-            "rebate": 0,
-            "fee": 0,
-            "net": 0,
-            "orderAmount": 0,
-            "commission": 0,
-            "disc80": 0,
-            "paidOrder": 0,
-            "paidAmt": 0,
-            "paidBack": ""
           }
         ],
         "yayaNotes": [
