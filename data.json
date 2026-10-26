@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792983219929,
+  "_modifiedAt": 1792992063361,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -3726,6 +3726,27 @@
       "fee": 0,
       "net": 0,
       "orderAmount": 0,
+      "commission": 0,
+      "disc80": 0,
+      "paidOrder": 0,
+      "paidAmt": 0,
+      "paidBack": ""
+    },
+    {
+      "id": "mvot6iddvvgsq",
+      "date": "2026-11-08",
+      "item": "巴拉巴拉羽绒服",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "常如意i",
+      "deadline": "",
+      "pajing": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 25,
+      "net": 225,
+      "orderAmount": 250,
       "commission": 0,
       "disc80": 0,
       "paidOrder": 0,
