@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1792978034513,
+  "_modifiedAt": 1792978101523,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 2
+    "hsReadCount": 1
   },
   "ledger": [
     {
@@ -1719,7 +1719,7 @@
       "id": "mvkalzv85kqg2",
       "date": "2026-10-23",
       "type": "out",
-      "cat": "还款",
+      "cat": "梁根",
       "amount": 2949.76,
       "note": "工商还款"
     },
