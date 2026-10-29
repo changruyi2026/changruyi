@@ -1553,17 +1553,13 @@ function renderRuyiCalendar() {
 
     let coverAmt = topMoney ? money(topMoney) : '';
 
-    /* 拍单待返款标识：填了拍单金额且未返 → 🍚；已返 → 不显示 */
-
-    const paidMark = top && top.paidOrder === 1 && (top.paidBack || '待返') !== '是' ? `<span class="paid-rice" title="拍单待返款">🍚</span>` : '';
-
     const itemText = top && top.item ? esc(top.item) : '未命名';
 
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
 
     const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
 
-    const amtRow = (coverAmt || paidMark) ? `<div class="hs-amt-row ${stCls}">${paidMark}<span class="hs-amt">${coverAmt}</span></div>` : '';
+    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
 
     /* 手机端简化：只显示一条，取物品前 2 个字；金额（到手）放在日期右上角 */
 
@@ -1642,6 +1638,10 @@ function fillRuyiEdit(n) {
   $('#hsPaidAmt').value = (n.paidAmt != null && n.paidAmt !== 0) ? n.paidAmt : '';
 
   $('#hsPaidBack').value = n.paidBack || '待返';
+
+  $('#hsLook').value = (n.look != null && n.look !== '') ? n.look : '';
+
+  $('#hsBoom').value = (n.boom != null && n.boom !== '') ? n.boom : '';
 
   const _poF = $('#hsPaidOrder'); if (_poF) _poF.dispatchEvent(new Event('change'));
 
@@ -1749,6 +1749,10 @@ function openRuyiDayModal(ds) {
 
       ${n.paidOrder ? `<div class="hs-note-meta">🧾 拍单 ${money(n.paidAmt || 0)} · ${n.paidBack === '是' ? '已返' : '待返'}</div>` : ''}
 
+      ${(n.look != null && n.look !== '') ? `<div class="hs-note-meta">👀 ${n.look}</div>` : ''}
+
+      ${(n.boom != null && n.boom !== '') ? `<div class="hs-note-meta">💥 ${n.boom}</div>` : ''}
+
       ${moneyBlock}
 
     </div>`;
@@ -1798,6 +1802,22 @@ function openRuyiDayModal(ds) {
         <label>是否已返</label>
 
         <select class="input" id="hsPaidBack" style="flex:0 0 90px"><option value="待返">待返</option><option value="是">是</option></select>
+
+      </div>
+
+      <div class="hs-deadline-row">
+
+        <label style="font-size:15px">👀</label>
+
+        <input class="input" id="hsLook" type="number" min="0" step="0.01" placeholder="可选，自填" />
+
+      </div>
+
+      <div class="hs-deadline-row">
+
+        <label style="font-size:15px">💥</label>
+
+        <input class="input" id="hsBoom" type="number" min="0" step="0.01" placeholder="可选，自填" />
 
       </div>
 
@@ -2177,17 +2197,13 @@ function renderYayaCalendar() {
 
     let coverAmt = topMoney ? money(topMoney) : '';
 
-    /* 拍单待返款标识：填了拍单金额且未返 → 🍚；已返 → 不显示 */
-
-    const paidMark = top && top.paidOrder === 1 && (top.paidBack || '待返') !== '是' ? `<span class="paid-rice" title="拍单待返款">🍚</span>` : '';
-
     const itemText = top && top.item ? esc(top.item) : '未命名';
 
     const lenCls = top && top.item ? `len-${Math.min(top.item.length, 6)}` : 'len-4';
 
     const cover = top ? `<div class="hs-cover ${lenCls} ${top.item ? '' : 'no-item'}">${acctBadge}<span class="hs-cover-text">${itemText}</span></div>` : '';
 
-    const amtRow = (coverAmt || paidMark) ? `<div class="hs-amt-row ${stCls}">${paidMark}<span class="hs-amt">${coverAmt}</span></div>` : '';
+    const amtRow = coverAmt ? `<div class="hs-amt-row ${stCls}"><span class="hs-amt">${coverAmt}</span></div>` : '';
 
     /* 手机端简化：只显示一条，取物品前 2 个字；金额（到手）放在日期右上角 */
 
@@ -2266,6 +2282,10 @@ function fillYayaEdit(n) {
   $('#hsPaidAmt').value = (n.paidAmt != null && n.paidAmt !== 0) ? n.paidAmt : '';
 
   $('#hsPaidBack').value = n.paidBack || '待返';
+
+  $('#hsLook').value = (n.look != null && n.look !== '') ? n.look : '';
+
+  $('#hsBoom').value = (n.boom != null && n.boom !== '') ? n.boom : '';
 
   const _poF = $('#hsPaidOrder'); if (_poF) _poF.dispatchEvent(new Event('change'));
 
@@ -2373,6 +2393,10 @@ function openYayaDayModal(ds) {
 
       ${n.paidOrder ? `<div class="hs-note-meta">🧾 拍单 ${money(n.paidAmt || 0)} · ${n.paidBack === '是' ? '已返' : '待返'}</div>` : ''}
 
+      ${(n.look != null && n.look !== '') ? `<div class="hs-note-meta">👀 ${n.look}</div>` : ''}
+
+      ${(n.boom != null && n.boom !== '') ? `<div class="hs-note-meta">💥 ${n.boom}</div>` : ''}
+
       ${moneyBlock}
 
     </div>`;
@@ -2422,6 +2446,22 @@ function openYayaDayModal(ds) {
         <label>是否已返</label>
 
         <select class="input" id="hsPaidBack" style="flex:0 0 90px"><option value="待返">待返</option><option value="是">是</option></select>
+
+      </div>
+
+      <div class="hs-deadline-row">
+
+        <label style="font-size:15px">👀</label>
+
+        <input class="input" id="hsLook" type="number" min="0" step="0.01" placeholder="可选，自填" />
+
+      </div>
+
+      <div class="hs-deadline-row">
+
+        <label style="font-size:15px">💥</label>
+
+        <input class="input" id="hsBoom" type="number" min="0" step="0.01" placeholder="可选，自填" />
 
       </div>
 
@@ -4578,6 +4618,10 @@ document.addEventListener('click', e => {
 
       const paidBack = paidOrder ? (($('#hsPaidBack') && $('#hsPaidBack').value) || '待返') : '';
 
+      const look = ($('#hsLook').value) ? Math.max(0, parseFloat($('#hsLook').value) || 0) : '';
+
+      const boom = ($('#hsBoom').value) ? Math.max(0, parseFloat($('#hsBoom').value) || 0) : '';
+
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0, disc80 = 0;
 
       if (type === '蒲公英商单') {
@@ -4614,7 +4658,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack };
+          S.ruyiNotes[idx] = { ...S.ruyiNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack, look, boom };
 
           toast('已修改出稿笔记 🍠');
 
@@ -4622,7 +4666,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack });
+        S.ruyiNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack, look, boom });
 
         toast('已保存出稿笔记 🍠');
 
@@ -4663,6 +4707,10 @@ document.addEventListener('click', e => {
       $('#hsPaidAmt').value = '';
 
       $('#hsPaidBack').value = '待返';
+
+      $('#hsLook').value = '';
+
+      $('#hsBoom').value = '';
 
       const _poC = $('#hsPaidOrder'); if (_poC) _poC.dispatchEvent(new Event('change'));
 
@@ -4816,6 +4864,10 @@ document.addEventListener('click', e => {
 
       const paidBack = paidOrder ? (($('#hsPaidBack') && $('#hsPaidBack').value) || '待返') : '';
 
+      const look = ($('#hsLook').value) ? Math.max(0, parseFloat($('#hsLook').value) || 0) : '';
+
+      const boom = ($('#hsBoom').value) ? Math.max(0, parseFloat($('#hsBoom').value) || 0) : '';
+
       let quote = 0, rebatePct = 0, rebate = 0, fee = 0, net = 0, orderAmount = 0, commission = 0, disc80 = 0;
 
       if (type === '蒲公英商单') {
@@ -4852,7 +4904,7 @@ document.addEventListener('click', e => {
 
         if (idx > -1) {
 
-          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack };
+          S.yayaNotes[idx] = { ...S.yayaNotes[idx], date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack, look, boom };
 
           toast('已修改出稿笔记 🍠');
 
@@ -4860,7 +4912,7 @@ document.addEventListener('click', e => {
 
       } else {
 
-        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack });
+        S.yayaNotes.push({ id: uid(), date: newDate, item, type, status, account, deadline, pajing, quote, rebatePct, rebate, fee, net, orderAmount, commission, disc80, paidOrder, paidAmt, paidBack, look, boom });
 
         toast('已保存出稿笔记 🍠');
 
@@ -4901,6 +4953,10 @@ document.addEventListener('click', e => {
       $('#hsPaidAmt').value = '';
 
       $('#hsPaidBack').value = '待返';
+
+      $('#hsLook').value = '';
+
+      $('#hsBoom').value = '';
 
       const _poC = $('#hsPaidOrder'); if (_poC) _poC.dispatchEvent(new Event('change'));
 
