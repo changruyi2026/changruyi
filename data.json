@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793259447529,
+  "_modifiedAt": 1793259666899,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3588,7 +3588,9 @@
       "disc80": 0,
       "paidOrder": 1,
       "paidAmt": 50,
-      "paidBack": "是"
+      "paidBack": "是",
+      "look": 2000,
+      "boom": 50000
     },
     {
       "id": "mungzoyivr9ir",
