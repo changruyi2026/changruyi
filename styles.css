@@ -905,7 +905,6 @@ input,textarea,select{font-family:inherit;color:inherit}
 .paid-amt{font-size:13px;font-weight:800;color:var(--rose-deep);flex-shrink:0}
 .paid-total{display:flex;justify-content:flex-end;align-items:baseline;gap:5px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-soft);font-weight:600}
 .paid-total b{color:var(--rose-deep);font-size:16px;font-weight:800}
-.paid-rice{font-size:12px;line-height:1;flex-shrink:0;margin-right:auto}
 .paid-row .hs-status{flex-shrink:0;font-size:12px}
 @media(max-width:600px){
 .wk-cal{grid-template-columns:repeat(4,1fr);gap:8px}
