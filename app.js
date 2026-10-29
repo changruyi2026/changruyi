@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v79'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v80'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -1809,15 +1809,11 @@ function openRuyiDayModal(ds) {
 
         <label style="font-size:15px">👀</label>
 
-        <input class="input" id="hsLook" type="number" min="0" step="0.01" placeholder="可选，自填" />
-
-      </div>
-
-      <div class="hs-deadline-row">
+        <input class="input" id="hsLook" type="number" min="0" step="0.01" placeholder="可选" style="flex:0 0 90px" />
 
         <label style="font-size:15px">💥</label>
 
-        <input class="input" id="hsBoom" type="number" min="0" step="0.01" placeholder="可选，自填" />
+        <input class="input" id="hsBoom" type="number" min="0" step="0.01" placeholder="可选" style="flex:0 0 90px" />
 
       </div>
 
@@ -2453,15 +2449,11 @@ function openYayaDayModal(ds) {
 
         <label style="font-size:15px">👀</label>
 
-        <input class="input" id="hsLook" type="number" min="0" step="0.01" placeholder="可选，自填" />
-
-      </div>
-
-      <div class="hs-deadline-row">
+        <input class="input" id="hsLook" type="number" min="0" step="0.01" placeholder="可选" style="flex:0 0 90px" />
 
         <label style="font-size:15px">💥</label>
 
-        <input class="input" id="hsBoom" type="number" min="0" step="0.01" placeholder="可选，自填" />
+        <input class="input" id="hsBoom" type="number" min="0" step="0.01" placeholder="可选" style="flex:0 0 90px" />
 
       </div>
 
