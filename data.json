@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793341916307,
+  "_modifiedAt": 1793342142149,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1922,6 +1922,14 @@
       "cat": "小红薯",
       "amount": 270,
       "note": "窗帘"
+    },
+    {
+      "id": "mvullww4rpklu",
+      "date": "2026-10-20",
+      "type": "in",
+      "cat": "小红薯",
+      "amount": 576,
+      "note": "黑白调"
     }
   ],
   "xhs": {
