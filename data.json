@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793330678138,
+  "_modifiedAt": 1793330696208,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3839,7 +3839,7 @@
       "disc80": 0,
       "paidOrder": 1,
       "paidAmt": 107.9,
-      "paidBack": "待返",
+      "paidBack": "是",
       "look": 1000,
       "boom": 30000
     },
