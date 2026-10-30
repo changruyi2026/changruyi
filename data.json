@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793341184651,
+  "_modifiedAt": 1793341237194,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1874,6 +1874,14 @@
       "cat": "人情",
       "amount": 200,
       "note": "逯娇"
+    },
+    {
+      "id": "mvul2imi6wioi",
+      "date": "2026-10-30",
+      "type": "out",
+      "cat": "小雨",
+      "amount": 5982.88,
+      "note": "相机"
     }
   ],
   "xhs": {
