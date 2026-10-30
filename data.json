@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793345430311,
+  "_modifiedAt": 1793345437025,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3994,7 +3994,7 @@
     },
     {
       "id": "mvt3isdjk49ii",
-      "date": "2026-11-10",
+      "date": "2026-11-05",
       "item": "宝宝巴士",
       "type": "众测招募",
       "status": "待出稿",
@@ -4011,7 +4011,9 @@
       "disc80": 0,
       "paidOrder": 0,
       "paidAmt": 0,
-      "paidBack": ""
+      "paidBack": "",
+      "look": "",
+      "boom": ""
     }
   ],
   "yayaNotes": [
