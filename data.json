@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793339797240,
+  "_modifiedAt": 1793339800849,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3948,29 +3948,6 @@
       "paidOrder": 0,
       "paidAmt": 0,
       "paidBack": ""
-    },
-    {
-      "id": "mvuk7njsx1ucr",
-      "date": "2026-11-07",
-      "item": "撒",
-      "type": "蒲公英商单",
-      "status": "待出稿",
-      "account": "常如意i",
-      "deadline": "",
-      "pajing": "",
-      "quote": 0,
-      "rebatePct": 0,
-      "rebate": 0,
-      "fee": 0,
-      "net": 0,
-      "orderAmount": 0,
-      "commission": 0,
-      "disc80": 0,
-      "paidOrder": 0,
-      "paidAmt": 0,
-      "paidBack": "",
-      "look": "",
-      "boom": ""
     }
   ],
   "yayaNotes": [
@@ -17790,6 +17767,7 @@
     }
   ],
   "deletedIds": {
-    "mumic8yp8dn55": 1790767528222
+    "mumic8yp8dn55": 1790767528222,
+    "mvuk7njsx1ucr": 1793339800849
   }
 }
