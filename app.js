@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v80'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v81'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -930,6 +930,8 @@ function renderRuyi() {
 
         <span class="hs-legend-item"><i class="hs-lg st-review"></i>审核中</span>
 
+        <span class="hs-legend-item"><i class="hs-lg st-approved"></i>审核通过待发布</span>
+
         <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
 
       </div>
@@ -965,6 +967,8 @@ function renderYaya() {
         <span class="hs-legend-item"><i class="hs-lg st-draft"></i>待出稿</span>
 
         <span class="hs-legend-item"><i class="hs-lg st-review"></i>审核中</span>
+
+        <span class="hs-legend-item"><i class="hs-lg st-approved"></i>审核通过待发布</span>
 
         <span class="hs-legend-item"><i class="hs-lg st-published"></i>已出稿</span>
 
@@ -1405,9 +1409,11 @@ const PUB_STATUSES = [
 
   { key: 'draft',     label: '待出稿', cls: 'st-draft',     icon: '●' },
 
-  { key: 'published', label: '已出稿', cls: 'st-published', icon: '●' },
+  { key: 'review',    label: '审核中', cls: 'st-review',    icon: '●' },
 
-  { key: 'review',    label: '审核中', cls: 'st-review',    icon: '●' }
+  { key: 'approved',  label: '审核通过待发布', cls: 'st-approved',  icon: '●' },
+
+  { key: 'published', label: '已出稿', cls: 'st-published', icon: '●' }
 
 ];
 
@@ -1421,7 +1427,7 @@ function normStatus(s) { return STATUS_RENAME[s] || s; }
 
 /* 状态优先级：未完成的排在前面，决定当天单元格的底色 */
 
-const PUB_STATUS_ORDER = { '待出稿': 0, '审核中': 1, '已出稿': 2 };
+const PUB_STATUS_ORDER = { '待出稿': 0, '审核中': 1, '审核通过待发布': 2, '已出稿': 3 };
 
 let ruyiCal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
 
