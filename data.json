@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793274727694,
+  "_modifiedAt": 1793325069070,
   "home": {
     "rest": [
       "2026-08-01",
@@ -4503,10 +4503,10 @@
   ],
   "backups": [
     {
-      "date": "2026-10-29",
-      "ts": 1793238753554,
+      "date": "2026-10-30",
+      "ts": 1793325069072,
       "data": {
-        "_modifiedAt": 1793238753552,
+        "_modifiedAt": 1793325069070,
         "home": {
           "rest": [
             "2026-08-01",
@@ -6349,6 +6349,38 @@
             "cat": "居家",
             "amount": 300,
             "note": "主卧床盖"
+          },
+          {
+            "id": "mvt6op5954oem",
+            "date": "2026-10-29",
+            "type": "in",
+            "cat": "梁根",
+            "amount": 1000,
+            "note": ""
+          },
+          {
+            "id": "mvt6pa9h82isg",
+            "date": "2026-10-28",
+            "type": "out",
+            "cat": "买菜",
+            "amount": 100,
+            "note": ""
+          },
+          {
+            "id": "mvt6pmcoczc5k",
+            "date": "2026-10-28",
+            "type": "out",
+            "cat": "买菜",
+            "amount": 118,
+            "note": "老婆大人"
+          },
+          {
+            "id": "mvtdcj5jlm1uz",
+            "date": "2026-10-28",
+            "type": "out",
+            "cat": "人情",
+            "amount": 200,
+            "note": "逯娇"
           }
         ],
         "xhs": {
@@ -8029,6 +8061,14 @@
               "type": "正常",
               "vol": "通常",
               "note": ""
+            },
+            {
+              "id": "mvthgzkc33n7e",
+              "date": "2026-10-29",
+              "time": "19:30",
+              "type": "偏稀",
+              "vol": "通常",
+              "note": ""
             }
           ]
         },
@@ -8050,7 +8090,14 @@
             "fee": 0,
             "net": 0,
             "orderAmount": 0,
-            "commission": 0
+            "commission": 0,
+            "pajing": "",
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 3500,
+            "boom": 60000
           },
           {
             "id": "mub0il3052bsn",
@@ -8071,7 +8118,9 @@
             "disc80": 0,
             "paidOrder": 1,
             "paidAmt": 50,
-            "paidBack": "是"
+            "paidBack": "是",
+            "look": 2000,
+            "boom": 50000
           },
           {
             "id": "mungzoyivr9ir",
@@ -8087,7 +8136,14 @@
             "fee": 0,
             "net": 0,
             "orderAmount": 0,
-            "commission": 0
+            "commission": 0,
+            "pajing": "",
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 5000,
+            "boom": 60000
           },
           {
             "id": "mv1qcn94gtsva",
@@ -8105,7 +8161,12 @@
             "orderAmount": 0,
             "commission": 0,
             "pajing": "",
-            "disc80": 0
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 2500,
+            "boom": 60000
           },
           {
             "id": "mv1qd4rh3h3cv",
@@ -8113,7 +8174,7 @@
             "item": "牙膏香薰合集",
             "type": "水下置换",
             "status": "已出稿",
-            "account": "芽芽Mochi",
+            "account": "常如意i",
             "deadline": "",
             "quote": 0,
             "rebatePct": 0,
@@ -8121,7 +8182,14 @@
             "fee": 0,
             "net": 0,
             "orderAmount": 0,
-            "commission": 0
+            "commission": 0,
+            "pajing": "",
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 2000,
+            "boom": 40000
           },
           {
             "id": "mv4tabtljekuu",
@@ -8139,7 +8207,12 @@
             "orderAmount": 0,
             "commission": 0,
             "pajing": "",
-            "disc80": 0
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 2000,
+            "boom": 30000
           },
           {
             "id": "mv4zyihotttu5",
@@ -8157,7 +8230,12 @@
             "orderAmount": 0,
             "commission": 0,
             "pajing": "前15后15",
-            "disc80": 1
+            "disc80": 1,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 3000,
+            "boom": 60000
           },
           {
             "id": "mv689rigr5r6p",
@@ -8175,7 +8253,12 @@
             "net": 90,
             "orderAmount": 100,
             "commission": 0,
-            "disc80": 0
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": 2000,
+            "boom": 40000
           },
           {
             "id": "mv68mx0mwbmi6",
@@ -8203,7 +8286,7 @@
             "date": "2026-11-02",
             "item": "贝易保温杯",
             "type": "众测招募",
-            "status": "待出稿",
+            "status": "审核中",
             "account": "常如意i",
             "deadline": "",
             "pajing": "",
@@ -8238,7 +8321,9 @@
             "disc80": 0,
             "paidOrder": 1,
             "paidAmt": 39,
-            "paidBack": "待返"
+            "paidBack": "待返",
+            "look": 2000,
+            "boom": 30000
           },
           {
             "id": "mveygt4pv61uw",
@@ -8259,14 +8344,16 @@
             "disc80": 0,
             "paidOrder": 1,
             "paidAmt": 107.9,
-            "paidBack": "待返"
+            "paidBack": "待返",
+            "look": 1000,
+            "boom": 20000
           },
           {
             "id": "mvf0te0yl1660",
             "date": "2026-10-31",
             "item": "茁伊书包",
             "type": "拍单置换",
-            "status": "待出稿",
+            "status": "审核中",
             "account": "常如意i",
             "deadline": "",
             "pajing": "",
@@ -8280,7 +8367,9 @@
             "disc80": 0,
             "paidOrder": 1,
             "paidAmt": 214.9,
-            "paidBack": "待返"
+            "paidBack": "待返",
+            "look": "",
+            "boom": ""
           },
           {
             "id": "mvkap2ro1fpx0",
@@ -8301,7 +8390,9 @@
             "disc80": 0,
             "paidOrder": 0,
             "paidAmt": 0,
-            "paidBack": ""
+            "paidBack": "",
+            "look": 1500,
+            "boom": 40000
           },
           {
             "id": "mvot6iddvvgsq",
@@ -8318,6 +8409,27 @@
             "fee": 25,
             "net": 225,
             "orderAmount": 250,
+            "commission": 0,
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": ""
+          },
+          {
+            "id": "mvt3isdjk49ii",
+            "date": "2026-11-10",
+            "item": "宝宝巴士",
+            "type": "众测招募",
+            "status": "待出稿",
+            "account": "常如意i",
+            "deadline": "",
+            "pajing": "",
+            "quote": 0,
+            "rebatePct": 0,
+            "rebate": 0,
+            "fee": 10,
+            "net": 90,
+            "orderAmount": 100,
             "commission": 0,
             "disc80": 0,
             "paidOrder": 0,
@@ -8891,7 +9003,9 @@
             "disc80": 0,
             "paidOrder": 1,
             "paidAmt": 107.9,
-            "paidBack": "待返"
+            "paidBack": "待返",
+            "look": 500,
+            "boom": 10000
           }
         ],
         "deletedIds": {
@@ -8900,10 +9014,10 @@
       }
     },
     {
-      "date": "2026-10-28",
-      "ts": 1793172632778,
+      "date": "2026-10-29",
+      "ts": 1793238570866,
       "data": {
-        "_modifiedAt": 1793172632776,
+        "_modifiedAt": 1793238570865,
         "home": {
           "rest": [
             "2026-08-01",
@@ -8928,7 +9042,7 @@
               }
             }
           ],
-          "hsReadCount": 0
+          "hsReadCount": 1
         },
         "ledger": [
           {
@@ -12639,7 +12753,7 @@
             "commission": 0,
             "disc80": 0,
             "paidOrder": 1,
-            "paidAmt": 149.9,
+            "paidAmt": 107.9,
             "paidBack": "待返"
           },
           {
@@ -13256,9 +13370,9 @@
           {
             "id": "mveygiyfak5lb",
             "date": "2026-10-28",
-            "item": "科巢枕头",
+            "item": "科巢睡袋",
             "type": "拍单置换",
-            "status": "审核中",
+            "status": "已出稿",
             "account": "芽芽Mochi",
             "deadline": "",
             "pajing": "",
@@ -13282,9 +13396,9 @@
     },
     {
       "date": "2026-10-27",
-      "ts": 1793099984635,
+      "ts": 1793071741780,
       "data": {
-        "_modifiedAt": 1793099984634,
+        "_modifiedAt": 1793071741779,
         "home": {
           "rest": [
             "2026-08-01",
@@ -13309,7 +13423,7 @@
               }
             }
           ],
-          "hsReadCount": 0
+          "hsReadCount": 1
         },
         "ledger": [
           {
@@ -15119,14 +15233,6 @@
             "cat": "交通",
             "amount": 90,
             "note": "地铁卡"
-          },
-          {
-            "id": "mvq8456pujq5h",
-            "date": "2026-10-27",
-            "type": "out",
-            "cat": "居家",
-            "amount": 300,
-            "note": "主卧床盖"
           }
         ],
         "xhs": {
@@ -15566,14 +15672,6 @@
               "ts": "2026-10-26T01:29:36.353Z",
               "f": 8040,
               "z": 127425
-            },
-            {
-              "id": "mvq98mqdvckyc",
-              "date": "2026-10-27",
-              "account": "常如意i",
-              "ts": "2026-10-27T05:38:22.357Z",
-              "f": 8059,
-              "z": 127533
             }
           ],
           "accounts": {
@@ -16005,14 +16103,6 @@
                   "ts": "2026-10-26T01:29:36.353Z",
                   "f": 8040,
                   "z": 127425
-                },
-                {
-                  "id": "mvq98mqdvckyc",
-                  "date": "2026-10-27",
-                  "account": "常如意i",
-                  "ts": "2026-10-27T05:38:22.357Z",
-                  "f": 8059,
-                  "z": 127533
                 }
               ]
             },
@@ -16783,14 +16873,6 @@
               "type": "偏干",
               "vol": "通常",
               "note": ""
-            },
-            {
-              "id": "mvqlfmyiko4sc",
-              "date": "2026-10-27",
-              "time": "17:19",
-              "type": "正常",
-              "vol": "通常",
-              "note": ""
             }
           ]
         },
@@ -16833,7 +16915,7 @@
             "disc80": 0,
             "paidOrder": 1,
             "paidAmt": 50,
-            "paidBack": "是"
+            "paidBack": "待返"
           },
           {
             "id": "mungzoyivr9ir",
@@ -17618,7 +17700,7 @@
             "date": "2026-10-27",
             "item": "康宁锅",
             "type": "蒲公英商单",
-            "status": "审核中",
+            "status": "待出稿",
             "account": "芽芽Mochi",
             "deadline": "",
             "quote": 300,
