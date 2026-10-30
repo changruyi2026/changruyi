@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793325069070,
+  "_modifiedAt": 1793325073563,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3758,7 +3758,7 @@
       "date": "2026-11-05",
       "item": "英氏拉拉裤",
       "type": "众测招募",
-      "status": "待出稿",
+      "status": "审核中",
       "account": "常如意i",
       "deadline": "",
       "pajing": "",
@@ -3772,7 +3772,9 @@
       "disc80": 0,
       "paidOrder": 1,
       "paidAmt": 93.88,
-      "paidBack": "待返"
+      "paidBack": "待返",
+      "look": "",
+      "boom": ""
     },
     {
       "id": "mvemdnriur0nx",
