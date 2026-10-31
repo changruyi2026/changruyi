@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793410117663,
+  "_modifiedAt": 1793410121232,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1175,7 +1175,7 @@
       "id": "mupiqstweu1vv",
       "date": "2026-10-01",
       "type": "out",
-      "cat": "餐饮",
+      "cat": "午餐",
       "amount": 58,
       "note": "午饭"
     },
