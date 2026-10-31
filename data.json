@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793416249758,
+  "_modifiedAt": 1793426674345,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3977,8 +3977,8 @@
       "paidOrder": 1,
       "paidAmt": 214.9,
       "paidBack": "待返",
-      "look": "",
-      "boom": ""
+      "look": 1500,
+      "boom": 30000
     },
     {
       "id": "mvkap2ro1fpx0",
