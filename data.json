@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793410465714,
+  "_modifiedAt": 1793410470564,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1647,7 +1647,7 @@
       "id": "mvekuxancv3yx",
       "date": "2026-10-16",
       "type": "out",
-      "cat": "餐饮",
+      "cat": "外出餐厅",
       "amount": 296.98,
       "note": "海底捞"
     },
