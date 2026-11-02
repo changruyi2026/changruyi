@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793582713024,
+  "_modifiedAt": 1793582721971,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2026,6 +2026,14 @@
       "cat": "居家购物",
       "amount": 100,
       "note": "话费-5551"
+    },
+    {
+      "id": "mvykudgz6wvfe",
+      "date": "2026-11-02",
+      "type": "out",
+      "cat": "早餐",
+      "amount": 1.98,
+      "note": ""
     }
   ],
   "xhs": {
