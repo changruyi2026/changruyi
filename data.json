@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793582585681,
+  "_modifiedAt": 1793582633886,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1970,6 +1970,14 @@
       "cat": "买菜零食",
       "amount": 4,
       "note": "水"
+    },
+    {
+      "id": "mvykshi6dcww1",
+      "date": "2026-11-01",
+      "type": "out",
+      "cat": "午餐",
+      "amount": 26.2,
+      "note": ""
     }
   ],
   "xhs": {
