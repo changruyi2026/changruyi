@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793582633886,
+  "_modifiedAt": 1793582644256,
   "home": {
     "rest": [
       "2026-08-01",
@@ -1978,6 +1978,14 @@
       "cat": "午餐",
       "amount": 26.2,
       "note": ""
+    },
+    {
+      "id": "mvykspi8rlvgl",
+      "date": "2026-11-01",
+      "type": "out",
+      "cat": "居家购物",
+      "amount": 81.6,
+      "note": "相机套"
     }
   ],
   "xhs": {
