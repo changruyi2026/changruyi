@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793586469863,
+  "_modifiedAt": 1793587276834,
   "home": {
     "rest": [
       "2026-08-01",
@@ -4700,8 +4700,8 @@
       "paidOrder": 0,
       "paidAmt": 0,
       "paidBack": "",
-      "look": "",
-      "boom": ""
+      "look": 999.97,
+      "boom": 20000
     },
     {
       "id": "mveygiyfak5lb",
