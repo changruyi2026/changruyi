@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1793929084648,
+  "_modifiedAt": 1793930630418,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -2106,6 +2106,14 @@
       "cat": "买菜零食",
       "amount": 36,
       "note": ""
+    },
+    {
+      "id": "mw4bz9ci4ijxa",
+      "date": "2026-11-06",
+      "type": "out",
+      "cat": "早餐",
+      "amount": 3.81,
+      "note": "早餐"
     }
   ],
   "xhs": {
