@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v84'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v85'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -298,12 +298,26 @@ let S = load();
 function load() {
   migrateCalendarSplit(); /* 迁移旧版红薯日历数据到如意/芽芽两个日历 */
 
-  try { const r = localStorage.getItem(KEY); if (r) return Object.assign(defaultState(), JSON.parse(r)); }
+  let st = null;
+
+  try { const r = localStorage.getItem(KEY); if (r) st = Object.assign(defaultState(), JSON.parse(r)); }
 
   catch (e) { console.warn('load failed', e); }
 
-  return defaultState();
+  if (!st) st = defaultState();
 
+  migrateLedgerCats(st); /* 支出分类迁移：早餐/午餐/晚餐 → 早中晚餐 */
+
+  return st;
+
+}
+
+/* 支出分类迁移：早餐/午餐/晚餐 → 早中晚餐（2026-11-06，幂等；每次启动都扫描，仅在有变更时落盘） */
+function migrateLedgerCats(st) {
+  const MAP = { '早餐': '早中晚餐', '午餐': '早中晚餐', '晚餐': '早中晚餐' };
+  let n = 0;
+  (st.ledger || []).forEach(r => { if (MAP[r.cat]) { r.cat = MAP[r.cat]; n++; } });
+  if (n > 0) { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { console.warn('cat migrate persist failed', e); } }
 }
 
 function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); trimBackups(S); trimDeletedIds(S); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
@@ -2903,11 +2917,11 @@ setInterval(tickClock, 1000);
 
 /* ===================== 3. 记账 ===================== */
 
-const EXP_CATS = ['外出餐厅', '早餐', '午餐', '晚餐', '买菜零食', '交通', '居家购物', '服饰类', '医疗', '还款', '旅游', '小红书', '小雨', '芽芽', '红豆', '人情'];
+const EXP_CATS = ['外出餐厅', '早中晚餐', '买菜零食', '交通', '居家购物', '服饰类', '医疗', '还款', '旅游', '小红书', '小雨', '芽芽', '红豆', '人情'];
 
 const INC_CATS = ['工资', '红包', '梁根', '小红薯', '其他'];
 
-const CAT_COLOR = { '餐饮': '#E0A98A', '买菜': '#C7B98C', '母婴': '#E8B98C', '交通': '#D8A06A', '居家': '#E9C7A1', '梁根': '#C49A78', '医疗': '#C9A98A', '还款': '#9FA8B0', '住宿': '#C2A0C0', '其他': '#BCA99B', '小红书': '#E08A6A', '小雨': '#8FA8B8', '芽芽': '#A8BE86', '红豆': '#C97E7E', '人情': '#B8935E', '外出餐厅': '#E0A98A', '早餐': '#F0C97A', '午餐': '#E8B98C', '晚餐': '#D89A6A', '买菜零食': '#C7B98C', '居家购物': '#E9C7A1', '旅游': '#8FB8C9', '服饰类': '#D8A7C4', '工资': '#CD8E6B', '副业': '#D3A878', '红包': '#E0A06A', '返款': '#D8A97E', '蒲公英': '#A8B58C', '小红薯': '#E0705F' };
+const CAT_COLOR = { '餐饮': '#E0A98A', '买菜': '#C7B98C', '母婴': '#E8B98C', '交通': '#D8A06A', '居家': '#E9C7A1', '梁根': '#C49A78', '医疗': '#C9A98A', '还款': '#9FA8B0', '住宿': '#C2A0C0', '其他': '#BCA99B', '小红书': '#E08A6A', '小雨': '#8FA8B8', '芽芽': '#A8BE86', '红豆': '#C97E7E', '人情': '#B8935E', '外出餐厅': '#E0A98A', '早中晚餐': '#E8B98C', '早餐': '#F0C97A', '午餐': '#E8B98C', '晚餐': '#D89A6A', '买菜零食': '#C7B98C', '居家购物': '#E9C7A1', '旅游': '#8FB8C9', '服饰类': '#D8A7C4', '工资': '#CD8E6B', '副业': '#D3A878', '红包': '#E0A06A', '返款': '#D8A97E', '蒲公英': '#A8B58C', '小红薯': '#E0705F' };
 
 /* 分类改名兼容：历史数据里旧名在显示/统计时自动映射为新名，避免孤儿分类 */
 const CAT_ALIAS = { '小鱼': '小雨' };
