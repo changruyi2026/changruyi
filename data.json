@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794193937123,
+  "_modifiedAt": 1794195044847,
   "home": {
     "rest": [
       "2026-08-01",
@@ -24,7 +24,7 @@
         }
       }
     ],
-    "hsReadCount": 1
+    "hsReadCount": 0
   },
   "ledger": [
     {
@@ -4487,7 +4487,7 @@
       "date": "2026-11-09",
       "item": "宝宝巴士",
       "type": "众测招募",
-      "status": "审核通过待发布",
+      "status": "已出稿",
       "account": "常如意i",
       "deadline": "",
       "pajing": "",
