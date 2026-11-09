@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794191255693,
+  "_modifiedAt": 1794191268040,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2281,6 +2281,14 @@
       "type": "out",
       "cat": "买菜零食",
       "amount": 162.1,
+      "note": "山姆"
+    },
+    {
+      "id": "mw8n5mmgavd7h",
+      "date": "2026-11-06",
+      "type": "out",
+      "cat": "买菜零食",
+      "amount": 144.7,
       "note": "山姆"
     }
   ],
