@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794838380087,
+  "_modifiedAt": 1794838411613,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2481,6 +2481,14 @@
       "type": "in",
       "cat": "小红薯",
       "amount": 216,
+      "note": ""
+    },
+    {
+      "id": "mwjcg5st4l0tv",
+      "date": "2026-11-15",
+      "type": "out",
+      "cat": "小红书",
+      "amount": 211.15,
       "note": ""
     }
   ],
