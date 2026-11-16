@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v85'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v86'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -95,7 +95,11 @@ function dayOfYear() {
 
 }
 
-const money = n => (n < 0 ? '-' : '') + '¥' + Math.abs(n).toLocaleString('zh-CN');
+/* 金额隐私模式：开启后所有 money() 输出掩码，便于截图分享时不暴露金额 */
+let moneyHidden = false;
+try { moneyHidden = localStorage.getItem('cr_money_hidden') === '1'; } catch (e) {}
+
+const money = n => (n < 0 ? '-' : '') + '¥' + (moneyHidden ? '***' : Math.abs(n).toLocaleString('zh-CN'));
 
 
 
@@ -6036,6 +6040,21 @@ $('#topDate').textContent = fmtDateCN(todayStr());
 const verPill = $('#verPill');
 
 if (verPill) verPill.textContent = APP_VERSION;
+
+/* 金额隐私开关：右上角眼睛按钮，切换后所有金额显示为 ¥***（截图分享用） */
+function updateMoneyEyeBtn() {
+  const b = $('#moneyEyeBtn');
+  if (b) { b.textContent = moneyHidden ? '🙈' : '👁️'; b.title = moneyHidden ? '当前已隐藏金额，点击恢复显示' : '当前显示金额，点击隐藏（截图用）'; b.classList.toggle('off', moneyHidden); }
+}
+function toggleMoneyHidden() {
+  moneyHidden = !moneyHidden;
+  try { localStorage.setItem('cr_money_hidden', moneyHidden ? '1' : '0'); } catch (e) {}
+  updateMoneyEyeBtn();
+  renderView(currentView);
+  toast(moneyHidden ? '已隐藏所有金额 🙈' : '已恢复显示金额 👁️');
+}
+updateMoneyEyeBtn();
+const _eyeBtn = $('#moneyEyeBtn'); if (_eyeBtn) _eyeBtn.addEventListener('click', toggleMoneyHidden);
 
 /* 版本标记：写入 localStorage；若检测到之前跑的是更旧的版本，提示刷新以彻底加载新版 */
 
