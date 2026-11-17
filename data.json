@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794904032802,
+  "_modifiedAt": 1794904040934,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2554,6 +2554,14 @@
       "cat": "早中晚餐",
       "amount": 58,
       "note": ""
+    },
+    {
+      "id": "mwkfitpimxmkm",
+      "date": "2026-11-14",
+      "type": "out",
+      "cat": "居家购物",
+      "amount": 22,
+      "note": "牙刷"
     }
   ],
   "xhs": {
