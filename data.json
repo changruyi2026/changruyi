@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794904020753,
+  "_modifiedAt": 1794904032802,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2546,6 +2546,14 @@
       "cat": "居家购物",
       "amount": 355.56,
       "note": "浴霸"
+    },
+    {
+      "id": "mwkfinfm42vxu",
+      "date": "2026-11-14",
+      "type": "out",
+      "cat": "早中晚餐",
+      "amount": 58,
+      "note": ""
     }
   ],
   "xhs": {
