@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794898426908,
+  "_modifiedAt": 1794898438104,
   "home": {
     "rest": [
       "2026-08-01",
@@ -4950,6 +4950,29 @@
       "paidOrder": 1,
       "paidAmt": 228.98,
       "paidBack": "待返",
+      "look": "",
+      "boom": ""
+    },
+    {
+      "id": "mwkc6qjc3uqy6",
+      "date": "2026-11-25",
+      "item": "OUATE",
+      "type": "蒲公英商单",
+      "status": "待出稿",
+      "account": "常如意i",
+      "deadline": "",
+      "pajing": "",
+      "quote": 800,
+      "rebatePct": 20,
+      "rebate": -160,
+      "fee": 80,
+      "net": 560,
+      "orderAmount": 0,
+      "commission": 0,
+      "disc80": 0,
+      "paidOrder": 0,
+      "paidAmt": 0,
+      "paidBack": "",
       "look": "",
       "boom": ""
     }
