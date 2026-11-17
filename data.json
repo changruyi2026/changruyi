@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794898438104,
+  "_modifiedAt": 1794898456544,
   "home": {
     "rest": [
       "2026-08-01",
@@ -4963,10 +4963,10 @@
       "deadline": "",
       "pajing": "",
       "quote": 800,
-      "rebatePct": 20,
-      "rebate": -160,
+      "rebatePct": 25,
+      "rebate": -200,
       "fee": 80,
-      "net": 560,
+      "net": 520,
       "orderAmount": 0,
       "commission": 0,
       "disc80": 0,
