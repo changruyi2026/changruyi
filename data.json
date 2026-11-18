@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794995404330,
+  "_modifiedAt": 1794995413544,
   "home": {
     "rest": [
       "2026-08-01",
@@ -5068,6 +5068,29 @@
       "id": "mwlv7yv6ny3eb",
       "date": "2026-11-23",
       "item": "千问",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "常如意i",
+      "deadline": "",
+      "pajing": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 40,
+      "net": 360,
+      "orderAmount": 400,
+      "commission": 0,
+      "disc80": 0,
+      "paidOrder": 0,
+      "paidAmt": 0,
+      "paidBack": "",
+      "look": "",
+      "boom": ""
+    },
+    {
+      "id": "mwlxx99keh3al",
+      "date": "2026-11-24",
+      "item": "去哪儿",
       "type": "众测招募",
       "status": "待出稿",
       "account": "常如意i",
