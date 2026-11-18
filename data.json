@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794995625880,
+  "_modifiedAt": 1795003100912,
   "home": {
     "rest": [
       "2026-08-01",
@@ -5733,9 +5733,9 @@
   "backups": [
     {
       "date": "2026-11-18",
-      "ts": 1794965478061,
+      "ts": 1795003100913,
       "data": {
-        "_modifiedAt": 1794965478060,
+        "_modifiedAt": 1795003100912,
         "home": {
           "rest": [
             "2026-08-01",
@@ -8314,6 +8314,14 @@
             "cat": "医疗",
             "amount": 482,
             "note": ""
+          },
+          {
+            "id": "mwlgm9dc5gr44",
+            "date": "2026-11-18",
+            "type": "in",
+            "cat": "小红薯",
+            "amount": 90,
+            "note": "保温杯"
           }
         ],
         "xhs": {
@@ -10633,7 +10641,7 @@
           },
           {
             "id": "mw4m0ginrq4o0",
-            "date": "2026-11-18",
+            "date": "2026-11-19",
             "item": "合生元",
             "type": "蒲公英商单",
             "status": "审核中",
@@ -10679,10 +10687,10 @@
           },
           {
             "id": "mw8mym60z85h4",
-            "date": "2026-11-20",
+            "date": "2026-11-17",
             "item": "彩虹保温杯",
             "type": "水下置换",
-            "status": "待出稿",
+            "status": "已出稿",
             "account": "常如意i",
             "deadline": "",
             "pajing": "前15后15",
@@ -10702,7 +10710,7 @@
           },
           {
             "id": "mw915yb7hjsgo",
-            "date": "2026-11-23",
+            "date": "2026-11-21",
             "item": "巧克力",
             "type": "众测招募",
             "status": "待出稿",
@@ -10784,6 +10792,52 @@
             "fee": 80,
             "net": 520,
             "orderAmount": 0,
+            "commission": 0,
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": "",
+            "boom": ""
+          },
+          {
+            "id": "mwlv7yv6ny3eb",
+            "date": "2026-11-23",
+            "item": "千问",
+            "type": "众测招募",
+            "status": "待出稿",
+            "account": "常如意i",
+            "deadline": "",
+            "pajing": "",
+            "quote": 0,
+            "rebatePct": 0,
+            "rebate": 0,
+            "fee": 40,
+            "net": 360,
+            "orderAmount": 400,
+            "commission": 0,
+            "disc80": 0,
+            "paidOrder": 0,
+            "paidAmt": 0,
+            "paidBack": "",
+            "look": "",
+            "boom": ""
+          },
+          {
+            "id": "mwlxx99keh3al",
+            "date": "2026-11-24",
+            "item": "去哪儿",
+            "type": "众测招募",
+            "status": "待出稿",
+            "account": "常如意i",
+            "deadline": "",
+            "pajing": "",
+            "quote": 0,
+            "rebatePct": 0,
+            "rebate": 0,
+            "fee": 40,
+            "net": 360,
+            "orderAmount": 400,
             "commission": 0,
             "disc80": 0,
             "paidOrder": 0,
@@ -11418,10 +11472,10 @@
       }
     },
     {
-      "date": "2026-11-17",
-      "ts": 1794879152685,
+      "date": "2026-11-16",
+      "ts": 1794838380089,
       "data": {
-        "_modifiedAt": 1794879152684,
+        "_modifiedAt": 1794838380087,
         "home": {
           "rest": [
             "2026-08-01",
@@ -13904,14 +13958,6 @@
             "cat": "小红薯",
             "amount": 216,
             "note": ""
-          },
-          {
-            "id": "mwjcg5st4l0tv",
-            "date": "2026-11-15",
-            "type": "out",
-            "cat": "小红书",
-            "amount": 211.15,
-            "note": ""
           }
         ],
         "xhs": {
@@ -16207,7 +16253,7 @@
           },
           {
             "id": "mw4m0ginrq4o0",
-            "date": "2026-11-18",
+            "date": "2026-11-17",
             "item": "合生元",
             "type": "蒲公英商单",
             "status": "审核中",
