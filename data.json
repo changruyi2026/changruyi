@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1794990846221,
+  "_modifiedAt": 1794990874434,
   "home": {
     "rest": [
       "2026-08-01",
@@ -5056,6 +5056,29 @@
       "fee": 80,
       "net": 520,
       "orderAmount": 0,
+      "commission": 0,
+      "disc80": 0,
+      "paidOrder": 0,
+      "paidAmt": 0,
+      "paidBack": "",
+      "look": "",
+      "boom": ""
+    },
+    {
+      "id": "mwlv7yv6ny3eb",
+      "date": "2026-11-23",
+      "item": "千问",
+      "type": "众测招募",
+      "status": "待出稿",
+      "account": "常如意i",
+      "deadline": "",
+      "pajing": "",
+      "quote": 0,
+      "rebatePct": 0,
+      "rebate": 0,
+      "fee": 40,
+      "net": 360,
+      "orderAmount": 400,
       "commission": 0,
       "disc80": 0,
       "paidOrder": 0,
