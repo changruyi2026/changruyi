@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795053128435,
+  "_modifiedAt": 1795053144141,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2650,6 +2650,14 @@
       "cat": "医疗",
       "amount": 16.47,
       "note": "喂药吸管"
+    },
+    {
+      "id": "mwmwamh9qq8yt",
+      "date": "2026-11-12",
+      "type": "out",
+      "cat": "医疗",
+      "amount": 22,
+      "note": "头孢"
     }
   ],
   "xhs": {
