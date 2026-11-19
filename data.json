@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795053213951,
+  "_modifiedAt": 1795053233735,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2690,6 +2690,14 @@
       "cat": "医疗",
       "amount": 39.9,
       "note": "挂号"
+    },
+    {
+      "id": "mwmwcjlzl85qg",
+      "date": "2026-11-10",
+      "type": "out",
+      "cat": "医疗",
+      "amount": 69.5,
+      "note": "退烧药"
     }
   ],
   "xhs": {
