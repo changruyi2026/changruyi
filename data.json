@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795053164353,
+  "_modifiedAt": 1795053178749,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2666,6 +2666,14 @@
       "cat": "医疗",
       "amount": 14.9,
       "note": "挂号"
+    },
+    {
+      "id": "mwmwbd6lrannq",
+      "date": "2026-11-11",
+      "type": "out",
+      "cat": "医疗",
+      "amount": 22.6,
+      "note": "开塞露"
     }
   ],
   "xhs": {
