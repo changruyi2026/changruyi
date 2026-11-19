@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795053108163,
+  "_modifiedAt": 1795053128435,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2642,6 +2642,14 @@
       "cat": "医疗",
       "amount": 39.3,
       "note": "挂号"
+    },
+    {
+      "id": "mwmwaaczxmsf4",
+      "date": "2026-11-13",
+      "type": "out",
+      "cat": "医疗",
+      "amount": 16.47,
+      "note": "喂药吸管"
     }
   ],
   "xhs": {
