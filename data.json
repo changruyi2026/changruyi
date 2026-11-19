@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795064965716,
+  "_modifiedAt": 1795065005192,
   "home": {
     "rest": [
       "2026-08-01",
@@ -5140,11 +5140,11 @@
       "account": "常如意i",
       "deadline": "",
       "pajing": "",
-      "quote": 850,
+      "quote": 800,
       "rebatePct": 0,
       "rebate": 0,
-      "fee": 85,
-      "net": 765,
+      "fee": 80,
+      "net": 720,
       "orderAmount": 0,
       "commission": 0,
       "disc80": 0,
