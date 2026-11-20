@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795144491327,
+  "_modifiedAt": 1795144498584,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2713,6 +2713,14 @@
       "type": "out",
       "cat": "小红书",
       "amount": 239.32,
+      "note": "托管"
+    },
+    {
+      "id": "mwoeoo0ozf3nt",
+      "date": "2026-11-20",
+      "type": "out",
+      "cat": "小红书",
+      "amount": 16.64,
       "note": "托管"
     }
   ],
