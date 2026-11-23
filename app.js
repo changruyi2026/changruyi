@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v87'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v88'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -2013,15 +2013,15 @@ function openRuyiDayModal(ds) {
 
     } else if (PUB_ORD_TYPES.includes(t)) {
 
-      /* 订单类商单：招募类（探店招募/众测招募）走平台收订单金额 10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
+      /* 订单类商单：招募类（探店招募/众测招募）走平台收（订单金额+提成）10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
 
       const o = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-      const fee = hasPubFee(t) ? Math.round(o * 0.1 * 100) / 100 : 0;
-
       const comm = (t === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0;
 
-      const net = Math.round((o - fee + comm) * 100) / 100;
+      const fee = hasPubFee(t) ? Math.round((o + comm) * 0.1 * 100) / 100 : 0;
+
+      const net = Math.round((o + comm - fee) * 100) / 100;
 
       const feeLabel = $('#hsOrderFeeLabel');
 
@@ -2653,15 +2653,15 @@ function openYayaDayModal(ds) {
 
     } else if (PUB_ORD_TYPES.includes(t)) {
 
-      /* 订单类商单：招募类（探店招募/众测招募）走平台收订单金额 10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
+      /* 订单类商单：招募类（探店招募/众测招募）走平台收（订单金额+提成）10% 手续费；水下探店/水下直发为私下交易，无平台手续费 */
 
       const o = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-      const fee = hasPubFee(t) ? Math.round(o * 0.1 * 100) / 100 : 0;
-
       const comm = (t === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0;
 
-      const net = Math.round((o - fee + comm) * 100) / 100;
+      const fee = hasPubFee(t) ? Math.round((o + comm) * 0.1 * 100) / 100 : 0;
+
+      const net = Math.round((o + comm - fee) * 100) / 100;
 
       const feeLabel = $('#hsOrderFeeLabel');
 
@@ -4660,11 +4660,11 @@ document.addEventListener('click', e => {
 
         orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-        fee = hasPubFee(type) ? Math.round(orderAmount * 0.1 * 100) / 100 : 0; /* 招募类收订单金额10%手续费；水下探店/水下直发无平台手续费 */
-
         commission = (type === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0; /* 众测招募可填提成，可为空 */
 
-        net = Math.round((orderAmount - fee + commission) * 100) / 100; /* 到手 = 订单金额 - 手续费 + 提成 */
+        fee = hasPubFee(type) ? Math.round((orderAmount + commission) * 0.1 * 100) / 100 : 0; /* 招募类按(订单金额+提成)的10%收手续费；水下探店/水下直发无平台手续费 */
+
+        net = Math.round((orderAmount + commission - fee) * 100) / 100; /* 到手 = 订单金额 + 提成 - 手续费 */
 
       }
 
@@ -4906,11 +4906,11 @@ document.addEventListener('click', e => {
 
         orderAmount = Math.max(0, parseFloat($('#hsOrderAmount').value || '0') || 0);
 
-        fee = hasPubFee(type) ? Math.round(orderAmount * 0.1 * 100) / 100 : 0; /* 招募类收订单金额10%手续费；水下探店/水下直发无平台手续费 */
-
         commission = (type === '众测招募') ? Math.max(0, parseFloat($('#hsCommission').value || '0') || 0) : 0; /* 众测招募可填提成，可为空 */
 
-        net = Math.round((orderAmount - fee + commission) * 100) / 100; /* 到手 = 订单金额 - 手续费 + 提成 */
+        fee = hasPubFee(type) ? Math.round((orderAmount + commission) * 0.1 * 100) / 100 : 0; /* 招募类按(订单金额+提成)的10%收手续费；水下探店/水下直发无平台手续费 */
+
+        net = Math.round((orderAmount + commission - fee) * 100) / 100; /* 到手 = 订单金额 + 提成 - 手续费 */
 
       }
 
