@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795397666024,
+  "_modifiedAt": 1795397677096,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2818,6 +2818,14 @@
       "cat": "外出餐厅",
       "amount": 89.9,
       "note": "海底捞"
+    },
+    {
+      "id": "mwslf5t4wvwlh",
+      "date": "2026-11-21",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 20,
+      "note": ""
     }
   ],
   "xhs": {
