@@ -6,7 +6,7 @@
 
 const KEY = 'changruyi_workbench_v1';
 
-const APP_VERSION = 'v88'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
+const APP_VERSION = 'v89'; /* 与 sw.js / index.html 的缓存版本号保持一致；用于「本地旧版本」检测与提示刷新 */
 
 
 
@@ -310,9 +310,7 @@ function load() {
 
   if (!st) st = defaultState();
 
-  migrateLedgerCats(st); /* 支出分类迁移：早餐/午餐/晚餐 → 早中晚餐 */
-
-  return st;
+  return st; /* 分类/金额迁移在启动区（常量定义后）执行，见文件末尾 migrateOnStart */
 
 }
 
@@ -322,6 +320,20 @@ function migrateLedgerCats(st) {
   let n = 0;
   (st.ledger || []).forEach(r => { if (MAP[r.cat]) { r.cat = MAP[r.cat]; n++; } });
   if (n > 0) { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { console.warn('cat migrate persist failed', e); } }
+}
+
+/* 订单类商单到手重算：提成计入 10% 手续费（2026-11-23 v88，幂等；每次启动扫描，仅在有变更时落盘） */
+function migrateOrderNet(st) {
+  let n = 0;
+  [].concat(st.ruyiNotes || [], st.yayaNotes || []).forEach(r => {
+    if (!PUB_ORD_TYPES.includes(r.type)) return;
+    const o = Math.max(0, r.orderAmount || 0);
+    const c = (r.type === '众测招募') ? Math.max(0, r.commission || 0) : 0;
+    const fee = hasPubFee(r.type) ? Math.round((o + c) * 0.1 * 100) / 100 : 0;
+    const net = Math.round((o + c - fee) * 100) / 100;
+    if (r.fee !== fee || r.net !== net) { r.fee = fee; r.net = net; n++; }
+  });
+  if (n > 0) { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { console.warn('order net migrate persist failed', e); } }
 }
 
 function save() { S._modifiedAt = Date.now(); snapshotIfNeeded(); trimBackups(S); trimDeletedIds(S); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('保存失败：本地存储已满（图片过多）', 'warn'); } pushSync(); updateHomeBadge(); }
@@ -6071,6 +6083,10 @@ try {
 /* 点击顶部同步状态可手动重试（提前绑定，避免首页渲染异常时丢失点击能力） */
 
 $('#syncPill').addEventListener('click', () => { retrySync(); });
+
+/* 数据迁移（须在常量定义后、渲染前执行）：支出分类合并 + 订单类到手按新公式重算 */
+migrateLedgerCats(S);
+migrateOrderNet(S);
 
 try { showView('home'); } catch (e) { console.error('首页渲染异常：', e); }
 
