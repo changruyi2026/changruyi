@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795397831807,
+  "_modifiedAt": 1795397850519,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2898,6 +2898,14 @@
       "cat": "外出餐厅",
       "amount": 48,
       "note": "砂锅筒骨"
+    },
+    {
+      "id": "mwslivmfrkm8g",
+      "date": "2026-11-19",
+      "type": "out",
+      "cat": "外出餐厅",
+      "amount": 68,
+      "note": "湘菜"
     }
   ],
   "xhs": {
