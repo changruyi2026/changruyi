@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795397648150,
+  "_modifiedAt": 1795397655822,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2802,6 +2802,14 @@
       "cat": "居家购物",
       "amount": 30,
       "note": "安装浴霸"
+    },
+    {
+      "id": "mwslepe66ndb9",
+      "date": "2026-11-22",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 10,
+      "note": ""
     }
   ],
   "xhs": {
