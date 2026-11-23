@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795397532121,
+  "_modifiedAt": 1795397555617,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2762,6 +2762,14 @@
       "cat": "梁根",
       "amount": 3000,
       "note": ""
+    },
+    {
+      "id": "mwslck2pcec0k",
+      "date": "2026-11-23",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 2928.31,
+      "note": "工商"
     }
   ],
   "xhs": {
