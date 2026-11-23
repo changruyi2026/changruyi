@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795397736763,
+  "_modifiedAt": 1795397751907,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2874,6 +2874,14 @@
       "cat": "早中晚餐",
       "amount": 28.66,
       "note": ""
+    },
+    {
+      "id": "mwslgrj7m0khi",
+      "date": "2026-11-20",
+      "type": "out",
+      "cat": "人情",
+      "amount": 177.5,
+      "note": "poop衣服"
     }
   ],
   "xhs": {
