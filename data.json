@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795397677096,
+  "_modifiedAt": 1795397689015,
   "home": {
     "rest": [
       "2026-08-01",
@@ -2825,6 +2825,14 @@
       "type": "out",
       "cat": "梁根",
       "amount": 20,
+      "note": ""
+    },
+    {
+      "id": "mwslff07dxnqo",
+      "date": "2026-11-21",
+      "type": "out",
+      "cat": "早中晚餐",
+      "amount": 17,
       "note": ""
     }
   ],
