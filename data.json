@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795497541614,
+  "_modifiedAt": 1795497891466,
   "home": {
     "rest": [
       "2026-08-01",
@@ -5384,8 +5384,8 @@
       "quote": 0,
       "rebatePct": 0,
       "rebate": 0,
-      "fee": 25,
-      "net": 613.41,
+      "fee": 63.84,
+      "net": 574.57,
       "orderAmount": 250,
       "commission": 388.41,
       "disc80": 0,
