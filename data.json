@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795574000138,
+  "_modifiedAt": 1795574016214,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3026,6 +3026,14 @@
       "cat": "交通",
       "amount": 4079.02,
       "note": "车险"
+    },
+    {
+      "id": "mwviepxyahxjs",
+      "date": "2026-11-25",
+      "type": "out",
+      "cat": "居家购物",
+      "amount": 100,
+      "note": "话费"
     }
   ],
   "xhs": {
