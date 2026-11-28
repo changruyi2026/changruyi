@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795843300929,
+  "_modifiedAt": 1795843307499,
   "home": {
     "rest": [
       "2026-08-01",
@@ -4858,6 +4858,13 @@
       {
         "id": "mwzyqfcx96dqd",
         "date": "2026-11-27",
+        "time": "13:21",
+        "medMg": 0,
+        "note": ""
+      },
+      {
+        "id": "mwzyqkff9v35b",
+        "date": "2026-11-26",
         "time": "13:21",
         "medMg": 0,
         "note": ""
