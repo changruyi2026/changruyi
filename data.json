@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795843421644,
+  "_modifiedAt": 1795843587518,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3130,6 +3130,14 @@
       "cat": "早中晚餐",
       "amount": 47.8,
       "note": "午餐"
+    },
+    {
+      "id": "mwzywkhqiju9c",
+      "date": "2026-11-28",
+      "type": "out",
+      "cat": "早中晚餐",
+      "amount": 17,
+      "note": "面"
     }
   ],
   "xhs": {
