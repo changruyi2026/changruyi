@@ -1,5 +1,5 @@
 {
-  "_modifiedAt": 1795844734290,
+  "_modifiedAt": 1795844744069,
   "home": {
     "rest": [
       "2026-08-01",
@@ -3146,6 +3146,14 @@
       "cat": "梁根",
       "amount": 1800,
       "note": ""
+    },
+    {
+      "id": "mwzzlcw5jetan",
+      "date": "2026-11-28",
+      "type": "out",
+      "cat": "梁根",
+      "amount": 1742.87,
+      "note": "社保"
     }
   ],
   "xhs": {
